@@ -893,6 +893,112 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   .stageHead .stageAtmo:before{animation:none!important}
 }
 </style>
+
+<style id="the-uni-knowledge-field-signature-glass">
+/* THE UNI Knowledge Field — signature thick cast-glass frame.
+   Keep the existing purple/burnished color family; increase physical glass depth. */
+.libraryStage{
+  position:relative!important;
+  isolation:isolate!important;
+  border:1px solid rgba(171,128,112,.34)!important;
+  border-radius:38px!important;
+  background:
+    radial-gradient(150% 115% at 18% 8%, rgba(72,38,71,.18) 0%, transparent 36%),
+    radial-gradient(120% 95% at 86% 4%, rgba(82,47,95,.13) 0%, transparent 40%),
+    linear-gradient(180deg, rgba(31,18,34,.78) 0%, rgba(20,11,25,.74) 18%, rgba(10,6,14,.80) 58%, rgba(5,4,8,.91) 100%)!important;
+  backdrop-filter:blur(24px) saturate(112%)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(112%)!important;
+  box-shadow:
+    inset 0 2px 0 rgba(255,245,238,.30),
+    inset 0 5px 12px rgba(255,226,210,.10),
+    inset 0 -9px 18px rgba(0,0,0,.24),
+    inset 0 -24px 42px rgba(0,0,0,.32),
+    inset 0 0 0 3px rgba(214,169,144,.09),
+    0 0 0 1px rgba(227,190,167,.10),
+    0 10px 24px rgba(0,0,0,.25),
+    0 26px 78px rgba(0,0,0,.22)!important;
+  overflow:hidden!important;
+}
+
+/* Thick outer glass lip. */
+.libraryStage:before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:3!important;
+  border-radius:inherit!important;
+  padding:6px!important;
+  background:
+    linear-gradient(180deg,
+      rgba(255,248,242,.72) 0%,
+      rgba(248,220,205,.43) 7%,
+      rgba(202,146,126,.20) 19%,
+      rgba(117,67,91,.13) 43%,
+      rgba(84,49,80,.11) 68%,
+      rgba(192,133,106,.17) 88%,
+      rgba(242,211,193,.33) 100%)!important;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0)!important;
+  -webkit-mask-composite:xor!important;
+  mask-composite:exclude!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.25),
+    0 0 18px rgba(119,74,92,.10)!important;
+  pointer-events:none!important;
+}
+
+/* Inner bevel makes the frame read like a solid glass slab, not a 1px border. */
+.libraryStage:after{
+  content:""!important;
+  position:absolute!important;
+  inset:10px!important;
+  z-index:3!important;
+  border-radius:29px!important;
+  border:1px solid rgba(255,231,217,.12)!important;
+  background:
+    linear-gradient(180deg,
+      rgba(255,250,245,.15) 0%,
+      rgba(255,235,222,.055) 10%,
+      transparent 22%,
+      transparent 78%,
+      rgba(225,171,142,.035) 88%,
+      rgba(255,241,232,.075) 100%)!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(230,184,157,.065),
+    0 0 0 1px rgba(55,25,48,.12)!important;
+  pointer-events:none!important;
+}
+
+/* Keep interactive field content above the decorative glass layers. */
+.stageHead,
+#network,
+.networkLegend,
+.fieldCoauthor,
+.drawer{
+  position:absolute;
+  z-index:6;
+}
+#network{
+  position:relative!important;
+  z-index:2!important;
+}
+.stageHead{z-index:14!important}
+.networkLegend,.fieldCoauthor{z-index:8!important}
+.drawer{z-index:20!important}
+
+@media(max-width:900px){
+  .libraryStage{border-radius:32px!important}
+  .libraryStage:before{padding:5px!important}
+  .libraryStage:after{inset:8px!important;border-radius:25px!important}
+}
+@media(max-width:680px){
+  .libraryStage{border-radius:30px!important}
+  .libraryStage:before{padding:5px!important}
+  .libraryStage:after{inset:8px!important;border-radius:23px!important}
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
