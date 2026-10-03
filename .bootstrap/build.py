@@ -326,7 +326,8 @@ if '177 connected learning experiences' not in ROOT_INDEX:
     raise RuntimeError('Root catalog count marker missing')
 print('Integrity gates passed: 370 files / 182 HTML / 177 builds / 181 sitemap URLs / zero old public branding.', flush=True)
 
-# Replace bootstrap repository contents with the verified production tree.
+# Freeze verified bytes before removing bootstrap machinery, then replace the repository tree.
+payload = [(p.relative_to(STAGE), p.read_bytes()) for p in all_files]
 for child in list(ROOT.iterdir()):
     if child.name == '.git':
         continue
@@ -334,10 +335,9 @@ for child in list(ROOT.iterdir()):
         shutil.rmtree(child)
     else:
         child.unlink()
-for src in [p for p in STAGE.rglob('*') if p.is_file()]:
-    rel = src.relative_to(STAGE)
+for rel, data in payload:
     dst = ROOT / rel
     dst.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src, dst)
+    dst.write_bytes(data)
 
 print('THE UNI production source prepared. Bootstrap machinery removed.', flush=True)
