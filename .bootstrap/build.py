@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import base64, concurrent.futures, hashlib, lzma, pathlib, re, shutil, subprocess, urllib.request, xml.etree.ElementTree as ET
+import base64, concurrent.futures, hashlib, lzma, pathlib, re, shutil, subprocess, time, urllib.request, xml.etree.ElementTree as ET
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 BOOT = ROOT / '.bootstrap'
@@ -9,10 +9,21 @@ EXPECTED_PAYLOAD_CHARS = 256684
 EXPECTED_XZ_SHA256 = 'ce399064604dbe0f5c1f990d743b356f1e910ce522a1dd498982291ce8578758'
 EXPECTED_PATCH_SHA256 = '0f9a5f33c84fe84a6310bef7ce0abca8b3a069007c5fdb60c156cdbbeb53fc78'
 
-def get(url):
-    req = urllib.request.Request(url, headers={'User-Agent':'THE-UNI-Migration/1.0'})
-    with urllib.request.urlopen(req, timeout=60) as response:
-        return response.read()
+def get(url, attempts=5):
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            req = urllib.request.Request(url, headers={'User-Agent':'THE-UNI-Migration/1.0'})
+            with urllib.request.urlopen(req, timeout=90) as response:
+                return response.read()
+        except Exception as exc:
+            last_error = exc
+            if attempt == attempts:
+                raise
+            delay = min(12, 2 ** (attempt - 1))
+            print(f'Retrying {url} after transient fetch error ({attempt}/{attempts}): {exc}', flush=True)
+            time.sleep(delay)
+    raise last_error
 
 # Reconstruct the exact frozen 360-file IKL production baseline.
 sitemap_bytes = get(BASE + 'sitemap.xml')
@@ -45,7 +56,7 @@ def fetch(rel):
     return rel
 
 print('Downloading frozen IKL production snapshot...')
-with concurrent.futures.ThreadPoolExecutor(max_workers=16) as pool:
+with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
     for n, _ in enumerate(pool.map(fetch, paths), 1):
         if n % 40 == 0 or n == len(paths):
             print(f'  {n}/{len(paths)}')
