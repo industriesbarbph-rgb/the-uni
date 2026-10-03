@@ -686,6 +686,25 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   .stageHead .stageAtmo:before{font-size:8px!important}
 }
 </style>
+
+<style id="the-uni-legend-left-final">
+/* Move Knowledge Field color legend to the lower-left. */
+.networkLegend{
+  left:24px!important;
+  right:auto!important;
+  bottom:16px!important;
+  justify-content:flex-start!important;
+  text-align:left!important;
+}
+@media(max-width:680px){
+  .networkLegend{
+    left:18px!important;
+    right:auto!important;
+    bottom:14px!important;
+    gap:9px!important;
+  }
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
