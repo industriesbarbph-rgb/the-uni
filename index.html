@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>THE UNI — Interactive Knowledge Library</title>
 <meta name="description" content="THE UNI is an interactive knowledge library and impossible museum where you explore ideas by touching, tracing, comparing, rebuilding, and testing.">
-<meta name="theme-color" content="#08070b">
+<meta name="theme-color" content="#08070b">\n<link rel="icon" type="image/png" sizes="256x256" href="/favicon.png">\n<link rel="apple-touch-icon" href="/favicon.png">
 <style>
 :root{--ink:#f6f1e8;--muted:#b8b0a6;--faint:#857e78;--line:rgba(240,216,171,.16);--panel:rgba(11,10,14,.61);--panel2:rgba(19,16,20,.74);--gold:#d5b476;--silver:#b5c5d2;--violet:#b99bcc;--radius:28px}
 .seoOnly{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
@@ -124,8 +124,8 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 <meta property="og:image" content="https://theuni.barbph.com/social/interactive-knowledge-library.jpg">
 <meta property="og:image:secure_url" content="https://theuni.barbph.com/social/interactive-knowledge-library.jpg">
 <meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="600">
-<meta property="og:image:height" content="315">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="THE UNI cinematic social preview">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="THE UNI — Interactive Knowledge Library">
@@ -1126,7 +1126,7 @@ function el(tag,attrs={}){const n=document.createElementNS(NS,tag);for(const [k,
 RELATIONS.forEach(r=>{const line=el('line',{class:'link'});linkLayer.appendChild(line);linkViews.push({r,line})});
 EXPERIENCES.forEach(d=>{
  d.r=5.2+Math.min(3.8,(degree.get(d.id)||0)*.34);d.phase=d.id*1.618;d.amp=1.1+(d.id%5)*.38;
- const g=el('g',{class:'node','data-family':d.family,tabindex:'0',role:'button','aria-label':d.title}),halo=el('circle',{class:'halo',r:d.r+5}),core=el('circle',{class:'core',r:d.r}),text=el('text',{x:d.r+7,y:3});text.textContent=d.title;g.append(halo,core,text);nodeLayer.appendChild(g);nodeViews.set(d.id,{d,g,halo,core,text,x:0,y:0,renderX:0,renderY:0});
+ const g=el('a',{class:'node','data-family':d.family,href:d.href,tabindex:'0',role:'link','aria-label':d.title}),halo=el('circle',{class:'halo',r:d.r+5}),core=el('circle',{class:'core',r:d.r}),text=el('text',{x:d.r+7,y:3});text.textContent=d.title;g.append(halo,core,text);nodeLayer.appendChild(g);nodeViews.set(d.id,{d,g,halo,core,text,x:0,y:0,renderX:0,renderY:0});
 });
 
 function layoutNodes(){
