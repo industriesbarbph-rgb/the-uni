@@ -173,12 +173,37 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
  #library,#about{scroll-margin-top:72px}
 }
 </style>
+<style id="the-uni-proportion-fix">
+/* Proportion correction after visual QA. */
+.masthead{padding:4px 14px 8px!important;min-height:82px}
+.brandArtifact img{width:clamp(210px,17vw,255px)!important;max-width:40vw!important;filter:drop-shadow(0 4px 9px rgba(0,0,0,.5)) drop-shadow(0 0 12px rgba(182,128,61,.07))!important}
+.mastUtilities{gap:10px!important}
+.navDock{width:calc(100% - 12px)!important;margin:0 auto!important;min-height:54px!important;padding:6px 16px!important}
+.navDock .nav{width:min(680px,78%)!important}
+.navDock .nav a{min-height:38px!important}
+.libraryDirect{margin-top:10px!important}
+.stoneMonument{width:min(980px,84%)!important;margin:16px auto 14px!important;border-radius:20px!important;background:transparent!important;border-color:color-mix(in srgb,var(--accent) 14%,rgba(255,255,255,.05))!important;box-shadow:0 18px 50px rgba(0,0,0,.16)!important}
+.stoneMonument img{width:100%!important;height:auto!important;max-height:178px!important;object-fit:cover!important;object-position:center!important}
+@media(max-width:900px){
+ .masthead{min-height:72px!important}
+ .brandArtifact img{width:220px!important;max-width:54vw!important}
+ .stoneMonument{width:min(94%,820px)!important}
+ .stoneMonument img{max-height:150px!important}
+}
+@media(max-width:680px){
+ .masthead{min-height:64px!important;padding:2px 6px 6px!important}
+ .brandArtifact img{width:190px!important;max-width:62vw!important}
+ .navDock{width:calc(100% - 8px)!important;min-height:50px!important}
+ .stoneMonument{width:96%!important;margin:10px auto 10px!important;border-radius:16px!important}
+ .stoneMonument img{max-height:118px!important}
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
 <div class="masthead">
-<a class="brandArtifact" href="/" aria-label="THE UNI by BarbPH"><img src="/assets/the-uni-wordmark-artifact-v4.svg" alt="THE UNI"></a>
+<a class="brandArtifact" href="/" aria-label="THE UNI by BarbPH"><img src="/assets/the-uni-wordmark-artifact-v4.svg?v=2" alt="THE UNI"></a>
 <div class="mastUtilities">
 <button class="atmoName" id="atmoName" type="button" title="Change atmosphere" aria-label="Change atmosphere">The Nocturne Cabinet</button>
 <div class="jewels"><a class="jewel play" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a><a class="jewel" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a></div>
