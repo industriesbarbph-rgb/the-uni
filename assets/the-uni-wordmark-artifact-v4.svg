@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 248 76" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 211 76" role="img" aria-labelledby="title desc">
 <title id="title">THE UNI</title>
 <desc id="desc">A bold carved-stone THE UNI artifact wordmark with BarbPH engraved vertically inside the I.</desc>
 <defs>
@@ -20,9 +20,9 @@
     <feComposite in="gray" in2="SourceGraphic" operator="in" result="texture"/>
     <feBlend in="SourceGraphic" in2="texture" mode="multiply" result="rock"/>
     <feTurbulence type="fractalNoise" baseFrequency=".012 .05" numOctaves="2" seed="6" result="chips"/>
-    <feDisplacementMap in="rock" in2="chips" scale="1.8" xChannelSelector="R" yChannelSelector="B" result="worn"/>
+    <feDisplacementMap in="rock" in2="chips" scale="2.5" xChannelSelector="R" yChannelSelector="B" result="worn"/>
     <feDropShadow dx="0" dy="2.3" stdDeviation="1.2" flood-color="#100b08" flood-opacity=".88"/>
-    <feSpecularLighting in="noise" surfaceScale="2.2" specularConstant=".52" specularExponent="14" lighting-color="#ffe0a3" result="spec">
+    <feSpecularLighting in="noise" surfaceScale="2.8" specularConstant=".52" specularExponent="14" lighting-color="#ffe0a3" result="spec">
       <feDistantLight azimuth="225" elevation="45"/>
     </feSpecularLighting>
     <feComposite in="spec" in2="SourceGraphic" operator="in" result="specCut"/>
@@ -34,19 +34,19 @@
   </filter>
 </defs>
 
-<g filter="url(#artifact)" fill="url(#stone)" stroke="url(#edge)" stroke-width="1.45" paint-order="stroke fill">
+<g filter="url(#artifact)" fill="url(#stone)" stroke="url(#edge)" stroke-width="1.75" paint-order="stroke fill">
   <text x="2" y="51" font-family="Georgia, 'Times New Roman', serif" font-size="27" font-weight="900" letter-spacing="2.2">THE</text>
-  <text x="68" y="61" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-weight="900" letter-spacing="-3.8">UN</text>
-  <path d="M184 7h54v10h-15v42h15v10h-54V59h15V17h-15z"/>
-  <rect x="201" y="16.4" width="20" height="42.5" rx="1.4" fill="#55351f" opacity=".68" stroke="#efc274" stroke-width=".9"/>
+  <text x="65" y="61" font-family="Georgia, 'Times New Roman', serif" font-size="66" font-weight="900" letter-spacing="-5.2">UN</text>
+  <path d="M157 7h47v10h-12.5v42H204v10h-47V59h12.5V17H157z"/>
+  <rect x="171" y="16.4" width="18.8" height="42.5" rx="1.2" fill="#3e2819" opacity=".78" stroke="#e6b567" stroke-width=".95"/>
 </g>
 
-<text transform="translate(216.6 56.7) rotate(-90)" fill="#f0c36a" stroke="#26170d" stroke-width=".45"
+<text transform="translate(185.6 56.7) rotate(-90)" fill="#e7b65e" stroke="#26170d" stroke-width=".45"
       font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="10.2" font-weight="900" letter-spacing=".42"
       filter="url(#engrave)">BarbPH</text>
 
 <g stroke="#5a3821" stroke-width=".9" opacity=".56" stroke-linecap="round">
-  <path d="M77 23l6 2.6M102 12l-4.8 4M133 49l7-2M169 21l6 2.4M191 14l6 1.4M229 60l5-1.4"/>
-  <path d="M16 36l4-1.3M43 26l5 2.1M92 57l4.3-2M153 30l5-1.6M179 43l4.4 1.4"/>
+  <path d="M77 23l6 2.6M102 12l-4.8 4M133 49l7-2M149 21l6 2.4M164 14l6 1.4M196 60l5-1.4"/>
+  <path d="M16 36l4-1.3M43 26l5 2.1M92 57l4.3-2M143 30l5-1.6M181 43l4.4 1.4"/>
 </g>
 </svg>
