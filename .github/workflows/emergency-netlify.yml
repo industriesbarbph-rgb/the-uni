@@ -1,0 +1,23 @@
+name: Emergency Netlify fallback
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/emergency-netlify.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Deploy current THE UNI build to Netlify fallback
+        run: >
+          npx -y @netlify/mcp@latest
+          --site-id 7a7c73e7-bb27-42ca-8048-4a95d1c8f471
+          --proxy-path "https://netlify-mcp.netlify.app/proxy/eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..EPOfo0MISoWf3rj8.cpjSsNQjLHmS50bL4H1yKQqLQopDc2wYRA58zJ1kCnR4VhcAEr2DMcCNNa8Hh6e2-EEngeMxPgJzH5um45_On4NO5CC1qlzK0ZOne_yoqFpjIfwel-FTlu_UdJ8Eux-5psXVqaLj1r0pw_eZG9qlUwXr4nAACXXPAgg9-vC0RWxlhU_ZAA5fuQWPrhVWt66FBkDVZf-cnZLswycQkoYwkbA6gumyRhBtBOHoqwJeCNO4nHdcXGTMN_y1i3wOvjfT8mFT3XDL-mHGV1tfRjNqCZj2j39gq8dkHyxsUzxdUEEZ8-cHhPjW25GQ9UeteJTfdYon8QlMkbin_f93ijw3xLJrvd6kQ6v0awudOZnnzkbKmwplGiY381AWkbWbnZUdQX2tC4mG.pevAScrkhj8GHMd4TvJiEA"
+          --no-wait
