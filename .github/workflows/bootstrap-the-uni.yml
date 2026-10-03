@@ -34,4 +34,4 @@ jobs:
           git commit -m "Import verified THE UNI production source"
           git push origin main
 
-# retrigger after staged patch-boundary fix
+# deterministic staged import
