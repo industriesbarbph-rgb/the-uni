@@ -282,7 +282,6 @@ issue_dir = STAGE/'.github/ISSUE_TEMPLATE'; issue_dir.mkdir(parents=True, exist_
 (issue_dir/'coauthor.yml').write_text(ISSUE)
 (issue_dir/'config.yml').write_text('blank_issues_enabled: false\n')
 workflow_dir = STAGE/'.github/workflows'; workflow_dir.mkdir(parents=True, exist_ok=True)
-(workflow_dir/'pages.yml').write_text(PAGES)
 
 # Build a clean sitemap for the THE UNI information architecture.
 urls = [
@@ -303,8 +302,8 @@ ET.ElementTree(urlset).write(STAGE/'sitemap.xml', encoding='utf-8', xml_declarat
 # Integrity and migration gates.
 all_files = [p for p in STAGE.rglob('*') if p.is_file()]
 html = list(STAGE.rglob('*.html'))
-if len(all_files) != 370:
-    raise RuntimeError(f'Expected 370 final files, found {len(all_files)}')
+if len(all_files) != 369:
+    raise RuntimeError(f'Expected 369 staged production files, found {len(all_files)}')
 if len(html) != 182:
     raise RuntimeError(f'Expected 182 HTML files, found {len(html)}')
 if len(list((STAGE/'builds').glob('*.html'))) != 177:
@@ -329,12 +328,12 @@ for rel in builds:
         raise RuntimeError(f'Library return route missing in {rel}')
 if '177 connected learning experiences' not in ROOT_INDEX:
     raise RuntimeError('Root catalog count marker missing')
-print('Integrity gates passed: 370 files / 182 HTML / 177 builds / 181 sitemap URLs / zero old public branding.', flush=True)
+print('Integrity gates passed: 369 staged files / 182 HTML / 177 builds / 181 sitemap URLs / zero old public branding.', flush=True)
 
 # Freeze verified bytes before removing bootstrap machinery, then replace the repository tree.
 payload = [(p.relative_to(STAGE), p.read_bytes()) for p in all_files]
 for child in list(ROOT.iterdir()):
-    if child.name == '.git':
+    if child.name in {'.git', '.github'}:
         continue
     if child.is_dir():
         shutil.rmtree(child)
