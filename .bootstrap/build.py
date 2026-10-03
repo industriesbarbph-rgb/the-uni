@@ -74,10 +74,9 @@ for rel in builds:
     p = STAGE / rel
     text = p.read_text(errors='ignore')
     text = brand_domain(text)
-    text = text.replace('href="../index.html" title="Back to the Interactive Knowledge Library"',
-                        'href="/interactive-knowledge-library/" title="Back to the Interactive Knowledge Library"')
-    text = text.replace("href='../index.html' title='Back to the Interactive Knowledge Library'",
-                        "href='/interactive-knowledge-library/' title='Back to the Interactive Knowledge Library'")
+    text = text.replace('../index.html', '/interactive-knowledge-library/')
+    text = re.sub(r'href=(["\\'])[^"\\']*\\1(?=[^>]*title=(["\\'])Back to the Interactive Knowledge Library\\2)',
+                  'href="/interactive-knowledge-library/"', text, flags=re.I)
     p.write_text(text)
 
 # Preserve the production library homepage as a collection page under THE UNI.
