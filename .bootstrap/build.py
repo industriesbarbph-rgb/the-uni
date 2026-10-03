@@ -75,7 +75,7 @@ for rel in builds:
     text = p.read_text(errors='ignore')
     text = brand_domain(text)
     text = text.replace('../index.html', '/interactive-knowledge-library/')
-    text = re.sub(r'href=(["\\'])[^"\\']*\\1(?=[^>]*title=(["\\'])Back to the Interactive Knowledge Library\\2)',
+    text = re.sub(r"""href=(["'])[^"']*\\1(?=[^>]*title=(["'])Back to the Interactive Knowledge Library\\2)""",
                   'href="/interactive-knowledge-library/"', text, flags=re.I)
     p.write_text(text)
 
