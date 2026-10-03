@@ -79,10 +79,7 @@ if patch_sha != EXPECTED_PATCH_SHA256:
 
 patch_path = BOOT / 'migration.patch'
 patch_path.write_bytes(patch)
-subprocess.run(['git','apply','--check',str(patch_path)], cwd=STAGE, check=True)
-subprocess.run(['git','apply',str(patch_path)], cwd=STAGE, check=True)
-
-# Post-migration integrity gates.
+# STAGE lives inside the checkout. Give it its own temporary Git boundary so\n# git apply targets the reconstructed site, not the parent repository root.\nsubprocess.run(['git','init','-q'], cwd=STAGE, check=True)\nsubprocess.run(['git','apply','--check',str(patch_path)], cwd=STAGE, check=True)\nsubprocess.run(['git','apply',str(patch_path)], cwd=STAGE, check=True)\nshutil.rmtree(STAGE/'.git', ignore_errors=True)\n\n# Post-migration integrity gates.
 all_files = [p for p in STAGE.rglob('*') if p.is_file()]
 html = list(STAGE.rglob('*.html'))
 if len(all_files) != 370:
