@@ -705,6 +705,102 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   }
 }
 </style>
+
+<style id="the-uni-field-coauthor">
+/* Editorial Co-Author invitation in the lower-right of the Knowledge Field. */
+.fieldCoauthor{
+  position:absolute!important;
+  right:24px!important;
+  bottom:13px!important;
+  z-index:8!important;
+  display:inline-flex!important;
+  align-items:baseline!important;
+  gap:7px!important;
+  text-decoration:none!important;
+  color:inherit!important;
+  white-space:nowrap!important;
+  isolation:isolate!important;
+  transition:transform .25s ease,opacity .25s ease!important;
+}
+.fieldCoauthor:before{
+  content:""!important;
+  position:absolute!important;
+  left:-38px!important;
+  top:55%!important;
+  width:29px!important;
+  height:1px!important;
+  background:linear-gradient(90deg,transparent,rgba(236,211,184,.42))!important;
+  transform-origin:right center!important;
+  transition:width .28s ease,opacity .28s ease!important;
+  opacity:.55!important;
+}
+.fieldCoauthor .co{
+  font-family:Arial,Helvetica,sans-serif!important;
+  font-size:7.5px!important;
+  font-weight:700!important;
+  letter-spacing:.32em!important;
+  text-transform:uppercase!important;
+  color:rgba(211,199,190,.48)!important;
+  transform:translateY(-5px)!important;
+}
+.fieldCoauthor .author{
+  font-family:Didot,"Bodoni 72","Bodoni MT","Times New Roman",serif!important;
+  font-size:clamp(22px,1.75vw,30px)!important;
+  font-style:italic!important;
+  font-weight:400!important;
+  letter-spacing:.01em!important;
+  line-height:.9!important;
+  color:rgba(245,235,226,.90)!important;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.12),
+    0 0 12px rgba(207,167,202,.08),
+    0 0 20px rgba(214,170,118,.06)!important;
+  transition:color .25s ease,text-shadow .25s ease!important;
+}
+.fieldCoauthor .arrow{
+  margin-left:1px!important;
+  font-family:Georgia,"Times New Roman",serif!important;
+  font-size:10px!important;
+  font-style:normal!important;
+  color:rgba(220,190,157,.48)!important;
+  transform:translateY(-8px)!important;
+  transition:transform .25s ease,color .25s ease!important;
+}
+.fieldCoauthor:hover,
+.fieldCoauthor:focus-visible{
+  transform:translateY(-2px)!important;
+  outline:none!important;
+}
+.fieldCoauthor:hover:before,
+.fieldCoauthor:focus-visible:before{
+  width:34px!important;
+  opacity:.9!important;
+}
+.fieldCoauthor:hover .author,
+.fieldCoauthor:focus-visible .author{
+  color:#fff7ef!important;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.18),
+    0 0 14px rgba(220,182,211,.18),
+    0 0 26px rgba(221,178,126,.12)!important;
+}
+.fieldCoauthor:hover .arrow,
+.fieldCoauthor:focus-visible .arrow{
+  color:rgba(246,221,194,.82)!important;
+  transform:translate(2px,-10px)!important;
+}
+@media(max-width:900px){
+  .fieldCoauthor{right:20px!important;bottom:13px!important}
+  .fieldCoauthor .author{font-size:22px!important}
+}
+@media(max-width:680px){
+  .fieldCoauthor{right:16px!important;bottom:12px!important;gap:5px!important}
+  .fieldCoauthor:before{display:none!important}
+  .fieldCoauthor .co{font-size:6.5px!important;letter-spacing:.23em!important}
+  .fieldCoauthor .author{font-size:18px!important}
+  .fieldCoauthor .arrow{font-size:8px!important}
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
@@ -718,6 +814,7 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 <section class="section libraryDirect" id="library"><div class="libraryStage"><div class="stageHead"><button class="atmoName stageAtmo" id="atmoName" type="button" title="Change atmosphere" aria-label="Change atmosphere">The Nocturne Cabinet</button><div class="searchWrap"><input class="search" id="search" type="search" placeholder="Search heart, flower, atom, volcano…" aria-label="Search the library"><button class="allBtn" id="showAll" type="button">All</button></div></div>
 <svg id="network" role="application" aria-label="Interactive constellation of THE UNI learning experiences"><defs><filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g class="zoomLayer"><g class="links"></g><g class="nodes"></g></g></svg>
 <div class="networkLegend"><span class="legendItem"><i class="legendDot" style="--c:#d1b06f"></i>Maps</span><span class="legendItem"><i class="legendDot" style="--c:#a8becd"></i>Objects</span><span class="legendItem"><i class="legendDot" style="--c:#ad94bc"></i>Labs</span><span class="legendItem"><i class="legendDot" style="--c:#c0815b"></i>Reconstruction</span></div>
+<a class="fieldCoauthor" href="/coauthor/" aria-label="Co-Author"><span class="co">CO</span><span class="author">AUTHOR</span><span class="arrow" aria-hidden="true">↗</span></a>
 <aside class="drawer" id="drawer" aria-live="polite"><button class="close" id="closeDrawer" type="button" aria-label="Close">×</button><div class="drawerKicker" id="drawerKicker"></div><h3 id="drawerTitle"></h3><p id="drawerDesc"></p><div class="badges" id="badges"></div><a class="exploreBtn" id="exploreBtn" href="#">Explore experience →</a><div class="relTitle">Related exhibits</div><div class="related" id="related"></div><p class="relationNote">Related exhibits are suggested from shared subject terms and library structure. They are discovery links, not evidence claims.</p></aside>
 </div></section>
 <section class="section" id="about"><div class="sectionKicker">Interactive Knowledge Library</div><h2>Curate your curiosities.</h2><p class="sectionIntro aboutLead">A living constellation of learning and collection of visual learning experiences built to help you explore knowledge by touching, tracing, comparing, dissecting, rebuilding, and testing what you learn not just by reading. You explore it.</p><div class="aboutNodeIntro"><h2>THE NODES KNOW.</h2><p class="sectionIntro">Touch a node to understand how subjects and fields intersect across the collection.</p></div><h2 class="aboutMuseum">An impossible museum on the internet.</h2><div class="about"><div class="aboutPanel"><h3>Built to be touched.</h3><p>Maps reveal relationships. Objects let you inspect structures. Laboratories let you take systems apart, rebuild them, compare them and follow processes in motion. Reconstruction separates evidence from inference.</p></div><div class="aboutPanel"><h3>Built from traceable sources.</h3><p>Educational claims are linked to their references inside each experience. Evidence stays accessible without turning the library entrance into a bibliography.</p></div></div></section>
