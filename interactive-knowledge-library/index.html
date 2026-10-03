@@ -204,6 +204,34 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 .masthead{min-height:auto!important;padding:8px 14px!important}
 .libraryDirect{margin-top:0!important}
 </style>
+<style id="the-uni-stage-atmosphere">
+.stageHead .stageAtmo{
+  display:inline-flex!important;
+  align-items:center!important;
+  pointer-events:auto!important;
+  margin:0!important;
+  padding:8px 0 8px 16px!important;
+  text-align:left!important;
+  white-space:nowrap!important;
+  opacity:.9!important;
+}
+.stageHead .stageAtmo:hover,
+.stageHead .stageAtmo:focus-visible{opacity:1!important}
+@media(max-width:900px){
+  .stageHead .stageAtmo{display:inline-flex!important;font-size:8px!important;max-width:42vw!important}
+}
+@media(max-width:680px){
+  .stageHead{align-items:flex-start!important}
+  .stageHead .stageAtmo{
+    display:inline-flex!important;
+    font-size:7.5px!important;
+    letter-spacing:.11em!important;
+    max-width:35vw!important;
+    white-space:normal!important;
+    line-height:1.25!important
+  }
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
@@ -211,11 +239,10 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 <div class="masthead">
 
 <div class="mastUtilities">
-<button class="atmoName" id="atmoName" type="button" title="Change atmosphere" aria-label="Change atmosphere">The Nocturne Cabinet</button>
 <div class="jewels"><a class="jewel play" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a><a class="jewel" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a></div>
 </div>
 </div>
-<section class="section libraryDirect" id="library"><div class="libraryStage"><div class="stageHead"><div class="modeTitle" id="modeTitle">All 177 Experiences</div><div class="searchWrap"><input class="search" id="search" type="search" placeholder="Search heart, flower, atom, volcano…" aria-label="Search the library"><button class="allBtn" id="showAll" type="button">All</button></div></div>
+<section class="section libraryDirect" id="library"><div class="libraryStage"><div class="stageHead"><button class="atmoName stageAtmo" id="atmoName" type="button" title="Change atmosphere" aria-label="Change atmosphere">The Nocturne Cabinet</button><div class="searchWrap"><input class="search" id="search" type="search" placeholder="Search heart, flower, atom, volcano…" aria-label="Search the library"><button class="allBtn" id="showAll" type="button">All</button></div></div>
 <svg id="network" role="application" aria-label="Interactive constellation of THE UNI learning experiences"><defs><filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g class="zoomLayer"><g class="links"></g><g class="nodes"></g></g></svg>
 <div class="networkHint">Touch a glow · search to explore</div><div class="networkLegend"><span class="legendItem"><i class="legendDot" style="--c:#d1b06f"></i>Maps</span><span class="legendItem"><i class="legendDot" style="--c:#a8becd"></i>Objects</span><span class="legendItem"><i class="legendDot" style="--c:#ad94bc"></i>Labs</span><span class="legendItem"><i class="legendDot" style="--c:#c0815b"></i>Reconstruction</span></div>
 <aside class="drawer" id="drawer" aria-live="polite"><button class="close" id="closeDrawer" type="button" aria-label="Close">×</button><div class="drawerKicker" id="drawerKicker"></div><h3 id="drawerTitle"></h3><p id="drawerDesc"></p><div class="badges" id="badges"></div><a class="exploreBtn" id="exploreBtn" href="#">Explore experience →</a><div class="relTitle">Related exhibits</div><div class="related" id="related"></div><p class="relationNote">Related exhibits are suggested from shared subject terms and library structure. They are discovery links, not evidence claims.</p></aside>
