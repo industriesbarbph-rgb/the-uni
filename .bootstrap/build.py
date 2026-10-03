@@ -10,22 +10,21 @@ EXPECTED_XZ_SHA256 = 'ce399064604dbe0f5c1f990d743b356f1e910ce522a1dd498982291ce8
 EXPECTED_PATCH_SHA256 = '0f9a5f33c84fe84a6310bef7ce0abca8b3a069007c5fdb60c156cdbbeb53fc78'
 
 def get(url, attempts=5):
-    last_error = None
+    last = None
     for attempt in range(1, attempts + 1):
         try:
             req = urllib.request.Request(url, headers={'User-Agent':'THE-UNI-Migration/1.0'})
             with urllib.request.urlopen(req, timeout=90) as response:
                 return response.read()
         except Exception as exc:
-            last_error = exc
+            last = exc
             if attempt == attempts:
                 raise
             delay = min(12, 2 ** (attempt - 1))
             print(f'Retrying {url} after transient fetch error ({attempt}/{attempts}): {exc}', flush=True)
             time.sleep(delay)
-    raise last_error
+    raise last
 
-# Reconstruct the exact frozen 360-file IKL production baseline.
 sitemap_bytes = get(BASE + 'sitemap.xml')
 root = ET.fromstring(sitemap_bytes)
 ns = {'s':'http://www.sitemaps.org/schemas/sitemap/0.9'}
@@ -61,7 +60,6 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         if n % 40 == 0 or n == len(paths):
             print(f'  {n}/{len(paths)}')
 
-# Reassemble and cryptographically verify the audited migration patch.
 parts = sorted(BOOT.glob('patch.part*'))
 encoded = ''.join(p.read_text().strip() for p in parts)
 if len(encoded) != EXPECTED_PAYLOAD_CHARS:
@@ -79,7 +77,18 @@ if patch_sha != EXPECTED_PATCH_SHA256:
 
 patch_path = BOOT / 'migration.patch'
 patch_path.write_bytes(patch)
-# STAGE lives inside the checkout. Give it its own temporary Git boundary so\n# git apply targets the reconstructed site, not the parent repository root.\nsubprocess.run(['git','init','-q'], cwd=STAGE, check=True)\nsubprocess.run(['git','apply','--check',str(patch_path)], cwd=STAGE, check=True)\nsubprocess.run(['git','apply',str(patch_path)], cwd=STAGE, check=True)\nshutil.rmtree(STAGE/'.git', ignore_errors=True)\n\n# Post-migration integrity gates.
+
+# Make STAGE a real temporary repository so Git applies new files and edits
+# to the reconstructed baseline rather than to the parent checkout.
+subprocess.run(['git','init','-q'], cwd=STAGE, check=True)
+subprocess.run(['git','config','user.email','bootstrap@theuni.local'], cwd=STAGE, check=True)
+subprocess.run(['git','config','user.name','THE UNI Bootstrap'], cwd=STAGE, check=True)
+subprocess.run(['git','add','-A'], cwd=STAGE, check=True)
+subprocess.run(['git','commit','-qm','Frozen IKL baseline'], cwd=STAGE, check=True)
+subprocess.run(['git','apply','--check',str(patch_path)], cwd=STAGE, check=True)
+subprocess.run(['git','apply',str(patch_path)], cwd=STAGE, check=True)
+shutil.rmtree(STAGE / '.git', ignore_errors=True)
+
 all_files = [p for p in STAGE.rglob('*') if p.is_file()]
 html = list(STAGE.rglob('*.html'))
 if len(all_files) != 370:
@@ -90,7 +99,6 @@ if len(list((STAGE/'builds').glob('*.html'))) != 177:
 for req in ['index.html','interactive-knowledge-library/index.html','the-impossible-museum/index.html','CNAME','sitemap.xml','robots.txt','.nojekyll']:
     if not (STAGE/req).exists():
         raise RuntimeError(f'Missing required file: {req}')
-
 if (STAGE/'CNAME').read_text().strip() != 'theuni.barbph.com':
     raise RuntimeError('CNAME mismatch')
 
@@ -107,7 +115,6 @@ if len(locs) != 181 or len(set(locs)) != 181:
 
 print('Integrity gates passed: 370 files / 177 builds / 181 sitemap URLs / zero old branding.')
 
-# Copy the exact verified target tree into the repository.
 for p in all_files:
     rel = p.relative_to(STAGE)
     dst = ROOT / rel
@@ -119,10 +126,8 @@ try:
 except FileNotFoundError:
     pass
 
-# Remove temporary bootstrap machinery so main contains only maintainable production source.
 bootstrap_workflow = ROOT/'.github/workflows/bootstrap-the-uni.yml'
 if bootstrap_workflow.exists():
     bootstrap_workflow.unlink()
 shutil.rmtree(BOOT, ignore_errors=True)
-
 print('THE UNI source tree prepared and bootstrap payload cleaned.')
