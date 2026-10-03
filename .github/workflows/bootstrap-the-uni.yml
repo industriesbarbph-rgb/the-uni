@@ -42,3 +42,5 @@ jobs:
 # retry after regex syntax fix
 
 # retry after parent-route declaration
+
+# retry with workflow-safe bootstrap
