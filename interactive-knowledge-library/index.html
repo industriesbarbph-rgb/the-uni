@@ -131,16 +131,6 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 <meta name="twitter:description" content="A growing collection of visual learning experiences built to help you explore knowledge by touching, tracing, comparing, dissecting, rebuilding, and testing what you learn.">
 <meta name="twitter:image" content="https://theuni.barbph.com/social/interactive-knowledge-library.jpg">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://theuni.barbph.com/#publisher","name":"THE UNI","url":"https://barbph.com/"},{"@type":"WebSite","@id":"https://theuni.barbph.com/#website","url":"https://theuni.barbph.com/","name":"THE UNI — Interactive Knowledge Library","description":"A growing collection of visual learning experiences built to help you explore knowledge by touching, tracing, comparing, dissecting, rebuilding, and testing what you learn.","publisher":{"@id":"https://theuni.barbph.com/#publisher"},"inLanguage":"en"},{"@type":"CollectionPage","@id":"https://theuni.barbph.com/#webpage","url":"https://theuni.barbph.com/","name":"THE UNI — Interactive Knowledge Library","description":"A growing collection of visual learning experiences built to help you explore knowledge by touching, tracing, comparing, dissecting, rebuilding, and testing what you learn.","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"about":"Interactive visual learning experiences","mainEntity":{"@type":"ItemList","numberOfItems":177},"inLanguage":"en"}]}
-/* THE UNI back-to-top control */
-(()=>{
- const btn=document.getElementById('toTop');
- if(!btn)return;
- const sync=()=>btn.classList.toggle('isVisible',window.scrollY>240);
- btn.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
- window.addEventListener('scroll',sync,{passive:true});
- sync();
-})();
-/* end THE UNI back-to-top control */
 </script>
 <!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
 
@@ -214,18 +204,6 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 .masthead{min-height:auto!important;padding:8px 14px!important}
 .libraryDirect{margin-top:0!important}
 </style>
-<style id="the-uni-nav-top-control">
-.navDock .nav button.toTop{
-  appearance:none;border:0;background:transparent;color:var(--muted);
-  width:100%;min-height:38px;border-radius:999px;cursor:pointer;
-  font:inherit;font-size:15px;line-height:1;transition:.22s ease;
-  opacity:0;pointer-events:none;transform:translateY(4px)
-}
-.navDock .nav button.toTop.isVisible{opacity:1;pointer-events:auto;transform:translateY(0)}
-.navDock .nav button.toTop:hover,.navDock .nav button.toTop:focus-visible{
-  color:var(--ink);background:rgba(255,255,255,.055);outline:none
-}
-</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
@@ -237,9 +215,6 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 <div class="jewels"><a class="jewel play" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a><a class="jewel" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a></div>
 </div>
 </div>
-<header class="navDock">
-<nav class="nav" aria-label="Primary"><a href="#about">About</a><a href="/coauthor/" target="_blank" rel="noopener noreferrer">Co-Author</a><button class="toTop" id="toTop" type="button" aria-label="Back to top" title="Back to top">↑</button></nav>
-</header>
 <section class="section libraryDirect" id="library"><div class="libraryStage"><div class="stageHead"><div class="modeTitle" id="modeTitle">All 177 Experiences</div><div class="searchWrap"><input class="search" id="search" type="search" placeholder="Search heart, flower, atom, volcano…" aria-label="Search the library"><button class="allBtn" id="showAll" type="button">All</button></div></div>
 <svg id="network" role="application" aria-label="Interactive constellation of THE UNI learning experiences"><defs><filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g class="zoomLayer"><g class="links"></g><g class="nodes"></g></g></svg>
 <div class="networkHint">Touch a glow · search to explore</div><div class="networkLegend"><span class="legendItem"><i class="legendDot" style="--c:#d1b06f"></i>Maps</span><span class="legendItem"><i class="legendDot" style="--c:#a8becd"></i>Objects</span><span class="legendItem"><i class="legendDot" style="--c:#ad94bc"></i>Labs</span><span class="legendItem"><i class="legendDot" style="--c:#c0815b"></i>Reconstruction</span></div>
