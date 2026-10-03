@@ -11,13 +11,13 @@
   </linearGradient>
   <filter id="rough" x="-7%" y="-16%" width="114%" height="132%" color-interpolation-filters="sRGB">
     <feTurbulence type="fractalNoise" baseFrequency=".024 .085" numOctaves="4" seed="17" result="noise"/>
-    <feDisplacementMap in="SourceGraphic" in2="noise" scale="5.5" xChannelSelector="R" yChannelSelector="G" result="worn"/>
+    <feDisplacementMap in="SourceGraphic" in2="noise" scale="7.2" xChannelSelector="R" yChannelSelector="G" result="worn"/>
     <feTurbulence type="fractalNoise" baseFrequency=".14" numOctaves="2" seed="8" result="grain"/>
     <feColorMatrix in="grain" type="saturate" values="0" result="gray"/>
     <feComposite in="gray" in2="worn" operator="in" result="texture"/>
     <feBlend in="worn" in2="texture" mode="multiply" result="stone"/>
     <feDropShadow dx="0" dy="9" stdDeviation="10" flood-color="#000" flood-opacity=".42"/>
-    <feSpecularLighting in="noise" surfaceScale="2.2" specularConstant=".22" specularExponent="12" lighting-color="#d6b182" result="spec">
+    <feSpecularLighting in="noise" surfaceScale="3.1" specularConstant=".22" specularExponent="12" lighting-color="#d6b182" result="spec">
       <feDistantLight azimuth="225" elevation="38"/>
     </feSpecularLighting>
     <feComposite in="spec" in2="worn" operator="in" result="specCut"/>
@@ -39,12 +39,12 @@
   <path d="M188 121l14 18 18-5M826 88l-11 24 18 13"/>
 </g>
 
-<g filter="url(#cut)" fill="#2a211b" stroke="#17120e" stroke-width=".9" paint-order="stroke fill">
-  <text x="184" y="163" font-family="Georgia, 'Times New Roman', serif" font-size="74" font-weight="700" letter-spacing="6">THE</text>
-  <text x="456" y="184" font-family="Georgia, 'Times New Roman', serif" font-size="137" font-weight="700" letter-spacing="-7">UN</text>
-  <path d="M879 52h110v21h-29v112h29v21H879v-21h29V73h-29z"/>
+<g filter="url(#cut)" fill="#201813" stroke="#17120e" stroke-width="1.15" paint-order="stroke fill">
+  <text x="184" y="163" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="800" letter-spacing="6">THE</text>
+  <text x="425" y="184" font-family="Georgia, 'Times New Roman', serif" font-size="145" font-weight="800" letter-spacing="-10">UN</text>
+  <path d="M741 47h112v22h-29v118h29v22H741v-22h29V69h-29z"/>
 </g>
 
-<text transform="translate(947 174) rotate(-90)" fill="#b88d52" stroke="#241811" stroke-width=".7"
+<text transform="translate(810 178) rotate(-90)" fill="#b88d52" stroke="#241811" stroke-width=".7"
       font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" letter-spacing="1.1">BarbPH</text>
 </svg>
