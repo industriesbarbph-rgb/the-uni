@@ -77,6 +77,11 @@ for rel in builds:
     text = text.replace('../index.html', '/interactive-knowledge-library/')
     text = re.sub(r"""href=(["'])[^"']*\\1(?=[^>]*title=(["'])Back to the Interactive Knowledge Library\\2)""",
                   'href="/interactive-knowledge-library/"', text, flags=re.I)
+    # Every experience explicitly declares its parent collection even when its visual UI has no back control.
+    if '<head>' in text:
+        text = text.replace('<head>', '<head>\n<link rel="up" href="/interactive-knowledge-library/">', 1)
+    else:
+        text = '<link rel="up" href="/interactive-knowledge-library/">\n' + text
     p.write_text(text)
 
 # Preserve the production library homepage as a collection page under THE UNI.
