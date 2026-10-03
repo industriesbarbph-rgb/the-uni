@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="up" href="/interactive-knowledge-library/">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pollination → Seed — Interactive Learning Lab | THE UNI</title>
+<style>
+:root{--p:#91b6a3;--s:#b9a0c8;--text:#f5f6f6;--muted:#aeb6ba;--border:rgba(231,238,241,.15)}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#090d10;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+body{background:radial-gradient(circle at 15% 15%,color-mix(in srgb,var(--p) 25%,transparent),transparent 34%),radial-gradient(circle at 85% 20%,color-mix(in srgb,var(--s) 18%,transparent),transparent 38%),linear-gradient(130deg,#080b0e,#20262b 38%,#0c1115 64%,#151a1e);background-size:160% 160%;animation:bg 24s ease-in-out infinite}
+@keyframes bg{50%{background-position:100% 60%}}@keyframes pulse{50%{opacity:.62;transform:scale(1.06)}}@keyframes sweep{to{transform:translateX(170%) rotate(-12deg)}}@keyframes dash{to{stroke-dashoffset:-35}}@keyframes orbit{to{transform:rotate(360deg)}}@keyframes chrono{50%{transform:translateX(18%);opacity:.26}}
+#app{width:100vw;height:100vh;position:relative;isolation:isolate}.amb{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.amb:before,.amb:after{content:"";position:absolute;inset:-20%;opacity:.18}
+.amb.pulse-ring:before{inset:20%;border:1px solid color-mix(in srgb,var(--p) 55%,transparent);border-radius:50%;animation:pulse 8s ease-in-out infinite}
+.amb.aurora:before{background:radial-gradient(ellipse at 30% 40%,color-mix(in srgb,var(--p) 30%,transparent),transparent 35%),radial-gradient(ellipse at 65% 55%,color-mix(in srgb,var(--s) 25%,transparent),transparent 38%);animation:bg 14s ease-in-out infinite}
+.amb.edge-sweep:before{width:45%;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--p) 22%,transparent),transparent);animation:sweep 13s linear infinite}
+.amb.signal:before{background:repeating-linear-gradient(90deg,transparent 0 8%,color-mix(in srgb,var(--p) 14%,transparent) 8.5%,transparent 9% 18%);animation:bg 20s linear infinite}
+.amb.caustic:before{background:repeating-linear-gradient(100deg,transparent 0 10%,color-mix(in srgb,var(--p) 16%,transparent) 11%,transparent 13% 22%);animation:sweep 19s ease-in-out infinite}
+.amb.breath:before{background:radial-gradient(circle at 0 0,color-mix(in srgb,var(--p) 32%,transparent),transparent 35%),radial-gradient(circle at 100% 100%,color-mix(in srgb,var(--s) 22%,transparent),transparent 35%);animation:pulse 14s ease-in-out infinite}
+.amb.grid:before{background-image:linear-gradient(color-mix(in srgb,var(--p) 10%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--p) 10%,transparent) 1px,transparent 1px);background-size:42px 42px;animation:bg 25s linear infinite}
+.amb.orbit:before{inset:10% 20%;border:1px solid color-mix(in srgb,var(--p) 30%,transparent);border-radius:50%;animation:orbit 60s linear infinite}
+.amb.chrono:before{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--p) 20%,transparent),transparent);animation:chrono 15s ease-in-out infinite}
+.amb.spectrum:before{background:linear-gradient(110deg,transparent,color-mix(in srgb,var(--p) 18%,transparent),color-mix(in srgb,var(--s) 18%,transparent),transparent);animation:sweep 16s ease-in-out infinite}
+.glass{background:linear-gradient(155deg,rgba(36,42,46,.88),rgba(11,15,18,.78));border:1px solid var(--border);box-shadow:0 18px 46px rgba(0,0,0,.28);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px)}
+#panel{position:absolute;z-index:6;left:16px;top:16px;width:365px;max-width:calc(100vw - 32px);border-radius:15px;padding:14px}
+.kicker{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}h1{font-size:17px;margin:4px 0 3px}.sub{font-size:10.5px;line-height:1.45;color:var(--muted);margin-bottom:10px}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.mode{border:1px solid var(--border);border-radius:8px;background:rgba(255,255,255,.035);padding:7px 3px;font-size:9.5px;color:var(--text);cursor:pointer}
+.mode.active{background:color-mix(in srgb,var(--p) 24%,transparent);border-color:color-mix(in srgb,var(--p) 55%,transparent)}
+#status{margin-top:10px;border-top:1px solid var(--border);padding-top:9px;min-height:44px;font-size:10.5px;line-height:1.45;color:var(--muted)}#status b{color:var(--text)}
+#stepbox{display:none;margin-top:8px;border:1px solid color-mix(in srgb,var(--s) 30%,transparent);background:color-mix(in srgb,var(--s) 7%,transparent);border-radius:9px;padding:8px;font-size:10px;line-height:1.4}
+#stepbox.show{display:block}.actions{display:flex;gap:5px;margin-top:6px}.smallbtn{border:1px solid var(--border);background:rgba(255,255,255,.04);border-radius:7px;padding:6px 8px;font-size:9px;color:var(--text);cursor:pointer}
+#lab{position:absolute;inset:0;z-index:2;width:100%;height:100%;touch-action:none}
+.chamber{fill:rgba(15,20,23,.34);stroke:rgba(235,242,244,.08);stroke-width:1.2}
+.connector{stroke:rgba(203,216,221,.20);stroke-width:2;fill:none}.connector.trace{stroke:var(--s);stroke-width:4;stroke-dasharray:10 8;animation:dash 1s linear infinite}
+.dock{fill:none;stroke:rgba(232,241,243,.22);stroke-width:1.5;stroke-dasharray:4 5;opacity:0}.rebuild .dock{opacity:1}
+.part{cursor:pointer;transition:opacity .2s}.part.dim{opacity:.13}.part .core{fill:rgba(20,26,29,.92);stroke:var(--p);stroke-width:2;filter:drop-shadow(0 0 7px color-mix(in srgb,var(--p) 30%,transparent))}
+.part .halo{fill:color-mix(in srgb,var(--p) 12%,transparent);stroke:none}.part text{fill:#edf2f3;font-size:11px;font-weight:650;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#0a0e11;stroke-width:4px}
+.part .num{font-size:8px;fill:var(--muted)}.part.selected .core{stroke:#fff;stroke-width:3;filter:drop-shadow(0 0 13px color-mix(in srgb,var(--p) 75%,transparent))}
+.part.correct .core{stroke:#8bc59f;stroke-width:3}.part.wrong .core{stroke:#d98291;stroke-width:3}
+#toolbar{position:absolute;z-index:7;right:16px;top:16px;border-radius:12px;padding:6px;display:flex;gap:6px}.icon{width:32px;height:32px;border:1px solid var(--border);background:rgba(255,255,255,.04);border-radius:8px;color:var(--text);cursor:pointer}.icon.on{background:color-mix(in srgb,var(--p) 25%,transparent)}
+#drawer{position:absolute;z-index:9;right:16px;top:62px;bottom:16px;width:min(410px,calc(100vw - 32px));border-radius:15px;display:none;overflow:hidden}.open{display:flex!important;flex-direction:column}
+.dhead{display:flex;padding:13px 14px 10px;border-bottom:1px solid var(--border)}.dtitle{flex:1}.dk{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}.dtitle h2{font-size:18px;margin:3px 0}.dbody{overflow:auto;padding:13px 14px 18px}
+.st{font-size:8.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}.st:first-child{margin-top:0}.lead{font-size:11.5px;line-height:1.5;color:#dce2e4}
+.card{border:1px solid var(--border);border-radius:9px;padding:9px;margin-top:7px;background:rgba(255,255,255,.025)}.card b{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--s)}.card div{font-size:10.5px;line-height:1.45;color:#d8dedf;margin-top:3px}
+.src{display:block;color:inherit;text-decoration:none;border:1px solid var(--border);border-radius:9px;padding:9px;margin-top:6px;background:rgba(255,255,255,.025)}.src strong{font-size:10px}.src small{display:block;color:var(--muted);margin-top:3px}
+#watermark{position:absolute;z-index:8;right:20px;bottom:18px;font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;color:rgba(220,231,234,.43);font-weight:650;pointer-events:none}
+#counter{position:absolute;z-index:5;left:50%;bottom:16px;transform:translateX(-50%);border-radius:999px;padding:7px 10px;font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+#toast{position:absolute;z-index:20;left:50%;top:18px;transform:translateX(-50%);opacity:0;border-radius:8px;padding:7px 10px;font-size:9.5px;color:var(--muted);transition:.2s;pointer-events:none}#toast.show{opacity:1}
+@media(max-width:760px){#panel{left:9px;top:9px;width:min(292px,calc(100vw - 72px));padding:11px}h1{font-size:14px}.sub{font-size:9.5px}.mode{font-size:8.5px;padding:6px 2px}#status{display:none}#toolbar{right:9px;top:9px;padding:5px}#drawer{left:8px;right:8px;top:auto;bottom:8px;width:auto;max-height:70vh}#counter{display:none}#watermark{right:9px;bottom:10px;font-size:8px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important}}
+</style>
+<style id="coach-doll-public-dock-style">
+/* THE UNI — compact public jewel controls */
+#cdPublicDock{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:linear-gradient(145deg,rgba(18,22,27,.76),rgba(5,7,10,.66));box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#cdPublicDock a{position:relative;display:grid;place-items:center;color:#f0f4f5;text-decoration:none;border:1px solid rgba(255,255,255,.15);background:radial-gradient(circle at 33% 26%,rgba(255,255,255,.18),rgba(255,255,255,.055) 39%,rgba(0,0,0,.26) 79%);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 16px rgba(198,218,233,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+#cdPublicDock a:hover,#cdPublicDock a:focus-visible{transform:translateY(-2px);border-color:rgba(229,207,166,.50);box-shadow:inset 0 1px rgba(255,255,255,.16),0 0 22px rgba(222,193,141,.17);outline:none}
+#cdPublicDock .cdWatch{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.15),0 0 21px rgba(222,193,141,.13)}
+#cdPublicDock .cdContact{width:34px;height:34px;border-radius:50%}
+#cdPublicDock .cdWatch::before,#cdPublicDock .cdContact::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(229,204,151,.18);pointer-events:none}
+#cdPublicDock .cdWatch::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(226,199,146,.11);animation:cdJewelBreath 5.6s ease-in-out infinite;pointer-events:none}
+#cdPublicDock svg{width:16px;height:16px}.cdWatch svg{width:17px!important;height:17px!important}
+.cdDockWord{width:auto!important;height:34px!important;padding:0 12px!important;border-radius:999px!important;font-size:8.5px!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:#e9e1d7!important}
+@keyframes cdJewelBreath{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.04)}}
+@media(max-width:680px){#cdPublicDock{left:8px;bottom:8px;gap:5px;padding:4px 5px}#cdPublicDock .cdWatch{width:36px;height:36px}#cdPublicDock .cdContact{width:33px;height:33px}.cdDockWord{width:33px!important;height:33px!important;padding:0!important;font-size:0!important}.cdDockWord::after{content:"⌂";font-size:15px}}
+@media(prefers-reduced-motion:reduce){#cdPublicDock a{transition:none!important}#cdPublicDock .cdWatch::after{animation:none!important}}
+</style>
+<style id="coach-doll-node-dna-v2">
+/* Node DNA V2 — assembly nodes use the same restrained luminous language as the knowledge maps */
+.part .core{fill:rgba(14,19,23,.93)!important;stroke:color-mix(in srgb,var(--p) 80%,rgba(245,249,250,.35))!important;stroke-width:2px!important;filter:drop-shadow(0 0 5px rgba(255,255,255,.04)) drop-shadow(0 0 12px color-mix(in srgb,var(--p) 29%,transparent))!important}
+.part .halo{fill:color-mix(in srgb,var(--p) 10%,transparent)!important;stroke:color-mix(in srgb,var(--p) 27%,transparent);stroke-width:1;animation:cdNodeHalo 6.8s ease-in-out infinite}
+.part:hover .core,.part.selected .core{stroke:#f6fafb!important;filter:drop-shadow(0 0 6px rgba(255,255,255,.14)) drop-shadow(0 0 17px color-mix(in srgb,var(--p) 46%,transparent))!important}
+.connector{stroke:color-mix(in srgb,var(--s) 28%,rgba(203,216,221,.18))!important;filter:drop-shadow(0 0 2px color-mix(in srgb,var(--s) 23%,transparent))}
+.connector.trace{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--s) 50%,transparent))}
+@keyframes cdNodeHalo{0%,100%{opacity:.45}50%{opacity:.92}}
+@media(prefers-reduced-motion:reduce){.part .halo{animation:none!important}}
+</style>
+
+<!-- IKL SEO + SOCIAL PUBLISHING LAYER -->
+<meta name="description" content="Explore Pollination → Seed in an interactive THE UNI learning lab. Take systems apart, rebuild them, trace processes, compare parts, and test…">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://theuni.barbph.com/builds/156-pollination-to-seed-lab.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="THE UNI — Interactive Knowledge Library">
+<meta property="og:title" content="Pollination → Seed — Interactive Learning Lab | THE UNI">
+<meta property="og:description" content="Explore Pollination → Seed in an interactive THE UNI learning lab. Take systems apart, rebuild them, trace processes, compare parts, and test…">
+<meta property="og:url" content="https://theuni.barbph.com/builds/156-pollination-to-seed-lab.html">
+<meta property="og:image" content="https://theuni.barbph.com/social/156-pollination-to-seed-lab.jpg">
+<meta property="og:image:secure_url" content="https://theuni.barbph.com/social/156-pollination-to-seed-lab.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Pollination → Seed — THE UNI interactive learning preview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pollination → Seed — Interactive Learning Lab | THE UNI">
+<meta name="twitter:description" content="Explore Pollination → Seed in an interactive THE UNI learning lab. Take systems apart, rebuild them, trace processes, compare parts, and test…">
+<meta name="twitter:image" content="https://theuni.barbph.com/social/156-pollination-to-seed-lab.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebPage","LearningResource"],"@id":"https://theuni.barbph.com/builds/156-pollination-to-seed-lab.html#learning-resource","url":"https://theuni.barbph.com/builds/156-pollination-to-seed-lab.html","name":"Pollination → Seed — Interactive Learning Lab | THE UNI","headline":"Pollination → Seed","description":"Explore Pollination → Seed in an interactive THE UNI learning lab. Take systems apart, rebuild them, trace processes, compare parts, and test…","inLanguage":"en","image":"https://theuni.barbph.com/social/156-pollination-to-seed-lab.jpg","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"creator":{"@id":"https://theuni.barbph.com/#publisher"},"learningResourceType":"Interactive learning laboratory","educationalUse":["instruction","self study","assessment"]}</script>
+<!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
+</head>
+<body>
+<div id="app">
+<div class="amb aurora"></div>
+<svg id="lab" viewBox="0 0 1000 700" aria-label="Interactive learning laboratory">
+<g id="view"><ellipse class="chamber" cx="510" cy="355" rx="325" ry="255"/><g id="connections"></g><g id="docks"></g><g id="parts"></g></g>
+</svg>
+
+<section id="panel" class="glass">
+<div class="kicker">Pearl Biolab · THE UNI Learning Laboratory</div>
+<h1>Pollination → Seed</h1>
+<div class="sub">Plant Biology · Open it, take it apart, rebuild it, trace what happens, compare it, then prove you understand it.</div>
+<div class="modes">
+<button class="mode active" data-mode="explore">Explore</button><button class="mode" data-mode="apart">Take It Apart</button><button class="mode" data-mode="rebuild">Rebuild</button>
+<button class="mode" data-mode="trace">Trace Process</button><button class="mode" data-mode="compare">Compare</button><button class="mode" data-mode="quiz">Quiz</button>
+</div>
+<div id="status"><b>Start anywhere.</b><br>Touch a component to open its high-yield knowledge drawer.</div>
+<div id="stepbox"><div id="steptext"></div><div class="actions"><button class="smallbtn" id="prev">← Back</button><button class="smallbtn" id="next">Next →</button></div></div>
+</section>
+
+<div id="toolbar" class="glass"><button class="icon" id="sound" title="Sound">◌</button><button class="icon" id="reset" title="Reset">◎</button></div>
+<div id="counter" class="glass">Trace pollination → seed</div>
+<aside id="drawer" class="glass"><div class="dhead"><div class="dtitle"><div class="dk">Verified learning lab</div><h2 id="dt">—</h2></div><button class="icon" id="close">×</button></div><div class="dbody" id="db"></div></aside>
+<div id="toast" class="glass"></div>
+</div>
+
+<script>
+const CFG={"title": "Pollination → Seed", "category": "Plant Biology", "theme": "Pearl Biolab", "parts": [{"name": "Pollen release", "role": "Anthers release mature pollen grains.", "trap": "Pollen is the male gametophyte, not simply sperm."}, {"name": "Pollination", "role": "Pollen reaches a compatible stigma.", "trap": "Pollination precedes fertilization."}, {"name": "Pollen-tube growth", "role": "Tube grows through female tissues toward an ovule.", "trap": "The grain does not simply fall into the ovary."}, {"name": "Double fertilization", "role": "One sperm contributes to zygote formation; another to endosperm formation in angiosperms.", "trap": "Double fertilization is a defining angiosperm process."}, {"name": "Embryo / endosperm", "role": "Embryo develops while endosperm supports seed development.", "trap": "Endosperm ploidy is typically triploid in angiosperms."}, {"name": "Seed / fruit development", "role": "Ovule becomes seed; ovary tissues commonly contribute to fruit.", "trap": "Seed and fruit arise from different floral structures."}], "process_title": "Trace pollination → seed", "process_steps": ["Pollen release: Anthers release mature pollen grains.", "Pollination: Pollen reaches a compatible stigma.", "Pollen-tube growth: Tube grows through female tissues toward an ovule.", "Double fertilization: One sperm contributes to zygote formation; another to endosperm formation in angiosperms.", "Embryo / endosperm: Embryo develops while endosperm supports seed development.", "Seed / fruit development: Ovule becomes seed; ovary tissues commonly contribute to fruit."], "sources": [{"name": "Biology 2e — Plant Reproduction", "org": "OpenStax · Rice University", "url": "https://openstax.org/books/biology-2e/pages/32-introduction"}, {"name": "Biology 2e — Pollination and Fertilization", "org": "OpenStax · Rice University", "url": "https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization"}]};
+const NS="http://www.w3.org/2000/svg";const partsG=document.getElementById("parts"),docksG=document.getElementById("docks"),connG=document.getElementById("connections"),svg=document.getElementById("lab");
+let mode="explore",step=0,soundOn=false,audio=null,score=0,total=0,streak=0,answered=false,drag=null;
+const N=CFG.parts.length,center={x:520,y:355};
+const pos=CFG.parts.map((_,i)=>{const a=-Math.PI/2+i*(Math.PI*2/N);return{x:center.x+Math.cos(a)*205,y:center.y+Math.sin(a)*165}});
+const explode=CFG.parts.map((_,i)=>{const a=-Math.PI/2+i*(Math.PI*2/N);return{x:center.x+Math.cos(a)*315,y:center.y+Math.sin(a)*250}});
+const tray=CFG.parts.map((_,i)=>({x:250+(i%4)*170,y:580+Math.floor(i/4)*70}));
+function E(tag,attrs={}){const e=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);return e}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function tone(f=550,d=.04){if(!soundOn)return;try{if(!audio)audio=new(AudioContext||webkitAudioContext)();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=f;g.gain.value=.018;o.connect(g);g.connect(audio.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+d);o.stop(audio.currentTime+d)}catch(e){}}
+function toast(t){const e=document.getElementById("toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),1000)}
+function build(){pos.forEach((p,i)=>{const d=E("circle",{class:"dock",cx:p.x,cy:p.y,r:48});docksG.appendChild(d);if(i<N-1){const q=pos[i+1];connG.appendChild(E("line",{class:"connector","data-link":i,x1:p.x,y1:p.y,x2:q.x,y2:q.y}))}
+const g=E("g",{class:"part","data-i":i,transform:`translate(${p.x} ${p.y})`});g.append(E("circle",{class:"halo",r:53}),E("circle",{class:"core",r:43}));
+const t=E("text",{y:-2});t.textContent=CFG.parts[i].name.length>18?CFG.parts[i].name.slice(0,17)+"…":CFG.parts[i].name;const n=E("text",{class:"num",y:15});n.textContent=`${i+1}/${N}`;g.append(t,n);partsG.appendChild(g);
+g.addEventListener("click",e=>{if(mode==="rebuild"&&drag)return;e.stopPropagation();clickPart(i)});
+g.addEventListener("pointerdown",e=>{if(mode!=="rebuild"||g.classList.contains("correct"))return;e.stopPropagation();g.setPointerCapture?.(e.pointerId);const p=ptSvg(e),c=current(i);drag={i,dx:p.x-c.x,dy:p.y-c.y}});
+g.addEventListener("pointermove",e=>{if(!drag||drag.i!==i)return;const p=ptSvg(e);setXY(i,p.x-drag.dx,p.y-drag.dy)});
+g.addEventListener("pointerup",()=>{if(!drag||drag.i!==i)return;const c=current(i),t=pos[i],dist=Math.hypot(c.x-t.x,c.y-t.y);if(dist<65){setXY(i,t.x,t.y);g.classList.add("correct");tone(760);toast("Snapped into place ✓");checkRebuild()}else{setXY(i,tray[i].x,tray[i].y);tone(330)}drag=null})})}
+function ptSvg(e){const r=svg.getBoundingClientRect();return{x:(e.clientX-r.left)/r.width*1000,y:(e.clientY-r.top)/r.height*700}}
+function current(i){const m=partsG.children[i].getAttribute("transform").match(/translate\(([-.\d]+) ([-.\d]+)\)/);return{x:+m[1],y:+m[2]}}function setXY(i,x,y){partsG.children[i].setAttribute("transform",`translate(${x} ${y})`)}
+function resetClasses(){[...partsG.children].forEach(g=>g.classList.remove("dim","selected","wrong","correct"))}
+function move(which){const arr=which==="origin"?pos:which==="explode"?explode:tray;[...partsG.children].forEach((g,i)=>{g.style.transition="transform .65s cubic-bezier(.2,.7,.2,1)";setXY(i,arr[i].x,arr[i].y)});setTimeout(()=>[...partsG.children].forEach(g=>g.style.transition=""),700)}
+function clickPart(i){if(mode==="quiz"){answer(i);return}resetClasses();[...partsG.children].forEach((g,j)=>g.classList.toggle("dim",j!==i));partsG.children[i].classList.add("selected");openDrawer(i);tone(570)}
+function openDrawer(i){const p=CFG.parts[i];document.getElementById("dt").textContent=p.name;document.getElementById("db").innerHTML=`<div class="st">Core role</div><div class="lead">${esc(p.role)}</div><div class="card"><b>High-yield anchor</b><div>${esc(p.name)} → ${esc(p.role)}</div></div><div class="card"><b>Common trap</b><div>${esc(p.trap)}</div></div><div class="st">Evidence & sources</div>${CFG.sources.map(s=>`<a class="src" href="${s.url}" target="_blank" rel="noopener"><strong>${esc(s.name)} ↗</strong><small>${esc(s.org)}</small></a>`).join("")}<div class="card"><b>Source note</b><div>This is a teaching model. Use the linked authoritative references for the underlying concepts and terminology.</div></div>`;document.getElementById("drawer").classList.add("open")}
+function status(a,b){document.getElementById("status").innerHTML=`<b>${a}</b><br>${b}`}
+function setMode(m){mode=m;document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));document.getElementById("drawer").classList.remove("open");resetClasses();connG.querySelectorAll(".connector").forEach(x=>x.classList.remove("trace"));document.getElementById("lab").classList.toggle("rebuild",m==="rebuild");document.getElementById("stepbox").classList.toggle("show",m==="trace"||m==="quiz");
+if(m==="explore"){move("origin");status("Explore","Touch any component for facts, traps and sources.")}if(m==="apart"){move("explode");status("Taken apart","The system has been exploded into its major teaching components.")}if(m==="rebuild"){move("tray");status("Build it yourself","Drag every component back to its ghost dock. Correct placements snap into position.")}if(m==="trace"){move("origin");step=0;renderTrace()}if(m==="compare"){move("origin");openCompare()}if(m==="quiz"){move("origin");score=0;total=0;streak=0;step=0;nextQuiz()}tone(480)}
+function renderTrace(){resetClasses();connG.querySelectorAll(".connector").forEach(x=>x.classList.remove("trace"));const i=Math.min(step,N-1);partsG.children[i].classList.add("selected");if(i>0)connG.querySelector(`[data-link="${i-1}"]`)?.classList.add("trace");document.getElementById("steptext").innerHTML=`<b>${step+1}/${N} · ${esc(CFG.parts[i].name)}</b><br>${esc(CFG.process_steps[i]||CFG.parts[i].role)}`;document.getElementById("prev").disabled=step===0;document.getElementById("next").textContent=step===N-1?"Restart ↻":"Next →";status(CFG.process_title,"Use Back/Next to move through the system.")}
+function openCompare(){const a=CFG.parts[0],b=CFG.parts[1],c=CFG.parts[N-2],d=CFG.parts[N-1];document.getElementById("dt").textContent="High-Yield Comparisons";document.getElementById("db").innerHTML=`<div class="st">Compare, don't memorize blindly</div><div class="card"><b>${esc(a.name)} vs ${esc(b.name)}</b><div><strong>${esc(a.name)}:</strong> ${esc(a.role)}<br><br><strong>${esc(b.name)}:</strong> ${esc(b.role)}</div></div><div class="card"><b>${esc(c.name)} vs ${esc(d.name)}</b><div><strong>${esc(c.name)}:</strong> ${esc(c.role)}<br><br><strong>${esc(d.name)}:</strong> ${esc(d.role)}</div></div><div class="card"><b>Common traps</b><div>${esc(a.trap)}<br><br>${esc(d.trap)}</div></div><div class="st">Sources</div>${CFG.sources.map(s=>`<a class="src" href="${s.url}" target="_blank" rel="noopener"><strong>${esc(s.name)} ↗</strong><small>${esc(s.org)}</small></a>`).join("")}`;document.getElementById("drawer").classList.add("open");status("Compare mode","Use contrasts to separate easily confused structures or stages.")}
+function nextQuiz(){answered=false;resetClasses();const i=step%N;document.getElementById("steptext").innerHTML=`<b>QUIZ · ${score}/${total} · streak ${streak}</b><br>Which component matches this role?<br><em>${esc(CFG.parts[i].role)}</em>`;status("Quiz mode","Touch the correct component.")}
+function answer(i){if(answered)return;answered=true;total++;const a=step%N;if(i===a){score++;streak++;partsG.children[i].classList.add("correct");document.getElementById("steptext").innerHTML=`✓ Correct — <b>${esc(CFG.parts[a].name)}</b><br>${esc(CFG.parts[a].role)}`;tone(780)}else{streak=0;partsG.children[i].classList.add("wrong");partsG.children[a].classList.add("correct");document.getElementById("steptext").innerHTML=`Correct answer: <b>${esc(CFG.parts[a].name)}</b><br>${esc(CFG.parts[a].trap)}`;tone(320)}}
+function checkRebuild(){if([...partsG.children].every(g=>g.classList.contains("correct"))){status("SYSTEM REBUILT ✓","Every component is back in place.");toast("LAB COMPLETE ✓");tone(850)}}
+document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));document.getElementById("prev").addEventListener("click",()=>{if(mode==="trace"){step=Math.max(0,step-1);renderTrace()}else if(mode==="quiz"){step=Math.max(0,step-1);nextQuiz()}});document.getElementById("next").addEventListener("click",()=>{if(mode==="trace"){step=step===N-1?0:step+1;renderTrace()}else if(mode==="quiz"){step=(step+1)%N;nextQuiz()}});document.getElementById("close").addEventListener("click",()=>document.getElementById("drawer").classList.remove("open"));document.getElementById("sound").addEventListener("click",e=>{soundOn=!soundOn;e.currentTarget.classList.toggle("on",soundOn);e.currentTarget.textContent=soundOn?"●":"◌";tone(650);toast(soundOn?"Sound on":"Sound off")});document.getElementById("reset").addEventListener("click",()=>setMode("explore"));build();
+</script><nav id="cdPublicDock" aria-label="THE UNI public links">
+<a aria-label='Back to the Interactive Knowledge Library' class='cdDockWord' href='/' title='Back to the Interactive Knowledge Library'>Library</a>
+<a class="cdWatch" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a>
+<a class="cdContact" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact THE UNI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a>
+</nav>
+
+<style id="ikl-collision-guard-style">
+/* IKL production collision guard: only moves bottom UI when the public dock would cover it. */
+:root{--ikl-dock-safe-bottom:74px}
+@media(max-width:680px){:root{--ikl-dock-safe-bottom:62px}}
+</style>
+<script id="ikl-collision-guard">
+(()=>{
+ const MOVE=['#legend','.legend','#drawer','.drawer','#modebar','.modebar','.modeBar','.mode-bar','#timeline','.timeline','.pathbar','.pathBar','.path-bar','.timelineWrap','.timeline-wrap','.bottomBar','.bottom-bar','.statusbar','.status-bar','#status'];
+ const QUIET=['#legend','.legend','#watermark','.watermark','.badge'];
+ const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>2&&r.height>2};
+ const overlap=(a,b,pad=4)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>pad&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>pad;
+ let queued=false,applying=false;
+ const observer=new MutationObserver(muts=>{if(applying)return;for(const m of muts){if(m.type==='attributes'&&m.attributeName==='class'){run();break}}});
+ const observe=()=>observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+ function all(selectors){const out=[];selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!out.includes(el))out.push(el)}));return out}
+ function rememberMove(el){if(el.dataset.iklMoveRemembered)return;el.dataset.iklMoveRemembered='1';el.dataset.iklInlineBottom=el.style.bottom||'';el.dataset.iklInlineTransform=el.style.transform||'';el.dataset.iklInlineMaxHeight=el.style.maxHeight||''}
+ function restoreMove(el){if(el.dataset.iklAdjusted!=='1')return;if(el.dataset.iklInlineBottom==='')el.style.removeProperty('bottom');else el.style.bottom=el.dataset.iklInlineBottom;if(el.dataset.iklInlineTransform==='')el.style.removeProperty('transform');else el.style.transform=el.dataset.iklInlineTransform;if(el.dataset.iklInlineMaxHeight==='')el.style.removeProperty('max-height');else el.style.maxHeight=el.dataset.iklInlineMaxHeight;el.dataset.iklAdjusted='0'}
+ function rememberQuiet(el){if(el.dataset.iklQuietRemembered)return;el.dataset.iklQuietRemembered='1';el.dataset.iklInlineVisibility=el.style.visibility||'';el.dataset.iklInlineOpacity=el.style.opacity||''}
+ function restoreQuiet(el){if(el.dataset.iklQuieted!=='1')return;if(el.dataset.iklInlineVisibility==='')el.style.removeProperty('visibility');else el.style.visibility=el.dataset.iklInlineVisibility;if(el.dataset.iklInlineOpacity==='')el.style.removeProperty('opacity');else el.style.opacity=el.dataset.iklInlineOpacity;el.dataset.iklQuieted='0'}
+ function run(){if(queued||applying)return;queued=true;requestAnimationFrame(()=>{
+   applying=true;observer.disconnect();
+   const movers=all(MOVE),quiets=all(QUIET);movers.forEach(el=>{rememberMove(el);restoreMove(el)});quiets.forEach(el=>{rememberQuiet(el);restoreQuiet(el)});
+   const dock=document.getElementById('cdPublicDock');
+   if(dock&&visible(dock)){
+     const dr=dock.getBoundingClientRect(),safe=Math.max(12,innerHeight-dr.top+10);
+     movers.forEach(el=>{if(el===dock||!visible(el))return;const cs=getComputedStyle(el);if(cs.position!=='fixed'&&cs.position!=='absolute')return;const r=el.getBoundingClientRect();if(!overlap(r,dr))return;const b=parseFloat(cs.bottom);el.dataset.iklAdjusted='1';if(Number.isFinite(b))el.style.bottom=Math.max(b,safe)+'px';else if(r.bottom>dr.top){const base=el.style.transform||'';el.style.transform=(base?base+' ':'')+'translateY(-'+(r.bottom-dr.top+10)+'px)'}if(el.matches('#drawer,.drawer')){const top=el.getBoundingClientRect().top;el.style.maxHeight=Math.max(160,innerHeight-top-safe-10)+'px'}})
+   }
+   const drawers=all(['#drawer','.drawer']).filter(visible);
+   drawers.forEach(drawer=>{const rr=drawer.getBoundingClientRect();quiets.forEach(el=>{if(el===drawer||!visible(el))return;if(overlap(el.getBoundingClientRect(),rr,6)){el.dataset.iklQuieted='1';el.style.visibility='hidden';el.style.opacity='0'}})});
+   queued=false;
+   applying=false;observe();
+ });}
+ addEventListener('load',run);addEventListener('resize',run,{passive:true});addEventListener('orientationchange',run,{passive:true});
+ observe();
+ run();setTimeout(run,30);setTimeout(run,120);setTimeout(run,350);
+})();
+</script>
+</body></html>

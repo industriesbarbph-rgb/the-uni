@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="up" href="/interactive-knowledge-library/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>High-Yield Anatomy of a Flower | THE UNI</title>
+<style>
+:root{
+  --bg:#151918;
+  --panel:rgba(28,34,32,.86);
+  --panel2:rgba(18,23,22,.82);
+  --border:rgba(213,231,222,.20);
+  --text:#f1f5f2;
+  --muted:#aebbb4;
+  --line:#64706a;
+  --green:#5e9c78;
+  --rose:#c97a91;
+  --gold:#d6aa62;
+  --violet:#9b82bb;
+  --blue:#729cad;
+  --cream:#e1d4b5;
+  --glass:linear-gradient(155deg,rgba(45,55,51,.88),rgba(19,25,23,.76));
+  --shadow:0 18px 48px rgba(0,0,0,.28),0 1px 8px rgba(190,220,205,.06);
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;height:100%;overflow:hidden;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 18% 8%,rgba(73,125,91,.24),transparent 30%),
+    radial-gradient(circle at 82% 16%,rgba(180,105,133,.16),transparent 34%),
+    radial-gradient(circle at 50% 90%,rgba(214,170,98,.10),transparent 34%),
+    linear-gradient(125deg,#111514,#26302c 18%,#56605b 34%,#1b211f 51%,#3d4541 68%,#141817 100%);
+  background-size:160% 160%;
+  animation:bgDrift 22s ease-in-out infinite;
+}
+body{overscroll-behavior:none}
+button,input{font:inherit}
+button{color:inherit}
+@keyframes bgDrift{0%,100%{background-position:0% 45%}50%{background-position:100% 55%}}
+@keyframes cornerBreath{0%,100%{opacity:.42}50%{opacity:.76}}
+@keyframes cornerBreath2{0%,100%{opacity:.24}50%{opacity:.58}}
+@keyframes pollenFloat{0%{transform:translate(0,0);opacity:.25}50%{opacity:.8}100%{transform:translate(10px,-24px);opacity:.08}}
+@keyframes tubeFlow{to{stroke-dashoffset:-34}}
+@keyframes shimmer{0%{transform:translateX(-180%)}70%,100%{transform:translateX(260%)}}
+@keyframes pulsePart{0%,100%{filter:drop-shadow(0 0 0 rgba(255,255,255,0))}50%{filter:drop-shadow(0 0 10px rgba(221,239,229,.55))}}
+@keyframes drawerIn{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes sheetIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+#app{position:relative;width:100vw;height:100vh;isolation:isolate}
+.ambient{position:absolute;inset:0;pointer-events:none;z-index:0}
+.ambient::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 0% 0%,rgba(117,177,136,.35),transparent 34%),
+    radial-gradient(circle at 100% 0%,rgba(206,126,150,.24),transparent 34%),
+    radial-gradient(circle at 0% 100%,rgba(213,178,109,.20),transparent 34%),
+    radial-gradient(circle at 100% 100%,rgba(115,154,166,.22),transparent 34%);
+  animation:cornerBreath 16s ease-in-out infinite;
+}
+.ambient::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 50% 45%,rgba(239,245,241,.09),transparent 34%),
+    linear-gradient(105deg,transparent 30%,rgba(255,255,255,.035) 49%,transparent 66%);
+  animation:cornerBreath2 21s 3s ease-in-out infinite;
+}
+.glass{
+  background:var(--glass);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+#canvasWrap{position:absolute;inset:0;z-index:1}
+#flowerSvg{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#flowerSvg:active{cursor:grabbing}
+.diagram-bg{
+  fill:rgba(18,24,22,.14);
+  stroke:rgba(226,238,232,.08);
+  stroke-width:1;
+}
+.part{cursor:pointer;transition:opacity .2s}
+.part .shape{transition:opacity .2s,stroke-width .2s,filter .2s}
+.part:hover .shape{filter:drop-shadow(0 0 7px rgba(236,244,239,.35))}
+.part.dim{opacity:.12}
+.part.selected .shape{
+  stroke:#f3faf5!important;
+  stroke-width:3px!important;
+  filter:drop-shadow(0 0 12px rgba(235,247,239,.72));
+  animation:pulsePart 1.8s ease-in-out infinite;
+}
+.part[data-part="stamen"] .shape,.part[data-part="carpel"] .shape{pointer-events:none}
+.part.related .shape{
+  stroke:rgba(230,239,233,.72)!important;
+  stroke-width:2px!important;
+  filter:drop-shadow(0 0 7px rgba(217,237,224,.32));
+}
+.leader{stroke:rgba(224,235,229,.44);stroke-width:1.2;fill:none}
+.label-text{
+  fill:#dce6e0;font-size:12px;font-weight:600;
+  paint-order:stroke;stroke:#141918;stroke-width:4px;stroke-linejoin:round;
+  pointer-events:none;
+}
+.label-sub{
+  fill:#9fb0a6;font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  paint-order:stroke;stroke:#141918;stroke-width:3px;pointer-events:none;
+}
+.labels.hidden{display:none}
+.pollen-dot{fill:#e5bd72;opacity:.6;pointer-events:none}
+.pollen-dot:nth-child(2n){animation:pollenFloat 4.8s ease-in-out infinite}
+.pollen-dot:nth-child(2n+1){animation:pollenFloat 6s 1.2s ease-in-out infinite}
+#pollenTube{
+  fill:none;stroke:#ead38e;stroke-width:4;stroke-linecap:round;
+  stroke-dasharray:9 7;opacity:0;pointer-events:none;
+}
+#pollenTube.active{opacity:.95;animation:tubeFlow 1s linear infinite}
+.pathway-target .shape{filter:drop-shadow(0 0 12px rgba(235,198,111,.78));stroke:#f3db9a!important;stroke-width:3px!important}
+#intro{
+  position:absolute;z-index:5;top:16px;left:16px;width:330px;max-width:calc(100vw - 32px);
+  border-radius:14px;padding:14px 15px;
+}
+.kicker{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:#b2c2b8;margin-bottom:4px}
+#intro h1{font-size:17px;margin:0 0 3px;font-weight:700}
+#intro .sub{font-size:11px;line-height:1.45;color:var(--muted);margin:0 0 10px}
+.mode-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.mode{
+  border:1px solid rgba(226,239,232,.16);
+  background:rgba(255,255,255,.045);
+  border-radius:9px;padding:7px 5px;font-size:10px;cursor:pointer;
+}
+.mode.active{background:rgba(111,156,127,.22);border-color:rgba(161,207,177,.48)}
+#quickInfo{
+  margin-top:10px;border-top:1px solid rgba(226,239,232,.11);padding-top:9px;
+  min-height:54px;font-size:11px;line-height:1.45;color:var(--muted)
+}
+#quickInfo strong{color:var(--text);font-size:12px}
+#quizPanel{
+  display:none;margin-top:9px;padding:9px 10px;border-radius:10px;
+  border:1px solid rgba(214,170,98,.22);background:rgba(214,170,98,.06);
+}
+#quizPanel.show{display:block}
+.quiz-title{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#d8ba7c;margin-bottom:5px}
+#quizPrompt{font-size:11px;line-height:1.45}
+#quizFeedback{font-size:10px;margin-top:6px;color:var(--muted)}
+#quizMeta{display:flex;justify-content:space-between;gap:8px;font-size:9px;color:var(--muted);margin-top:7px}
+#pathPanel{
+  display:none;margin-top:9px;padding:9px 10px;border-radius:10px;
+  border:1px solid rgba(214,170,98,.22);background:rgba(214,170,98,.055)
+}
+#pathPanel.show{display:block}
+#pathStep{font-size:11px;line-height:1.45;color:#e8e0cc}
+.path-actions{display:flex;gap:6px;margin-top:7px}
+.action{
+  border:1px solid rgba(226,239,232,.16);background:rgba(255,255,255,.045);
+  border-radius:8px;padding:7px 9px;font-size:10px;cursor:pointer;
+}
+.action:hover{background:rgba(255,255,255,.09)}
+.action.primary{background:rgba(111,156,127,.20);border-color:rgba(161,207,177,.36)}
+#toolbar{
+  position:absolute;z-index:6;top:16px;right:16px;display:flex;align-items:center;gap:6px;
+  border-radius:12px;padding:6px;
+}
+#searchBox{position:relative}
+#searchInput{
+  width:205px;border:1px solid rgba(226,239,232,.13);outline:none;
+  background:rgba(255,255,255,.04);color:var(--text);border-radius:8px;padding:8px 30px 8px 9px;
+  font-size:11px;
+}
+#searchInput::placeholder{color:#96a79d}
+#searchMark{position:absolute;right:9px;top:7px;color:var(--muted);font-size:12px}
+.iconbtn{
+  width:32px;height:32px;border-radius:8px;border:1px solid rgba(226,239,232,.14);
+  background:rgba(255,255,255,.045);color:var(--text);cursor:pointer;display:grid;place-items:center;
+}
+.iconbtn.on{background:rgba(111,156,127,.30);border-color:rgba(161,207,177,.45)}
+#legend{
+  position:absolute;z-index:4;bottom:16px;left:16px;border-radius:12px;padding:9px 11px;
+  display:grid;grid-template-columns:repeat(2,auto);column-gap:14px;row-gap:5px;font-size:9.5px;color:var(--muted)
+}
+.legend-item{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%}
+#hyBadge{
+  position:absolute;z-index:4;bottom:16px;left:50%;transform:translateX(-50%);
+  border-radius:999px;padding:7px 11px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#c8d3cc;
+}
+#watermark{
+  position:absolute;z-index:6;right:20px;bottom:18px;
+  font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:650;
+  color:rgba(218,230,223,.46);text-shadow:0 0 12px rgba(100,153,117,.16);
+  pointer-events:none;user-select:none;white-space:nowrap;
+}
+#drawer{
+  position:absolute;z-index:9;right:16px;top:62px;bottom:16px;width:min(410px,calc(100vw - 32px));
+  border-radius:15px;display:none;overflow:hidden;
+}
+#drawer.open{display:flex;flex-direction:column;animation:drawerIn .26s ease-out}
+#drawer::after{
+  content:"";position:absolute;top:0;bottom:0;width:30%;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(230,244,235,.07),transparent);
+  animation:shimmer 9s ease-in-out infinite
+}
+.drawer-head{
+  position:relative;z-index:1;display:flex;gap:12px;padding:14px 15px 11px;
+  border-bottom:1px solid rgba(226,239,232,.11)
+}
+.drawer-title{flex:1;min-width:0}
+.drawer-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin-bottom:4px}
+.drawer-title h2{font-size:18px;line-height:1.15;margin:0}
+.drawer-body{position:relative;z-index:1;overflow:auto;padding:13px 15px 20px;scrollbar-width:thin}
+.section-title{font-size:9px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:15px 0 7px}
+.section-title:first-child{margin-top:0}
+.lead{font-size:12px;line-height:1.55;color:#d8e0db}
+.fact-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.fact{
+  padding:9px;border-radius:10px;border:1px solid rgba(226,239,232,.11);background:rgba(255,255,255,.035)
+}
+.fact .f-label{font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.fact .f-text{font-size:10.5px;line-height:1.45;color:#dbe3de}
+.pearl{
+  border:1px solid rgba(214,170,98,.20);background:rgba(214,170,98,.055);
+  border-radius:10px;padding:10px 11px;margin-top:9px
+}
+.pearl b{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#d8ba7c;margin-bottom:4px}
+.pearl div{font-size:10.5px;line-height:1.5;color:#e2ddd1}
+.trap{
+  border:1px solid rgba(201,122,145,.20);background:rgba(201,122,145,.055);
+  border-radius:10px;padding:10px 11px;margin-top:7px
+}
+.trap b{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:#d79aac;margin-bottom:4px}
+.trap div{font-size:10.5px;line-height:1.5;color:#e4d7dc}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+.badge{
+  font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;border:1px solid rgba(226,239,232,.13);
+  border-radius:999px;padding:4px 7px;color:#b9c7bf;background:rgba(255,255,255,.035)
+}
+.related-grid{display:flex;flex-wrap:wrap;gap:6px}
+.related-btn{
+  border:1px solid rgba(226,239,232,.13);background:rgba(255,255,255,.035);
+  border-radius:999px;padding:6px 8px;font-size:9.5px;cursor:pointer
+}
+.source-card{
+  display:block;text-decoration:none;color:inherit;border:1px solid rgba(226,239,232,.11);
+  background:rgba(255,255,255,.03);border-radius:10px;padding:9px 10px;margin-bottom:7px
+}
+.source-card:hover{background:rgba(255,255,255,.07)}
+.source-name{font-size:10.5px;font-weight:700;line-height:1.35}
+.source-meta{font-size:8.5px;color:var(--muted);margin-top:3px}
+.note{font-size:9.5px;line-height:1.5;color:var(--muted);margin-top:10px}
+.compare-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px
+}
+.compare-box{
+  border:1px solid rgba(226,239,232,.11);border-radius:10px;padding:10px;background:rgba(255,255,255,.03)
+}
+.compare-box strong{display:block;font-size:10px;margin-bottom:4px}
+.compare-box span{font-size:9.5px;line-height:1.45;color:var(--muted)}
+#toast{
+  position:absolute;z-index:20;left:50%;top:18px;transform:translateX(-50%) translateY(-8px);
+  opacity:0;pointer-events:none;border-radius:9px;padding:7px 10px;font-size:10px;color:var(--muted);
+  transition:.2s
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){
+  #intro{width:300px}
+  #searchInput{width:160px}
+  #drawer{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:70vh;border-radius:16px}
+  #drawer.open{animation:sheetIn .26s ease-out}
+  #hyBadge{display:none}
+}
+@media(max-width:650px){
+  #intro{top:9px;left:9px;width:min(275px,calc(100vw - 76px));padding:11px 12px}
+  #intro h1{font-size:14px}
+  #intro .sub{font-size:10px;margin-bottom:7px}
+  .mode{font-size:9px;padding:6px 3px}
+  #toolbar{top:9px;right:9px;padding:5px}
+  #searchBox{display:none}
+  #toolbar.searching #searchBox{display:block;position:fixed;top:54px;left:9px;right:9px}
+  #toolbar.searching #searchInput{width:100%;background:rgba(24,30,28,.96)}
+  #legend{bottom:10px;left:9px;grid-template-columns:1fr;max-height:112px;overflow:auto;padding:7px 9px}
+  #watermark{right:10px;bottom:11px;font-size:8.5px}
+  #quickInfo{display:none}
+  #quizPanel,#pathPanel{margin-top:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+}
+</style>
+<style id="coach-doll-public-dock-style">
+/* THE UNI — compact public jewel controls */
+#cdPublicDock{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:linear-gradient(145deg,rgba(18,22,27,.76),rgba(5,7,10,.66));box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#cdPublicDock a{position:relative;display:grid;place-items:center;color:#f0f4f5;text-decoration:none;border:1px solid rgba(255,255,255,.15);background:radial-gradient(circle at 33% 26%,rgba(255,255,255,.18),rgba(255,255,255,.055) 39%,rgba(0,0,0,.26) 79%);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 16px rgba(198,218,233,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+#cdPublicDock a:hover,#cdPublicDock a:focus-visible{transform:translateY(-2px);border-color:rgba(229,207,166,.50);box-shadow:inset 0 1px rgba(255,255,255,.16),0 0 22px rgba(222,193,141,.17);outline:none}
+#cdPublicDock .cdWatch{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.15),0 0 21px rgba(222,193,141,.13)}
+#cdPublicDock .cdContact{width:34px;height:34px;border-radius:50%}
+#cdPublicDock .cdWatch::before,#cdPublicDock .cdContact::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(229,204,151,.18);pointer-events:none}
+#cdPublicDock .cdWatch::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(226,199,146,.11);animation:cdJewelBreath 5.6s ease-in-out infinite;pointer-events:none}
+#cdPublicDock svg{width:16px;height:16px}.cdWatch svg{width:17px!important;height:17px!important}
+.cdDockWord{width:auto!important;height:34px!important;padding:0 12px!important;border-radius:999px!important;font-size:8.5px!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:#e9e1d7!important}
+@keyframes cdJewelBreath{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.04)}}
+@media(max-width:680px){#cdPublicDock{left:8px;bottom:8px;gap:5px;padding:4px 5px}#cdPublicDock .cdWatch{width:36px;height:36px}#cdPublicDock .cdContact{width:33px;height:33px}.cdDockWord{width:33px!important;height:33px!important;padding:0!important;font-size:0!important}.cdDockWord::after{content:"⌂";font-size:15px}}
+@media(prefers-reduced-motion:reduce){#cdPublicDock a{transition:none!important}#cdPublicDock .cdWatch::after{animation:none!important}}
+</style>
+
+<!-- IKL SEO + SOCIAL PUBLISHING LAYER -->
+<meta name="description" content="Explore High-Yield Anatomy of a Flower as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://theuni.barbph.com/builds/066-flower-anatomy.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="THE UNI — Interactive Knowledge Library">
+<meta property="og:title" content="High-Yield Anatomy of a Flower | THE UNI">
+<meta property="og:description" content="Explore High-Yield Anatomy of a Flower as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…">
+<meta property="og:url" content="https://theuni.barbph.com/builds/066-flower-anatomy.html">
+<meta property="og:image" content="https://theuni.barbph.com/social/066-flower-anatomy.jpg">
+<meta property="og:image:secure_url" content="https://theuni.barbph.com/social/066-flower-anatomy.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="High-Yield Anatomy of a Flower — THE UNI interactive learning preview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="High-Yield Anatomy of a Flower | THE UNI">
+<meta name="twitter:description" content="Explore High-Yield Anatomy of a Flower as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…">
+<meta name="twitter:image" content="https://theuni.barbph.com/social/066-flower-anatomy.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebPage","LearningResource"],"@id":"https://theuni.barbph.com/builds/066-flower-anatomy.html#learning-resource","url":"https://theuni.barbph.com/builds/066-flower-anatomy.html","name":"High-Yield Anatomy of a Flower | THE UNI","headline":"High-Yield Anatomy of a Flower","description":"Explore High-Yield Anatomy of a Flower as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…","inLanguage":"en","image":"https://theuni.barbph.com/social/066-flower-anatomy.jpg","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"creator":{"@id":"https://theuni.barbph.com/#publisher"},"learningResourceType":"Interactive learning object","educationalUse":["instruction","self study","assessment"]}</script>
+<!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
+</head>
+<body>
+<div id="app">
+  <div class="ambient"></div>
+
+  <div id="canvasWrap">
+    <svg id="flowerSvg" viewBox="0 0 900 700" role="img" aria-labelledby="svgTitle svgDesc">
+      <title id="svgTitle">Interactive high-yield anatomy of a generalized complete flower</title>
+      <desc id="svgDesc">A longitudinal schematic of a generalized bisexual flower showing petals, sepals, stamens, anthers, filaments, stigma, style, ovary, ovules, receptacle, nectary and flower stalk. Select structures for explanations and sources.</desc>
+
+      <g id="zoomLayer">
+        <ellipse class="diagram-bg" cx="450" cy="360" rx="310" ry="292"></ellipse>
+
+        <!-- back petals -->
+        <g class="part" data-part="petal" aria-label="Petal" role="button" tabindex="0">
+          <path class="shape" d="M421 335 C342 314 259 244 274 156 C284 104 336 86 372 121 C421 168 435 253 433 324 Z"
+                fill="#a96179" fill-opacity=".68" stroke="#d4a0b1" stroke-width="1.5"/>
+        </g>
+        <g class="part" data-part="petal" aria-label="Petal" role="button" tabindex="0">
+          <path class="shape" d="M479 335 C558 314 641 244 626 156 C616 104 564 86 528 121 C479 168 465 253 467 324 Z"
+                fill="#a96179" fill-opacity=".68" stroke="#d4a0b1" stroke-width="1.5"/>
+        </g>
+        <g class="part" data-part="petal" aria-label="Petal" role="button" tabindex="0">
+          <path class="shape" d="M433 318 C385 258 376 166 424 102 C441 80 459 80 476 102 C524 166 515 258 467 318 Z"
+                fill="#b97893" fill-opacity=".50" stroke="#d7aabe" stroke-width="1.4"/>
+        </g>
+
+        <!-- front petal lobes -->
+        <g class="part" data-part="petal" aria-label="Petal" role="button" tabindex="0">
+          <path class="shape" d="M389 351 C316 352 236 328 214 271 C195 224 222 188 265 194 C330 204 390 262 419 325 Z"
+                fill="#c67f98" fill-opacity=".70" stroke="#e1afc0" stroke-width="1.5"/>
+        </g>
+        <g class="part" data-part="petal" aria-label="Petal" role="button" tabindex="0">
+          <path class="shape" d="M511 351 C584 352 664 328 686 271 C705 224 678 188 635 194 C570 204 510 262 481 325 Z"
+                fill="#c67f98" fill-opacity=".70" stroke="#e1afc0" stroke-width="1.5"/>
+        </g>
+
+        <!-- sepals -->
+        <g class="part" data-part="sepal" aria-label="Sepal" role="button" tabindex="0">
+          <path class="shape" d="M405 414 C346 433 285 436 248 408 C289 393 344 356 403 345 Z"
+                fill="#5f9571" fill-opacity=".78" stroke="#93bd9e" stroke-width="1.5"/>
+        </g>
+        <g class="part" data-part="sepal" aria-label="Sepal" role="button" tabindex="0">
+          <path class="shape" d="M495 414 C554 433 615 436 652 408 C611 393 556 356 497 345 Z"
+                fill="#5f9571" fill-opacity=".78" stroke="#93bd9e" stroke-width="1.5"/>
+        </g>
+
+        <!-- receptacle -->
+        <g class="part" data-part="receptacle" aria-label="Receptacle" role="button" tabindex="0">
+          <path class="shape" d="M354 444 C380 416 520 416 546 444 C520 474 380 474 354 444 Z"
+                fill="#688872" stroke="#a6bfad" stroke-width="1.7"/>
+        </g>
+
+        <!-- pedicel -->
+        <g class="part" data-part="pedicel" aria-label="Pedicel or flower stalk" role="button" tabindex="0">
+          <path class="shape" d="M430 470 C429 526 427 590 422 650 L478 650 C473 590 471 526 470 470 Z"
+                fill="#496c56" stroke="#8fb099" stroke-width="1.7"/>
+          <path d="M450 478 C450 535 449 594 448 642" stroke="rgba(210,232,216,.22)" stroke-width="2" fill="none"/>
+        </g>
+
+        <!-- nectary ring -->
+        <g class="part" data-part="nectary" aria-label="Nectary" role="button" tabindex="0">
+          <path class="shape" d="M368 426 C388 405 512 405 532 426" fill="none" stroke="#d7ae63" stroke-width="10" stroke-linecap="round" opacity=".62"/>
+        </g>
+
+        <!-- stamens back left -->
+        <g class="part" data-part="filament" aria-label="Filament" role="button" tabindex="0">
+          <path class="shape" d="M391 420 C357 364 330 309 326 252" fill="none" stroke="#d9c9a8" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="part" data-part="anther" aria-label="Anther" role="button" tabindex="0">
+          <ellipse class="shape" cx="324" cy="237" rx="20" ry="10" transform="rotate(-18 324 237)"
+                   fill="#d2a751" stroke="#edd291" stroke-width="1.7"/>
+          <line x1="324" y1="228" x2="324" y2="246" stroke="rgba(90,63,22,.55)" stroke-width="2"/>
+        </g>
+
+        <g class="part" data-part="filament" aria-label="Filament" role="button" tabindex="0">
+          <path class="shape" d="M407 422 C386 356 376 311 379 271" fill="none" stroke="#d9c9a8" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="part" data-part="anther" aria-label="Anther" role="button" tabindex="0">
+          <ellipse class="shape" cx="381" cy="257" rx="19" ry="10" transform="rotate(-8 381 257)"
+                   fill="#d2a751" stroke="#edd291" stroke-width="1.7"/>
+          <line x1="381" y1="248" x2="381" y2="266" stroke="rgba(90,63,22,.55)" stroke-width="2"/>
+        </g>
+
+        <!-- stamens right -->
+        <g class="part" data-part="filament" aria-label="Filament" role="button" tabindex="0">
+          <path class="shape" d="M509 420 C543 364 570 309 574 252" fill="none" stroke="#d9c9a8" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="part" data-part="anther" aria-label="Anther" role="button" tabindex="0">
+          <ellipse class="shape" cx="576" cy="237" rx="20" ry="10" transform="rotate(18 576 237)"
+                   fill="#d2a751" stroke="#edd291" stroke-width="1.7"/>
+          <line x1="576" y1="228" x2="576" y2="246" stroke="rgba(90,63,22,.55)" stroke-width="2"/>
+        </g>
+
+        <g class="part" data-part="filament" aria-label="Filament" role="button" tabindex="0">
+          <path class="shape" d="M493 422 C514 356 524 311 521 271" fill="none" stroke="#d9c9a8" stroke-width="5" stroke-linecap="round"/>
+        </g>
+        <g class="part" data-part="anther" aria-label="Anther" role="button" tabindex="0">
+          <ellipse class="shape" cx="519" cy="257" rx="19" ry="10" transform="rotate(8 519 257)"
+                   fill="#d2a751" stroke="#edd291" stroke-width="1.7"/>
+          <line x1="519" y1="248" x2="519" y2="266" stroke="rgba(90,63,22,.55)" stroke-width="2"/>
+        </g>
+
+        <!-- ovary -->
+        <g class="part" data-part="ovary" aria-label="Ovary" role="button" tabindex="0">
+          <path class="shape" d="M392 430 C384 392 398 356 424 344 C441 336 459 336 476 344 C502 356 516 392 508 430 C502 463 480 486 450 490 C420 486 398 463 392 430 Z"
+                fill="#6b8d6a" stroke="#b7c9a9" stroke-width="2"/>
+          <path d="M405 427 C402 394 414 368 433 359 C444 354 456 354 467 359 C486 368 498 394 495 427 C490 450 474 467 450 472 C426 467 410 450 405 427 Z"
+                fill="rgba(24,37,28,.72)" stroke="rgba(222,236,210,.24)" stroke-width="1.3"/>
+        </g>
+
+        <!-- placenta -->
+        <g class="part" data-part="placenta" aria-label="Placenta" role="button" tabindex="0">
+          <path class="shape" d="M449 366 C448 392 448 425 450 460" fill="none" stroke="#b1c58d" stroke-width="5" stroke-linecap="round"/>
+        </g>
+
+        <!-- locule clickable transparent interior -->
+        <g class="part" data-part="locule" aria-label="Locule" role="button" tabindex="0">
+          <path class="shape" d="M409 426 C408 396 419 374 436 365 C441 363 444 362 447 362 L447 460 C428 455 414 443 409 426 Z"
+                fill="rgba(97,144,101,.09)" stroke="rgba(190,214,181,.18)" stroke-width="1"/>
+          <path class="shape" d="M491 426 C492 396 481 374 464 365 C459 363 456 362 453 362 L453 460 C472 455 486 443 491 426 Z"
+                fill="rgba(97,144,101,.09)" stroke="rgba(190,214,181,.18)" stroke-width="1"/>
+        </g>
+
+        <!-- ovules -->
+        <g class="part" data-part="ovule" aria-label="Ovule" role="button" tabindex="0">
+          <ellipse class="shape" cx="429" cy="389" rx="11" ry="8" fill="#d3c48e" stroke="#eee0ad" stroke-width="1.2"/>
+          <ellipse class="shape" cx="472" cy="389" rx="11" ry="8" fill="#d3c48e" stroke="#eee0ad" stroke-width="1.2"/>
+          <ellipse class="shape" cx="426" cy="418" rx="11" ry="8" fill="#d3c48e" stroke="#eee0ad" stroke-width="1.2"/>
+          <ellipse class="shape" cx="474" cy="418" rx="11" ry="8" fill="#d3c48e" stroke="#eee0ad" stroke-width="1.2"/>
+          <ellipse class="shape" cx="433" cy="446" rx="10" ry="7" fill="#d3c48e" stroke="#eee0ad" stroke-width="1.2"/>
+          <ellipse class="shape" cx="467" cy="446" rx="10" ry="7" fill="#d3c48e" stroke="#eee0ad" stroke-width="1.2"/>
+        </g>
+
+        <!-- style -->
+        <g class="part" data-part="style" aria-label="Style" role="button" tabindex="0">
+          <path class="shape" d="M441 347 C439 308 440 262 444 219 L456 219 C460 262 461 308 459 347 Z"
+                fill="#a9b88b" stroke="#d8e0b9" stroke-width="1.7"/>
+        </g>
+
+        <!-- stigma -->
+        <g class="part" data-part="stigma" aria-label="Stigma" role="button" tabindex="0">
+          <path class="shape" d="M450 220 C433 223 415 215 410 202 C420 190 435 190 450 198 C465 190 480 190 490 202 C485 215 467 223 450 220 Z"
+                fill="#bb9f69" stroke="#ead59f" stroke-width="1.8"/>
+          <circle cx="425" cy="202" r="2.2" fill="#ead59f"/>
+          <circle cx="439" cy="207" r="2" fill="#ead59f"/>
+          <circle cx="462" cy="207" r="2" fill="#ead59f"/>
+          <circle cx="476" cy="202" r="2.2" fill="#ead59f"/>
+        </g>
+
+        <!-- pollen tube -->
+        <path id="pollenTube" d="M449 207 C450 249 450 298 451 348 C451 383 450 409 468 445"></path>
+
+        <!-- pollen grains -->
+        <g class="part" data-part="pollen" aria-label="Pollen grain" role="button" tabindex="0">
+          <circle class="shape pollen-dot" cx="304" cy="222" r="4.2" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="292" cy="235" r="3.4" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="342" cy="218" r="3.7" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="596" cy="220" r="4.2" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="608" cy="234" r="3.4" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="560" cy="216" r="3.5" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="434" cy="187" r="3.6" stroke="#f3dc9c" stroke-width=".8"/>
+          <circle class="shape pollen-dot" cx="454" cy="181" r="4.1" stroke="#f3dc9c" stroke-width=".8"/>
+        </g>
+
+        <!-- invisible higher-level hit targets -->
+        <g class="part" data-part="stamen" aria-label="Stamen" role="button" tabindex="0">
+          <path class="shape" d="M291 208 C338 214 370 299 397 419 M609 208 C562 214 530 299 503 419"
+                fill="none" stroke="transparent" stroke-width="22"/>
+        </g>
+        <g class="part" data-part="carpel" aria-label="Carpel" role="button" tabindex="0">
+          <path class="shape" d="M450 196 L450 343 C505 360 529 458 450 500 C371 458 395 360 450 343 Z"
+                fill="none" stroke="transparent" stroke-width="24"/>
+        </g>
+
+        <!-- labels -->
+        <g id="labels" class="labels">
+          <path class="leader" d="M297 139 L356 181"></path><text class="label-text" x="212" y="137">Petal</text><text class="label-sub" x="212" y="151">corolla</text>
+          <path class="leader" d="M246 401 L330 397"></path><text class="label-text" x="173" y="397">Sepal</text><text class="label-sub" x="173" y="411">calyx</text>
+          <path class="leader" d="M286 240 L316 238"></path><text class="label-text" x="215" y="240">Anther</text>
+          <path class="leader" d="M297 317 L354 331"></path><text class="label-text" x="215" y="317">Filament</text>
+          <path class="leader" d="M450 175 L450 194"></path><text class="label-text" x="421" y="160">Stigma</text>
+          <path class="leader" d="M531 286 L461 286"></path><text class="label-text" x="540" y="289">Style</text>
+          <path class="leader" d="M555 389 L505 400"></path><text class="label-text" x="566" y="388">Ovary</text>
+          <path class="leader" d="M556 435 L484 423"></path><text class="label-text" x="568" y="438">Ovule</text>
+          <path class="leader" d="M565 475 L510 454"></path><text class="label-text" x="576" y="477">Receptacle</text>
+          <path class="leader" d="M570 552 L472 552"></path><text class="label-text" x="581" y="555">Flower stalk</text><text class="label-sub" x="581" y="569">pedicel / peduncle context</text>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <section id="intro" class="glass">
+    <div class="kicker">Botanical Holograph · Living Bloom Lab</div>
+    <h1>High-Yield Anatomy of a Flower</h1>
+    <p class="sub">A generalized complete, bisexual angiosperm flower. Touch a structure to inspect function, exam pearls, common traps and sources.</p>
+
+    <div class="mode-row">
+      <button class="mode active" data-mode="explore">Explore</button>
+      <button class="mode" data-mode="pathway">Pollination</button>
+      <button class="mode" data-mode="quiz">Quiz</button>
+    </div>
+
+    <div id="quickInfo">
+      <strong>Start anywhere.</strong><br>
+      Try the stigma, anther, ovary or ovule. Zoom/pan the flower just like the knowledge maps.
+    </div>
+
+    <div id="pathPanel">
+      <div class="quiz-title">Pollination → fertilization pathway</div>
+      <div id="pathStep"></div>
+      <div class="path-actions">
+        <button class="action" id="prevPath">← Back</button>
+        <button class="action primary" id="nextPath">Next →</button>
+      </div>
+    </div>
+
+    <div id="quizPanel">
+      <div class="quiz-title">Identify the structure</div>
+      <div id="quizPrompt"></div>
+      <div id="quizFeedback"></div>
+      <div id="quizMeta"><span id="quizScore">Score 0/0</span><span id="quizStreak">Streak 0</span></div>
+      <div class="path-actions">
+        <button class="action" id="quizExplain">Explain</button>
+        <button class="action primary" id="nextQuiz">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="toolbar" class="glass">
+    <div id="searchBox">
+      <input id="searchInput" type="search" placeholder="Find a structure…" autocomplete="off" spellcheck="false" aria-label="Find a flower structure">
+      <span id="searchMark">⌕</span>
+    </div>
+    <button class="iconbtn" id="mobileSearch" aria-label="Search" title="Search">⌕</button>
+    <button class="iconbtn on" id="labelToggle" aria-label="Toggle labels" title="Toggle labels">Aa</button>
+    <button class="iconbtn" id="compareBtn" aria-label="High-yield comparisons" title="High-yield comparisons">≠</button>
+    <button class="iconbtn" id="soundToggle" aria-label="Toggle interface sound" title="Sound">◌</button>
+    <button class="iconbtn" id="resetView" aria-label="Reset view" title="Reset view">◎</button>
+  </div>
+
+  <div id="legend" class="glass">
+    <div class="legend-item"><span class="dot" style="background:var(--rose)"></span>Perianth</div>
+    <div class="legend-item"><span class="dot" style="background:var(--gold)"></span>Androecium</div>
+    <div class="legend-item"><span class="dot" style="background:#9eb37f"></span>Gynoecium</div>
+    <div class="legend-item"><span class="dot" style="background:var(--green)"></span>Support / accessory</div>
+  </div>
+
+  <div id="hyBadge" class="glass">Generalized schematic · floral morphology varies among angiosperms</div>
+  
+
+  <aside id="drawer" class="glass" aria-live="polite">
+    <div class="drawer-head">
+      <div class="drawer-title">
+        <div class="drawer-kicker" id="drawerKicker">Flower intelligence</div>
+        <h2 id="drawerTitle">—</h2>
+      </div>
+      <button class="iconbtn" id="drawerClose" aria-label="Close drawer">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <div id="toast" class="glass"></div>
+</div>
+
+<script>
+const sources = {
+  S1:{title:"Biology 2e — Angiosperms",org:"OpenStax · Rice University",type:"Peer-reviewed open textbook",url:"https://openstax.org/books/biology-2e/pages/26-3-angiosperms"},
+  S2:{title:"Biology 2e — Reproductive Development and Structure",org:"OpenStax · Rice University",type:"Peer-reviewed open textbook",url:"https://openstax.org/books/biology-2e/pages/32-1-reproductive-development-and-structure"},
+  S3:{title:"Biology 2e — Pollination and Fertilization",org:"OpenStax · Rice University",type:"Peer-reviewed open textbook",url:"https://openstax.org/books/biology-2e/pages/32-2-pollination-and-fertilization"},
+  S4:{title:"Virginia Master Naturalist Botany",org:"Virginia Tech · Virginia Cooperative Extension",type:"University extension botany reference",url:"https://www.pubs.ext.vt.edu/ANR/ANR-10/ANR-10.html"},
+  S5:{title:"Botany Basics — Anatomy of a Cherry Blossom",org:"U.S. National Arboretum · USDA",type:"U.S. government botany reference",url:"https://www.usna.usda.gov/visit/beyond-the-tidal-basin/botany-basics"},
+  S6:{title:"Extension Gardener Handbook — Botany",org:"NC State Extension",type:"University extension botany reference",url:"https://content.ces.ncsu.edu/extension-gardener-handbook/3-botany"},
+  S7:{title:"Flower Anatomy",org:"University of California Agriculture and Natural Resources",type:"University research & extension reference",url:"https://ucanr.edu/site/fruit-nut-research-information-center/flower-anatomy"},
+  S8:{title:"Flower Morphology — The Science of Plants",org:"University of Minnesota",type:"University open textbook",url:"https://open.lib.umn.edu/horticulture/chapter/7-2-flower-morphology/"},
+  S9:{title:"Fruit Morphology — The Science of Plants",org:"University of Minnesota",type:"University open textbook",url:"https://open.lib.umn.edu/horticulture/chapter/8-1-fruit-morphology/"}
+};
+
+const parts = {
+  petal:{
+    title:"Petal", group:"Perianth · Corolla",
+    what:"A petal is a modified floral organ positioned inside the sepals. Collectively, petals form the corolla.",
+    function:"In many animal-pollinated species, petals help attract pollinators through color, pattern, scent or associated rewards; morphology varies widely.",
+    pearl:"Petals + sepals = perianth. Corolla = all petals.",
+    trap:"Do not assume petals are always brightly colored or even present. Wind-pollinated flowers may have reduced perianths, and some flowers have tepals instead of clearly distinct sepals and petals.",
+    sources:["S1","S6","S8"],related:["sepal","perianth","nectary"]
+  },
+  sepal:{
+    title:"Sepal",group:"Perianth · Calyx",
+    what:"A sepal is usually the outermost floral organ. Collectively, sepals form the calyx.",
+    function:"Sepals commonly enclose and protect the developing floral bud; they are often green and leaf-like, but not always.",
+    pearl:"Calyx = sepals. It is the outer whorl of a typical complete flower.",
+    trap:"Color is not a reliable definition. Some sepals are showy; location in the outer whorl is more dependable.",
+    sources:["S1","S4","S5"],related:["petal","perianth","receptacle"]
+  },
+  perianth:{
+    title:"Perianth",group:"Accessory floral structures",
+    what:"The perianth is the collective term for the calyx (sepals) plus corolla (petals).",
+    function:"It surrounds the reproductive organs and may protect the bud and participate in pollinator attraction.",
+    pearl:"Perianth = calyx + corolla.",
+    trap:"Some flowers lack a perianth, and in others the members are not differentiated into sepals and petals; those similar members are often called tepals.",
+    sources:["S1","S8"],related:["petal","sepal"]
+  },
+  anther:{
+    title:"Anther",group:"Androecium · Stamen",
+    what:"The anther is the pollen-producing portion of a stamen. It contains microsporangia (pollen sacs), where microspores develop into pollen grains.",
+    function:"It produces and releases pollen, the male gametophyte of seed plants.",
+    pearl:"Anther = pollen-producing part; filament = supporting stalk.",
+    trap:"Pollen is not simply 'sperm.' A pollen grain is the male gametophyte; it produces/delivers the sperm cells.",
+    sources:["S1","S2","S5","S8"],related:["filament","stamen","pollen"]
+  },
+  filament:{
+    title:"Filament",group:"Androecium · Stamen",
+    what:"The filament is the stalk-like portion of the stamen that supports the anther.",
+    function:"It positions the anther for effective pollen presentation and connects it to the flower.",
+    pearl:"Stamen = anther + filament.",
+    trap:"The filament does not produce pollen; the anther does.",
+    sources:["S1","S5","S8"],related:["anther","stamen"]
+  },
+  stamen:{
+    title:"Stamen",group:"Androecium",
+    what:"A stamen is a male reproductive floral organ consisting of an anther and usually a supporting filament.",
+    function:"Stamens produce and present pollen. All stamens together form the androecium.",
+    pearl:"Androecium = all stamens.",
+    trap:"A complete flower may have many stamens, few stamens or fused stamens; the generalized diagram is not a universal count.",
+    sources:["S1","S2","S4"],related:["anther","filament","pollen","carpel"]
+  },
+  pollen:{
+    title:"Pollen grain",group:"Male gametophyte",
+    what:"A pollen grain is the male gametophyte. In angiosperms it develops from microspores produced in the anther's microsporangia.",
+    function:"After compatible pollen reaches a receptive stigma, it can germinate and form a pollen tube that delivers sperm cells toward the ovule.",
+    pearl:"Pollination = transfer/deposition of pollen; fertilization happens later after pollen-tube growth.",
+    trap:"Pollen ≠ sperm. Pollen is the gametophyte that gives rise to or carries the sperm cells.",
+    sources:["S1","S2","S3"],related:["anther","stigma","pollen-tube"]
+  },
+  stigma:{
+    title:"Stigma",group:"Gynoecium · Carpel/Pistil",
+    what:"The stigma is the pollen-receptive region at the top of a carpel or pistil.",
+    function:"It receives pollen. Compatible pollen may hydrate, germinate and begin pollen-tube growth from this surface.",
+    pearl:"Stigma receives pollen; style connects stigma to ovary.",
+    trap:"Pollination ends with pollen transfer to a receptive surface; it is not the same event as fertilization.",
+    sources:["S1","S3","S4","S5"],related:["style","pollen","carpel"]
+  },
+  style:{
+    title:"Style",group:"Gynoecium · Carpel/Pistil",
+    what:"The style is the connecting structure between the stigma and ovary in many flowers.",
+    function:"It provides the route through which a pollen tube can grow toward the ovary and ovules.",
+    pearl:"Stigma → style → ovary is the classic carpel/pistil sequence.",
+    trap:"Styles vary greatly and may be very short or absent in some flowers.",
+    sources:["S1","S3","S5"],related:["stigma","ovary","pollen-tube","carpel"]
+  },
+  ovary:{
+    title:"Ovary",group:"Gynoecium · Carpel/Pistil",
+    what:"The ovary is the basal portion of the carpel/pistil that encloses one or more ovules.",
+    function:"It protects ovules before fertilization. After fertilization, ovary tissues usually develop into the fruit while ovules develop into seeds.",
+    pearl:"Ovule → seed. Ovary → fruit (typically).",
+    trap:"Ovary position is a separate concept: a flower may have a superior or inferior ovary depending on where the other floral parts attach.",
+    sources:["S1","S3","S4","S5"],related:["ovule","style","carpel","locule","placenta"]
+  },
+  ovule:{
+    title:"Ovule",group:"Inside the ovary",
+    what:"An ovule is a structure inside the ovary that contains the female gametophyte (embryo sac) and the egg cell.",
+    function:"The pollen tube ultimately reaches an ovule; after fertilization, the ovule develops into a seed.",
+    pearl:"Seed comes from the ovule—not from the entire ovary.",
+    trap:"The ovule is not itself just the egg. It is a multicellular structure that contains the female gametophyte and egg cell.",
+    sources:["S1","S2","S3","S5"],related:["ovary","placenta","locule","pollen-tube"]
+  },
+  carpel:{
+    title:"Carpel / Pistil",group:"Gynoecium",
+    what:"A carpel is a fundamental female reproductive unit of the flower, classically described as stigma, style and ovary. Flowers may have one or multiple carpels, and carpels may be fused.",
+    function:"It receives pollen and encloses ovules, linking pollination with fertilization and seed/fruit development.",
+    pearl:"Gynoecium = all carpels. A pistil may be a single carpel or may be compound when carpels are fused.",
+    trap:"Do not use 'carpel' and 'pistil' as perfectly interchangeable in every morphological context; compound pistils can contain multiple fused carpels.",
+    sources:["S1","S4","S7"],related:["stigma","style","ovary","stamen"]
+  },
+  receptacle:{
+    title:"Receptacle",group:"Floral axis / support",
+    what:"The receptacle is the expanded or compressed end of the floral axis where floral organs attach.",
+    function:"It bears the sepals, petals, stamens and carpels/pistils in their characteristic positions.",
+    pearl:"Think of the receptacle as the compact floral platform carrying the whorls.",
+    trap:"Receptacle is not the same as the flower stalk.",
+    sources:["S4","S6","S8"],related:["sepal","petal","stamen","carpel","pedicel"]
+  },
+  pedicel:{
+    title:"Flower stalk: pedicel / peduncle",group:"Support",
+    what:"A pedicel is the stalk of an individual flower within an inflorescence. A peduncle supports a solitary flower or an entire inflorescence, depending on context.",
+    function:"It mechanically supports and connects the flower to the plant shoot system.",
+    pearl:"Pedicel = individual flower stalk within an inflorescence; peduncle = stalk of the inflorescence or solitary flower.",
+    trap:"Many simplified diagrams label any flower stalk 'pedicel'; botanical terminology depends on whether the flower is solitary or part of an inflorescence.",
+    sources:["S6","S8"],related:["receptacle"]
+  },
+  nectary:{
+    title:"Nectary",group:"Accessory / pollinator reward",
+    what:"A nectary is specialized nectar-producing tissue. Floral nectaries may occur at various positions depending on species.",
+    function:"Nectar can reward animal pollinators and help direct their movement through a flower.",
+    pearl:"Nectary location is not universal. It is an accessory structure, not one of the four fundamental floral whorls.",
+    trap:"Do not expect every flower to have a conspicuous nectary; wind-pollinated flowers may not offer nectar at all.",
+    sources:["S6","S8"],related:["petal","receptacle"]
+  },
+  locule:{
+    title:"Locule",group:"Ovary internal anatomy",
+    what:"A locule is a chamber within an ovary.",
+    function:"Locules contain ovules; the number and arrangement of locules vary with ovary and carpel structure.",
+    pearl:"Locule = chamber. Ovule = reproductive structure within the chamber.",
+    trap:"The two-locule ovary drawn here is schematic. Ovaries can have one, two, three or more locules.",
+    sources:["S9"],related:["ovary","ovule","placenta"]
+  },
+  placenta:{
+    title:"Placenta",group:"Ovary internal anatomy",
+    what:"The placenta is the region of the ovary to which ovules are attached.",
+    function:"It anchors ovules within the ovary; the pattern of ovule attachment is called placentation.",
+    pearl:"Placenta anchors ovules; locule is the chamber containing them.",
+    trap:"Placental position varies among angiosperms. The central attachment shown here is a teaching schematic, not a universal arrangement.",
+    sources:["S9"],related:["ovary","ovule","locule"]
+  },
+  "pollen-tube":{
+    title:"Pollen tube",group:"Pollination → fertilization",
+    what:"After a compatible pollen grain germinates, the pollen-tube cell produces a tube that grows through the stigma/style tissues toward an ovule.",
+    function:"The tube delivers sperm cells into the female gametophyte through the ovule's micropyle.",
+    pearl:"Pollen tube growth occurs after pollination and before fertilization.",
+    trap:"The pollen grain does not simply fall directly into the ovary; a tube grows through maternal tissues.",
+    sources:["S1","S2","S3"],related:["pollen","stigma","style","ovule"]
+  }
+};
+
+const sourceForOverview=["S1","S2","S4","S7"];
+const allPartIds=Object.keys(parts);
+
+const pathways=[
+  {part:"anther",text:"1 · Pollen develops in microsporangia (pollen sacs) inside the anther."},
+  {part:"pollen",text:"2 · Mature pollen grains are released and transported by a pollination vector such as an animal, wind or water."},
+  {part:"stigma",text:"3 · Pollination occurs when pollen reaches a receptive stigma."},
+  {part:"pollen-tube",text:"4 · Compatible pollen germinates; a pollen tube grows through the stigma/style toward the ovary."},
+  {part:"ovule",text:"5 · The pollen tube reaches an ovule and enters the female gametophyte through the micropyle."},
+  {part:"ovule",text:"6 · Double fertilization forms a diploid zygote and triploid endosperm in angiosperms."},
+  {part:"ovary",text:"7 · After fertilization, the ovule develops into a seed and ovary tissues typically mature into fruit."}
+];
+
+const quizQuestions=[
+  {q:"Which structure receives pollen?",a:"stigma"},
+  {q:"Which part of a stamen produces pollen?",a:"anther"},
+  {q:"Which structure supports the anther?",a:"filament"},
+  {q:"Which structure contains the ovules?",a:"ovary"},
+  {q:"Which structure typically develops into a seed after fertilization?",a:"ovule"},
+  {q:"Which structure links the stigma to the ovary?",a:"style"},
+  {q:"Which floral organ is collectively part of the calyx?",a:"sepal"},
+  {q:"Which floral organ is collectively part of the corolla?",a:"petal"},
+  {q:"Which structure is the compact floral platform where organs attach?",a:"receptacle"},
+  {q:"Which chamber inside the ovary is called a locule?",a:"locule"},
+  {q:"Which ovary region anchors ovules?",a:"placenta"}
+];
+
+let mode="explore", selected=null, soundOn=false, audioCtx=null;
+let pathwayIndex=0, quizIndex=-1, quizScore=0, quizTotal=0, quizStreak=0, lastQuizPart=null;
+
+const svg=document.getElementById("flowerSvg");
+const defaultView={x:0,y:0,w:900,h:700};
+let view={...defaultView};
+let panState=null;
+
+function applyView(){
+  svg.setAttribute("viewBox",`${view.x} ${view.y} ${view.w} ${view.h}`);
+}
+function svgPoint(clientX,clientY){
+  const rect=svg.getBoundingClientRect();
+  return {
+    x:view.x+(clientX-rect.left)/rect.width*view.w,
+    y:view.y+(clientY-rect.top)/rect.height*view.h
+  };
+}
+svg.addEventListener("wheel",ev=>{
+  ev.preventDefault();
+  const before=svgPoint(ev.clientX,ev.clientY);
+  const factor=Math.exp(ev.deltaY*0.0012);
+  const newW=Math.max(280,Math.min(1500,view.w*factor));
+  const newH=newW*(700/900);
+  const rx=(before.x-view.x)/view.w;
+  const ry=(before.y-view.y)/view.h;
+  view.x=before.x-rx*newW;
+  view.y=before.y-ry*newH;
+  view.w=newW;view.h=newH;applyView();
+},{passive:false});
+svg.addEventListener("pointerdown",ev=>{
+  if(ev.target.closest?.(".part"))return;
+  panState={x:ev.clientX,y:ev.clientY,startX:view.x,startY:view.y};
+  svg.setPointerCapture?.(ev.pointerId);
+});
+svg.addEventListener("pointermove",ev=>{
+  if(!panState)return;
+  const rect=svg.getBoundingClientRect();
+  view.x=panState.startX-(ev.clientX-panState.x)/rect.width*view.w;
+  view.y=panState.startY-(ev.clientY-panState.y)/rect.height*view.h;
+  applyView();
+});
+["pointerup","pointercancel","pointerleave"].forEach(type=>svg.addEventListener(type,()=>{panState=null}));
+applyView();
+
+function sourceCards(ids){
+  return ids.map(id=>{
+    const s=sources[id];
+    return `<a class="source-card" href="${s.url}" target="_blank" rel="noopener noreferrer">
+      <div class="source-name">${s.title} ↗</div>
+      <div class="source-meta">${s.org} · ${s.type}</div>
+    </a>`;
+  }).join("");
+}
+function escapeHtml(v){
+  return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+function uiTone(freq=520,dur=.04,vol=.018){
+  if(!soundOn)return;
+  try{
+    if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type="sine";o.frequency.value=freq;
+    g.gain.setValueAtTime(vol,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);
+    o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.classList.add("show");
+  clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),1300);
+}
+function partElements(id){return [...document.querySelectorAll(`.part[data-part="${id}"]`)];}
+function clearHighlights(){
+  document.querySelectorAll(".part").forEach(el=>el.classList.remove("dim","selected","related","pathway-target"));
+  document.getElementById("pollenTube").classList.remove("active");
+}
+function highlightPart(id,related=[]){
+  clearHighlights();
+  document.querySelectorAll(".part").forEach(el=>{
+    const p=el.dataset.part;
+    if(p===id)el.classList.add("selected");
+    else if(related.includes(p))el.classList.add("related");
+    else el.classList.add("dim");
+  });
+  if(id==="pollen-tube"){
+    document.getElementById("pollenTube").classList.add("active");
+    ["stigma","style","ovule"].forEach(r=>partElements(r).forEach(el=>el.classList.add("related")));
+  }
+}
+function openPart(id){
+  const d=parts[id]; if(!d)return;
+  selected=id;
+  highlightPart(id,d.related||[]);
+  document.getElementById("quickInfo").innerHTML=`<strong>${escapeHtml(d.title)}</strong><br>${escapeHtml(d.what)}`;
+  const drawer=document.getElementById("drawer");
+  document.getElementById("drawerKicker").textContent="Verified flower anatomy";
+  document.getElementById("drawerTitle").textContent=d.title;
+  document.getElementById("drawerBody").innerHTML=`
+    <div class="section-title">${escapeHtml(d.group)}</div>
+    <div class="lead">${escapeHtml(d.what)}</div>
+    <div class="badges"><span class="badge">High-yield</span><span class="badge">${d.sources.length} sources</span><span class="badge">Reviewed 16 Aug 2026</span></div>
+    <div class="fact-grid">
+      <div class="fact"><div class="f-label">Core function</div><div class="f-text">${escapeHtml(d.function)}</div></div>
+      <div class="fact"><div class="f-label">Anatomical system</div><div class="f-text">${escapeHtml(d.group)}</div></div>
+    </div>
+    <div class="pearl"><b>Exam pearl</b><div>${escapeHtml(d.pearl)}</div></div>
+    <div class="trap"><b>Common trap</b><div>${escapeHtml(d.trap)}</div></div>
+    <div class="section-title">Related structures</div>
+    <div class="related-grid">${(d.related||[]).map(r=>`<button class="related-btn" data-rel="${r}">${escapeHtml(parts[r]?.title||r)}</button>`).join("")}</div>
+    <div class="section-title">Evidence & sources</div>
+    ${sourceCards(d.sources)}
+    <div class="note">This is a generalized teaching schematic. Flower morphology varies substantially across angiosperms; the source cards support the anatomical definitions and high-yield distinctions shown here.</div>
+  `;
+  drawer.classList.add("open");
+  drawer.querySelectorAll("[data-rel]").forEach(btn=>btn.addEventListener("click",()=>openPart(btn.dataset.rel)));
+  uiTone(560,.04,.018);
+}
+function openComparisons(){
+  selected=null;clearHighlights();
+  document.getElementById("drawerKicker").textContent="High-yield distinctions";
+  document.getElementById("drawerTitle").textContent="Flower anatomy comparisons";
+  document.getElementById("drawerBody").innerHTML=`
+    <div class="section-title">Do not mix these up</div>
+    <div class="compare-row">
+      <div class="compare-box"><strong>Complete flower</strong><span>Has all four organ sets: sepals, petals, stamens and carpels/pistils.</span></div>
+      <div class="compare-box"><strong>Incomplete flower</strong><span>Missing one or more of those four floral organ sets.</span></div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-box"><strong>Perfect / bisexual</strong><span>Has both stamens and carpels/pistils.</span></div>
+      <div class="compare-box"><strong>Imperfect / unisexual</strong><span>Has stamens or carpels/pistils, but not both.</span></div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-box"><strong>Pollination</strong><span>Transfer of pollen to the receptive female surface, typically the stigma.</span></div>
+      <div class="compare-box"><strong>Fertilization</strong><span>Fusion events that occur after pollen germination and pollen-tube growth.</span></div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-box"><strong>Ovule → seed</strong><span>The fertilized ovule matures into a seed.</span></div>
+      <div class="compare-box"><strong>Ovary → fruit</strong><span>Ovary tissues typically mature into fruit after fertilization.</span></div>
+    </div>
+    <div class="compare-row">
+      <div class="compare-box"><strong>Superior ovary</strong><span>Sepals, petals and stamens attach below the ovary.</span></div>
+      <div class="compare-box"><strong>Inferior ovary</strong><span>Those floral parts attach above the ovary.</span></div>
+    </div>
+    <div class="pearl"><b>Very high-yield</b><div>A flower can be perfect but incomplete. “Perfect” asks whether both reproductive organ types are present; “complete” asks whether all four floral organ sets are present.</div></div>
+    <div class="section-title">Sources</div>
+    ${sourceCards(["S1","S2","S3","S4","S7"])}
+  `;
+  document.getElementById("drawer").classList.add("open");uiTone(620,.04,.018);
+}
+function setMode(newMode){
+  mode=newMode;
+  document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===mode));
+  document.getElementById("pathPanel").classList.toggle("show",mode==="pathway");
+  document.getElementById("quizPanel").classList.toggle("show",mode==="quiz");
+  document.getElementById("labels").classList.toggle("hidden",mode==="quiz" || !document.getElementById("labelToggle").classList.contains("on"));
+  document.getElementById("drawer").classList.remove("open");
+  clearHighlights();
+  if(mode==="pathway"){pathwayIndex=0;renderPathway()}
+  if(mode==="quiz"){startQuiz()}
+  if(mode==="explore"){
+    document.getElementById("quickInfo").innerHTML="<strong>Explore anatomy.</strong><br>Touch any structure for function, exam pearls, traps and sources.";
+  }
+  uiTone(480,.035,.016);
+}
+function renderPathway(){
+  const s=pathways[pathwayIndex];
+  document.getElementById("pathStep").textContent=s.text;
+  clearHighlights();
+  if(s.part==="pollen-tube"){
+    document.getElementById("pollenTube").classList.add("active");
+    ["stigma","style","ovule"].forEach(r=>partElements(r).forEach(el=>el.classList.add("pathway-target")));
+  }else{
+    partElements(s.part).forEach(el=>el.classList.add("pathway-target"));
+  }
+  document.getElementById("prevPath").disabled=pathwayIndex===0;
+  document.getElementById("nextPath").textContent=pathwayIndex===pathways.length-1?"Restart ↻":"Next →";
+}
+function stepPath(delta){
+  if(delta>0 && pathwayIndex===pathways.length-1)pathwayIndex=0;
+  else pathwayIndex=Math.max(0,Math.min(pathways.length-1,pathwayIndex+delta));
+  renderPathway();uiTone(540,.035,.016);
+}
+function startQuiz(){
+  quizScore=0;quizTotal=0;quizStreak=0;lastQuizPart=null;nextQuiz();
+}
+function nextQuiz(){
+  quizIndex=(quizIndex+1)%quizQuestions.length;
+  const q=quizQuestions[quizIndex];
+  document.getElementById("quizPrompt").textContent=q.q;
+  document.getElementById("quizFeedback").textContent="Touch the answer on the flower.";
+  lastQuizPart=null;clearHighlights();updateQuizMeta();
+}
+function updateQuizMeta(){
+  document.getElementById("quizScore").textContent=`Score ${quizScore}/${quizTotal}`;
+  document.getElementById("quizStreak").textContent=`Streak ${quizStreak}`;
+}
+function answerQuiz(id){
+  if(lastQuizPart)return;
+  const q=quizQuestions[quizIndex];quizTotal++;
+  if(id===q.a){
+    quizScore++;quizStreak++;lastQuizPart=id;
+    document.getElementById("quizFeedback").textContent=`✓ Correct — ${parts[id].title}`;
+    partElements(id).forEach(el=>el.classList.add("selected"));
+    uiTone(760,.06,.022);
+  }else{
+    quizStreak=0;lastQuizPart=id;
+    document.getElementById("quizFeedback").textContent=`Not quite. Correct answer: ${parts[q.a].title}`;
+    clearHighlights();partElements(q.a).forEach(el=>el.classList.add("selected"));
+    uiTone(330,.07,.018);
+  }
+  updateQuizMeta();
+}
+document.querySelectorAll(".part").forEach(el=>{
+  const activate=()=>{
+    const id=el.dataset.part;
+    if(mode==="quiz"){answerQuiz(id);return}
+    if(mode==="pathway"){openPart(id);return}
+    openPart(id);
+  };
+  el.addEventListener("click",ev=>{ev.stopPropagation();activate()});
+  el.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();activate()}});
+});
+document.querySelectorAll(".mode").forEach(btn=>btn.addEventListener("click",()=>setMode(btn.dataset.mode)));
+document.getElementById("prevPath").addEventListener("click",()=>stepPath(-1));
+document.getElementById("nextPath").addEventListener("click",()=>stepPath(1));
+document.getElementById("nextQuiz").addEventListener("click",nextQuiz);
+document.getElementById("quizExplain").addEventListener("click",()=>{
+  const id=quizQuestions[quizIndex].a;openPart(id);
+});
+document.getElementById("compareBtn").addEventListener("click",openComparisons);
+document.getElementById("drawerClose").addEventListener("click",()=>{document.getElementById("drawer").classList.remove("open");uiTone(430,.03,.014)});
+document.getElementById("labelToggle").addEventListener("click",ev=>{
+  ev.currentTarget.classList.toggle("on");
+  document.getElementById("labels").classList.toggle("hidden",!ev.currentTarget.classList.contains("on")||mode==="quiz");
+  toast(ev.currentTarget.classList.contains("on")?"Labels on":"Labels off");
+});
+document.getElementById("soundToggle").addEventListener("click",ev=>{
+  soundOn=!soundOn;ev.currentTarget.classList.toggle("on",soundOn);ev.currentTarget.textContent=soundOn?"●":"◌";
+  if(soundOn)uiTone(620,.06,.022);toast(soundOn?"Interface sound on":"Interface sound off");
+});
+document.getElementById("resetView").addEventListener("click",()=>{
+  view={...defaultView};applyView();clearHighlights();
+  if(mode==="pathway")renderPathway();
+  uiTone(470,.03,.014);
+});
+const search=document.getElementById("searchInput");
+search.addEventListener("input",()=>{
+  const q=search.value.trim().toLowerCase();
+  if(!q){clearHighlights();return}
+  const hit=allPartIds.find(id=>id.includes(q)||parts[id].title.toLowerCase().includes(q)||parts[id].group.toLowerCase().includes(q));
+  if(hit)highlightPart(hit,parts[hit].related||[]);
+});
+search.addEventListener("keydown",ev=>{
+  if(ev.key==="Enter"){
+    const q=search.value.trim().toLowerCase();
+    const hit=allPartIds.find(id=>id.includes(q)||parts[id].title.toLowerCase().includes(q)||parts[id].group.toLowerCase().includes(q));
+    if(hit){openPart(hit);search.blur();document.getElementById("toolbar").classList.remove("searching")}
+  }
+  if(ev.key==="Escape"){search.value="";clearHighlights();search.blur()}
+});
+document.getElementById("mobileSearch").addEventListener("click",()=>{
+  const tb=document.getElementById("toolbar");tb.classList.toggle("searching");
+  if(tb.classList.contains("searching"))setTimeout(()=>search.focus(),50);
+});
+svg.addEventListener("click",()=>{
+  if(mode==="explore"){clearHighlights();document.getElementById("drawer").classList.remove("open")}
+});
+["intro","toolbar","drawer","legend"].forEach(id=>document.getElementById(id)?.addEventListener("click",ev=>ev.stopPropagation()));
+</script>
+<nav id="cdPublicDock" aria-label="THE UNI public links">
+<a aria-label='Back to the Interactive Knowledge Library' class='cdDockWord' href='/' title='Back to the Interactive Knowledge Library'>Library</a>
+<a class="cdWatch" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a>
+<a class="cdContact" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact THE UNI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a>
+</nav>
+
+<style id="ikl-collision-guard-style">
+/* IKL production collision guard: only moves bottom UI when the public dock would cover it. */
+:root{--ikl-dock-safe-bottom:74px}
+@media(max-width:680px){:root{--ikl-dock-safe-bottom:62px}}
+</style>
+<script id="ikl-collision-guard">
+(()=>{
+ const MOVE=['#legend','.legend','#drawer','.drawer','#modebar','.modebar','.modeBar','.mode-bar','#timeline','.timeline','.pathbar','.pathBar','.path-bar','.timelineWrap','.timeline-wrap','.bottomBar','.bottom-bar','.statusbar','.status-bar','#status'];
+ const QUIET=['#legend','.legend','#watermark','.watermark','.badge'];
+ const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>2&&r.height>2};
+ const overlap=(a,b,pad=4)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>pad&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>pad;
+ let queued=false,applying=false;
+ const observer=new MutationObserver(muts=>{if(applying)return;for(const m of muts){if(m.type==='attributes'&&m.attributeName==='class'){run();break}}});
+ const observe=()=>observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+ function all(selectors){const out=[];selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!out.includes(el))out.push(el)}));return out}
+ function rememberMove(el){if(el.dataset.iklMoveRemembered)return;el.dataset.iklMoveRemembered='1';el.dataset.iklInlineBottom=el.style.bottom||'';el.dataset.iklInlineTransform=el.style.transform||'';el.dataset.iklInlineMaxHeight=el.style.maxHeight||''}
+ function restoreMove(el){if(el.dataset.iklAdjusted!=='1')return;if(el.dataset.iklInlineBottom==='')el.style.removeProperty('bottom');else el.style.bottom=el.dataset.iklInlineBottom;if(el.dataset.iklInlineTransform==='')el.style.removeProperty('transform');else el.style.transform=el.dataset.iklInlineTransform;if(el.dataset.iklInlineMaxHeight==='')el.style.removeProperty('max-height');else el.style.maxHeight=el.dataset.iklInlineMaxHeight;el.dataset.iklAdjusted='0'}
+ function rememberQuiet(el){if(el.dataset.iklQuietRemembered)return;el.dataset.iklQuietRemembered='1';el.dataset.iklInlineVisibility=el.style.visibility||'';el.dataset.iklInlineOpacity=el.style.opacity||''}
+ function restoreQuiet(el){if(el.dataset.iklQuieted!=='1')return;if(el.dataset.iklInlineVisibility==='')el.style.removeProperty('visibility');else el.style.visibility=el.dataset.iklInlineVisibility;if(el.dataset.iklInlineOpacity==='')el.style.removeProperty('opacity');else el.style.opacity=el.dataset.iklInlineOpacity;el.dataset.iklQuieted='0'}
+ function run(){if(queued||applying)return;queued=true;requestAnimationFrame(()=>{
+   applying=true;observer.disconnect();
+   const movers=all(MOVE),quiets=all(QUIET);movers.forEach(el=>{rememberMove(el);restoreMove(el)});quiets.forEach(el=>{rememberQuiet(el);restoreQuiet(el)});
+   const dock=document.getElementById('cdPublicDock');
+   if(dock&&visible(dock)){
+     const dr=dock.getBoundingClientRect(),safe=Math.max(12,innerHeight-dr.top+10);
+     movers.forEach(el=>{if(el===dock||!visible(el))return;const cs=getComputedStyle(el);if(cs.position!=='fixed'&&cs.position!=='absolute')return;const r=el.getBoundingClientRect();if(!overlap(r,dr))return;const b=parseFloat(cs.bottom);el.dataset.iklAdjusted='1';if(Number.isFinite(b))el.style.bottom=Math.max(b,safe)+'px';else if(r.bottom>dr.top){const base=el.style.transform||'';el.style.transform=(base?base+' ':'')+'translateY(-'+(r.bottom-dr.top+10)+'px)'}if(el.matches('#drawer,.drawer')){const top=el.getBoundingClientRect().top;el.style.maxHeight=Math.max(160,innerHeight-top-safe-10)+'px'}})
+   }
+   const drawers=all(['#drawer','.drawer']).filter(visible);
+   drawers.forEach(drawer=>{const rr=drawer.getBoundingClientRect();quiets.forEach(el=>{if(el===drawer||!visible(el))return;if(overlap(el.getBoundingClientRect(),rr,6)){el.dataset.iklQuieted='1';el.style.visibility='hidden';el.style.opacity='0'}})});
+   queued=false;
+   applying=false;observe();
+ });}
+ addEventListener('load',run);addEventListener('resize',run,{passive:true});addEventListener('orientationchange',run,{passive:true});
+ observe();
+ run();setTimeout(run,30);setTimeout(run,120);setTimeout(run,350);
+})();
+</script>
+</body>
+</html>

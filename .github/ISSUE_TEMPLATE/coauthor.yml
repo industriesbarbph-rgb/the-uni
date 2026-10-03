@@ -1,0 +1,55 @@
+name: THE UNI Co-Author Submission
+description: Propose a subject, node, relationship, learning experience, correction, or source for THE UNI.
+title: "[Co-Author] "
+labels:
+  - co-author-submission
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for proposing a contribution to **THE UNI**. Submission does not provide editing or publishing access. Every proposal is reviewed before anything can enter the public site.
+  - type: dropdown
+    id: contribution_type
+    attributes:
+      label: Contribution type
+      options:
+        - New subject or field
+        - New node for an existing Knowledge Map
+        - Relationship between existing nodes
+        - New Knowledge Object
+        - New Learning Laboratory topic
+        - Reconstruction topic
+        - The Impossible Museum exhibit
+        - Correction to existing content
+        - Source or evidence contribution
+        - Question identifying missing coverage
+        - Other proposed learning experience
+    validations: {required: true}
+  - type: input
+    id: proposed_subject
+    attributes: {label: Proposed subject, placeholder: "Example: Embodied Cognition"}
+    validations: {required: true}
+  - type: textarea
+    id: proposal_details
+    attributes: {label: What should THE UNI add, change, or represent?, description: Describe the proposed knowledge, structure, correction, exhibit, or learning experience.}
+    validations: {required: true}
+  - type: textarea
+    id: sources_evidence
+    attributes: {label: Sources or evidence, description: Add URLs, citations, primary sources, official documentation, or other material that can be checked.}
+    validations: {required: true}
+  - type: textarea
+    id: uncertainty_or_inference
+    attributes: {label: What is uncertain, disputed, inferred, or still needs checking?, description: Keep evidence, inference, and disputed claims clearly separated.}
+  - type: input
+    id: contributor_name
+    attributes: {label: Contributor name / preferred credit}
+    validations: {required: true}
+  - type: checkboxes
+    id: acknowledgement
+    attributes:
+      label: Submission acknowledgement
+      options:
+        - label: I understand this is a proposal for review and is not published automatically.
+          required: true
+        - label: I confirm that I identified sources/evidence in good faith and flagged known uncertainty or inference.
+          required: true

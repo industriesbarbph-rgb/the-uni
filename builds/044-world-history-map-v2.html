@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="up" href="/interactive-knowledge-library/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>World History · The Living Archive | THE UNI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --bg:#171411;
+  --bg2:#2b241d;
+  --panel:rgba(39,32,26,.82);
+  --panel2:rgba(57,47,37,.72);
+  --panel-border:rgba(203,166,101,.28);
+  --text:#f0e8dc;
+  --text-dim:#b8aa98;
+  --line:#74695d;
+  --gold:#c9a45e;
+  --gold-soft:#e0c58c;
+  --bronze:#a97043;
+  --burgundy:#7d3d43;
+  --glass:linear-gradient(155deg,rgba(72,60,47,.76),rgba(28,24,20,.80));
+  --shadow:0 18px 48px rgba(0,0,0,.32),0 1px 0 rgba(255,240,212,.06) inset;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;padding:0;height:100%;overflow:hidden;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%,rgba(190,137,69,.13),transparent 27%),
+    radial-gradient(circle at 88% 18%,rgba(126,82,52,.11),transparent 29%),
+    radial-gradient(circle at 50% 110%,rgba(151,93,55,.18),transparent 40%),
+    linear-gradient(120deg,#171411,#30271f 30%,#1b1713 55%,#34291f 78%,#171411);
+  background-size:180% 180%;
+  animation:metalDrift 18s ease-in-out infinite;
+}
+body{overscroll-behavior:none}
+button,input{font:inherit}
+button{color:inherit}
+@keyframes metalDrift{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+@keyframes sweep{0%{transform:translateX(-180%) skewX(-13deg);opacity:0}28%{opacity:.75}70%{opacity:.35}100%{transform:translateX(340%) skewX(-13deg);opacity:0}}
+@keyframes cornerGlow{0%,100%{opacity:.56}50%{opacity:.92}}
+@keyframes flow{to{stroke-dashoffset:-30}}
+@keyframes nodePulse{0%{opacity:.34;transform:scale(.78)}62%{opacity:.07;transform:scale(1.48)}100%{opacity:0;transform:scale(1.65)}}
+@keyframes drawerIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+@keyframes sheetIn{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glint{0%,74%,100%{transform:translateX(-170%)}86%{transform:translateX(270%)}}
+@keyframes chronoPulse{0%,100%{box-shadow:0 0 0 rgba(201,164,94,0)}50%{box-shadow:0 0 18px rgba(201,164,94,.14)}}
+
+#wrap{position:relative;width:100vw;height:100vh;isolation:isolate}
+#wrap::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle at 0 0,rgba(236,206,153,.14),transparent 35%),
+    radial-gradient(circle at 100% 0,rgba(180,126,72,.11),transparent 37%),
+    radial-gradient(circle at 0 100%,rgba(180,126,72,.09),transparent 40%),
+    radial-gradient(circle at 100% 100%,rgba(236,206,153,.11),transparent 39%);
+  animation:cornerGlow 7s ease-in-out infinite;
+}
+.sheen-top{position:absolute;inset:0;pointer-events:none;z-index:0;background:linear-gradient(180deg,rgba(255,235,201,.08),rgba(255,255,255,.01) 32%,transparent 62%)}
+.sheen-bottom{position:absolute;left:0;right:0;bottom:0;height:42%;pointer-events:none;z-index:0;background:linear-gradient(180deg,transparent,rgba(0,0,0,.23))}
+.edge-line{position:absolute;top:0;left:0;right:0;height:1px;pointer-events:none;z-index:0;background:linear-gradient(90deg,transparent 3%,rgba(220,185,123,.25) 25%,rgba(250,228,190,.52) 50%,rgba(220,185,123,.25) 75%,transparent 97%)}
+.sweep-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.sweep-band{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(224,197,150,.08),transparent)}
+.sweep-band.b1{width:42%;animation:sweep 8s 0s ease-in-out infinite}
+.sweep-band.b2{width:25%;animation:sweep 13s 4s ease-in-out infinite}
+
+svg{width:100%;height:100%;display:block;cursor:grab;position:relative;z-index:1;touch-action:none}
+svg:active{cursor:grabbing}
+
+.link{stroke:var(--line);stroke-opacity:.48;transition:stroke-opacity .25s,stroke-width .25s}
+.link.dim{stroke-opacity:.035}
+.link.time-dim{stroke-opacity:.018!important}
+.link.lit{stroke:var(--rel,var(--gold));stroke-opacity:.92;stroke-width:2.15px;stroke-dasharray:9 7;animation:flow 1.2s linear infinite}
+.link.selected{stroke:var(--rel,var(--gold-soft));stroke-opacity:1;stroke-width:3px;stroke-dasharray:11 5;animation:flow .82s linear infinite;filter:drop-shadow(0 0 4px rgba(207,168,99,.18))}
+.link-hit{stroke:transparent;stroke-width:18px;pointer-events:stroke;cursor:pointer}
+.link-hit.time-dim{pointer-events:none}
+
+.node{transition:opacity .26s}
+.node circle.core{stroke:#1b1713;stroke-width:1.5px;cursor:pointer;transition:opacity .22s,stroke .22s,stroke-width .22s,r .22s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.33))}
+.node text{
+  fill:var(--text);font-size:10.5px;pointer-events:none;text-anchor:middle;
+  paint-order:stroke;stroke:#171411;stroke-width:3.4px;stroke-linejoin:round;
+  transition:opacity .22s,font-size .22s;
+}
+.node .halo{fill:none;stroke:var(--gold-soft);stroke-width:1px;opacity:0;pointer-events:none;transform-box:fill-box;transform-origin:center}
+.node.dim circle.core,.node.dim text{opacity:.11}
+.node.lit circle.core{stroke:var(--gold-soft);stroke-width:2.6px}
+.node.lit text{font-size:11.5px;font-weight:700}
+.node.lit .halo{animation:nodePulse 1.2s ease-out}
+.node.connected circle.core{stroke:#beaa88;stroke-width:2px}
+.node.search-dim{opacity:.10}
+.node.search-hit circle.core{stroke:var(--gold-soft);stroke-width:2.6px}
+.node.search-hit .halo{opacity:.28}
+.node.time-dim{opacity:.055;pointer-events:none}
+.node.time-dim text{opacity:.35}
+
+.glass{
+  background:var(--glass);border:1px solid var(--panel-border);box-shadow:var(--shadow);
+  backdrop-filter:blur(11px);-webkit-backdrop-filter:blur(11px);
+}
+
+#panel{
+  position:absolute;top:16px;left:16px;z-index:5;width:316px;max-width:calc(100vw - 32px);
+  border-radius:13px;padding:14px 16px;font-size:13px;line-height:1.5;
+}
+#panel h1{font-size:15px;font-weight:700;margin:0 0 2px;letter-spacing:.015em}
+#panel p.sub{color:var(--text-dim);margin:0 0 10px;font-size:11.5px}
+#detail{min-height:60px}
+#detail .name{font-weight:760;font-size:14px;margin-bottom:3px}
+#detail .cat{color:#d0b886;font-size:10px;margin-bottom:5px;text-transform:uppercase;letter-spacing:.09em}
+#detail .date{color:var(--gold-soft);font-size:10.5px;margin-bottom:6px}
+#detail .desc{color:var(--text-dim)}
+#detail .placeholder{color:var(--text-dim);font-style:italic}
+.microline{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px;color:var(--text-dim);font-size:10.5px}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px rgba(201,164,94,.09)}
+
+.action{
+  border:1px solid rgba(216,181,118,.25);background:rgba(235,210,169,.055);color:var(--text);
+  border-radius:8px;padding:7px 10px;cursor:pointer;font-size:11px;font-weight:680;letter-spacing:.035em;
+  transition:background .2s,transform .2s,border-color .2s;
+}
+.action:hover{background:rgba(235,210,169,.10);border-color:rgba(224,194,142,.42)}
+.action:active{transform:scale(.98)}
+.action.primary{margin-top:10px;width:100%;text-transform:uppercase}
+
+#toolbar{
+  position:absolute;top:16px;right:16px;z-index:7;display:flex;align-items:center;gap:7px;
+  padding:7px;border-radius:12px;
+}
+#searchBox{position:relative;display:flex;align-items:center}
+#searchInput{
+  width:220px;border:0;outline:0;background:rgba(10,8,7,.18);border:1px solid rgba(218,183,122,.16);
+  border-radius:8px;padding:8px 34px 8px 10px;color:var(--text);font-size:12px;
+}
+#searchInput::placeholder{color:#9c8e7d}
+#searchIcon{position:absolute;right:10px;font-size:13px;color:var(--text-dim);pointer-events:none}
+.iconbtn{
+  width:32px;height:32px;border-radius:8px;border:1px solid rgba(218,183,122,.20);background:rgba(235,210,169,.055);
+  color:var(--text);display:grid;place-items:center;cursor:pointer;font-size:13px;font-weight:700;
+}
+.iconbtn.on{background:rgba(201,164,94,.92);color:#211a14}
+#hint{
+  position:absolute;top:68px;right:16px;z-index:4;padding:7px 10px;border-radius:9px;font-size:10px;
+  color:var(--text-dim);max-width:260px;
+}
+#legend{
+  position:absolute;bottom:16px;left:16px;z-index:4;padding:10px 13px;border-radius:11px;font-size:10px;
+  display:grid;grid-template-columns:repeat(2,auto);column-gap:13px;row-gap:5px;
+}
+#legend .item{display:flex;align-items:center;gap:6px;color:var(--text-dim);white-space:nowrap}
+#legend .dot{width:8px;height:8px;border-radius:50%;flex:none}
+
+#watermark{
+  position:absolute;bottom:18px;right:22px;z-index:6;font-size:10px;font-weight:650;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(216,184,128,.48);text-shadow:0 0 12px rgba(201,164,94,.12);
+  white-space:nowrap;pointer-events:none;user-select:none;
+}
+
+#drawer{
+  position:absolute;z-index:9;right:16px;top:68px;bottom:16px;width:min(420px,calc(100vw - 32px));
+  border-radius:15px;overflow:hidden;display:none;
+}
+#drawer.open{display:flex;flex-direction:column;animation:drawerIn .26s ease-out}
+#drawer::after{
+  content:"";position:absolute;top:0;bottom:0;width:33%;background:linear-gradient(90deg,transparent,rgba(229,202,157,.08),transparent);
+  pointer-events:none;animation:glint 9s ease-in-out infinite;opacity:.58;
+}
+.drawer-head{padding:15px 16px 11px;border-bottom:1px solid rgba(220,185,127,.14);display:flex;gap:12px;align-items:flex-start;position:relative;z-index:1}
+.drawer-title{flex:1;min-width:0}
+.drawer-kicker{font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:#cbb58e;margin-bottom:4px}
+.drawer-title h2{font-size:18px;line-height:1.15;margin:0;font-weight:750}
+.drawer-close{flex:none}
+.drawer-body{padding:14px 16px 20px;overflow:auto;position:relative;z-index:1;scrollbar-width:thin}
+.section-title{font-size:9.5px;font-weight:760;letter-spacing:.14em;color:#c7ad7e;text-transform:uppercase;margin:16px 0 8px}
+.section-title:first-child{margin-top:0}
+.lead{font-size:12.5px;line-height:1.62;color:#d5c8b8}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+.badge{font-size:9px;letter-spacing:.055em;text-transform:uppercase;border:1px solid rgba(214,179,117,.20);padding:4px 7px;border-radius:999px;background:rgba(228,200,153,.055);color:#cbbca8}
+.connection{
+  width:100%;text-align:left;border:1px solid rgba(218,183,122,.15);background:rgba(235,210,169,.04);
+  border-radius:10px;padding:10px 11px;margin-bottom:7px;cursor:pointer;color:var(--text);position:relative;overflow:hidden;
+}
+.connection:hover{background:rgba(235,210,169,.085);border-color:rgba(224,194,142,.30)}
+.connection .to{font-size:12px;font-weight:720;margin-bottom:3px;padding-right:20px}
+.connection .why{font-size:10.5px;color:var(--text-dim);line-height:1.45}
+.connection .arrow{position:absolute;right:10px;top:10px;color:#ccb583}
+.rel-chip{display:inline-flex;align-items:center;gap:5px;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#cbbca8;margin-top:7px}
+.rel-chip i{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--chip,var(--gold))}
+.source-card{
+  display:block;text-decoration:none;color:inherit;border:1px solid rgba(218,183,122,.15);background:rgba(235,210,169,.035);
+  border-radius:10px;padding:10px 11px;margin-bottom:7px;transition:background .18s,border-color .18s;
+}
+.source-card:hover{background:rgba(235,210,169,.08);border-color:rgba(224,194,142,.28)}
+.source-name{font-size:11.5px;font-weight:720;line-height:1.35}
+.source-meta{font-size:9.5px;color:var(--text-dim);margin-top:3px;letter-spacing:.02em}
+.source-note{font-size:10px;color:var(--text-dim);line-height:1.5;margin-top:8px}
+
+#pathbar{
+  position:absolute;z-index:7;bottom:118px;left:50%;transform:translateX(-50%);
+  max-width:min(680px,calc(100vw - 470px));min-width:280px;border-radius:11px;padding:8px 10px;display:none;
+}
+#pathbar.show{display:flex;align-items:center;gap:8px}
+#pathLabel{font-size:9px;font-weight:760;letter-spacing:.11em;text-transform:uppercase;color:#c7ad7e;white-space:nowrap}
+#pathText{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;color:#d4c6b4}
+#clearPath{flex:none}
+
+#chronobar{
+  position:absolute;z-index:7;left:50%;bottom:16px;transform:translateX(-50%);
+  width:min(760px,calc(100vw - 440px));min-width:360px;border-radius:13px;padding:9px 11px;
+  animation:chronoPulse 5s ease-in-out infinite;
+}
+.chrono-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.chrono-title{font-size:9px;font-weight:760;letter-spacing:.14em;text-transform:uppercase;color:#c7ad7e;white-space:nowrap}
+#chronoReadout{font-size:11px;color:#e2cfac;font-weight:700;margin-left:auto}
+#allHistory{width:auto;padding:0 10px}
+.era-row{display:flex;gap:5px;overflow:auto;scrollbar-width:none;margin-bottom:8px}
+.era-row::-webkit-scrollbar{display:none}
+.era{
+  flex:none;border:1px solid rgba(218,183,122,.14);background:rgba(235,210,169,.035);color:#bfb09d;
+  border-radius:999px;padding:4px 8px;font-size:8.8px;font-weight:700;letter-spacing:.055em;text-transform:uppercase;cursor:pointer;
+}
+.era.active{background:rgba(201,164,94,.9);color:#211a14;border-color:rgba(201,164,94,.9)}
+.slider-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center}
+.slider-cap{font-size:8.5px;color:#9f907e;white-space:nowrap}
+#yearSlider{width:100%;accent-color:#c9a45e}
+#toast{
+  position:absolute;z-index:20;left:50%;top:20px;transform:translateX(-50%) translateY(-10px);
+  opacity:0;pointer-events:none;padding:7px 10px;border-radius:9px;font-size:10.5px;color:var(--text-dim);
+  transition:opacity .2s,transform .2s;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:980px){
+  #chronobar{width:min(650px,calc(100vw - 355px));min-width:330px}
+  #pathbar{max-width:min(580px,calc(100vw - 370px))}
+}
+@media(max-width:820px){
+  #panel{width:276px}
+  #searchInput{width:190px}
+  #hint{display:none}
+  #drawer{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:70vh;border-radius:16px}
+  #drawer.open{animation:sheetIn .26s ease-out}
+  #chronobar{left:8px;right:8px;bottom:8px;transform:none;width:auto;min-width:0}
+  #pathbar{left:8px;right:8px;bottom:118px;transform:none;max-width:none;min-width:0}
+  #legend{bottom:118px}
+  #watermark{bottom:112px;right:14px;font-size:9px;letter-spacing:.12em}
+}
+@media(max-width:640px){
+  #panel{top:10px;left:10px;width:min(254px,calc(100vw - 82px));padding:11px 12px}
+  #panel h1{font-size:13px}
+  #panel p.sub{font-size:10px;margin-bottom:7px}
+  #detail{min-height:0}
+  #detail .desc{font-size:11px;max-height:48px;overflow:hidden}
+  #toolbar{top:10px;right:10px;padding:5px}
+  #searchBox{display:none}
+  #toolbar.searching #searchBox{display:flex;position:fixed;left:10px;right:10px;top:58px}
+  #toolbar.searching #searchInput{width:100%;background:rgba(36,29,24,.96);box-shadow:var(--shadow)}
+  #legend{display:none}
+  #watermark{display:block;bottom:112px;right:13px;z-index:8}
+  #chronobar{padding:8px 9px}
+  .slider-cap{display:none}
+  .slider-row{grid-template-columns:1fr}
+  .chrono-title{font-size:8.5px}
+  #chronoReadout{font-size:10px}
+  .desktop-only{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+}
+</style>
+<style id="coach-doll-public-dock-style">
+/* THE UNI — compact public jewel controls */
+#cdPublicDock{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:linear-gradient(145deg,rgba(18,22,27,.76),rgba(5,7,10,.66));box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#cdPublicDock a{position:relative;display:grid;place-items:center;color:#f0f4f5;text-decoration:none;border:1px solid rgba(255,255,255,.15);background:radial-gradient(circle at 33% 26%,rgba(255,255,255,.18),rgba(255,255,255,.055) 39%,rgba(0,0,0,.26) 79%);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 16px rgba(198,218,233,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+#cdPublicDock a:hover,#cdPublicDock a:focus-visible{transform:translateY(-2px);border-color:rgba(229,207,166,.50);box-shadow:inset 0 1px rgba(255,255,255,.16),0 0 22px rgba(222,193,141,.17);outline:none}
+#cdPublicDock .cdWatch{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.15),0 0 21px rgba(222,193,141,.13)}
+#cdPublicDock .cdContact{width:34px;height:34px;border-radius:50%}
+#cdPublicDock .cdWatch::before,#cdPublicDock .cdContact::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(229,204,151,.18);pointer-events:none}
+#cdPublicDock .cdWatch::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(226,199,146,.11);animation:cdJewelBreath 5.6s ease-in-out infinite;pointer-events:none}
+#cdPublicDock svg{width:16px;height:16px}.cdWatch svg{width:17px!important;height:17px!important}
+.cdDockWord{width:auto!important;height:34px!important;padding:0 12px!important;border-radius:999px!important;font-size:8.5px!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:#e9e1d7!important}
+@keyframes cdJewelBreath{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.04)}}
+@media(max-width:680px){#cdPublicDock{left:8px;bottom:8px;gap:5px;padding:4px 5px}#cdPublicDock .cdWatch{width:36px;height:36px}#cdPublicDock .cdContact{width:33px;height:33px}.cdDockWord{width:33px!important;height:33px!important;padding:0!important;font-size:0!important}.cdDockWord::after{content:"⌂";font-size:15px}}
+@media(prefers-reduced-motion:reduce){#cdPublicDock a{transition:none!important}#cdPublicDock .cdWatch::after{animation:none!important}}
+</style>
+<style id="coach-doll-node-dna-v2">
+/* Node DNA V2 — preserves each subject palette while sharpening the living-network look */
+.node circle.core{stroke:color-mix(in srgb,var(--accent) 44%,var(--bg));stroke-width:1.7px;filter:drop-shadow(0 0 4px rgba(255,255,255,.05)) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 23%,transparent))!important}
+.node .halo{stroke:var(--accent);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 32%,transparent))}
+.node:hover circle.core,.node.lit circle.core,.node.search-hit circle.core{stroke:var(--accent2);filter:drop-shadow(0 0 5px rgba(255,255,255,.14)) drop-shadow(0 0 16px color-mix(in srgb,var(--accent2) 40%,transparent))!important}
+.link{filter:drop-shadow(0 0 2px color-mix(in srgb,var(--accent) 18%,transparent))}
+.link.lit,.link.selected{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent2) 40%,transparent))}
+</style>
+
+<!-- IKL SEO + SOCIAL PUBLISHING LAYER -->
+<meta name="description" content="Explore World History · The Living Archive in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow…">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://theuni.barbph.com/builds/044-world-history-map-v2.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="THE UNI — Interactive Knowledge Library">
+<meta property="og:title" content="World History · The Living Archive | THE UNI">
+<meta property="og:description" content="Explore World History · The Living Archive in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow…">
+<meta property="og:url" content="https://theuni.barbph.com/builds/044-world-history-map-v2.html">
+<meta property="og:image" content="https://theuni.barbph.com/social/044-world-history-map-v2.jpg">
+<meta property="og:image:secure_url" content="https://theuni.barbph.com/social/044-world-history-map-v2.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="World History · The Living Archive — THE UNI interactive learning preview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="World History · The Living Archive | THE UNI">
+<meta name="twitter:description" content="Explore World History · The Living Archive in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow…">
+<meta name="twitter:image" content="https://theuni.barbph.com/social/044-world-history-map-v2.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebPage","LearningResource"],"@id":"https://theuni.barbph.com/builds/044-world-history-map-v2.html#learning-resource","url":"https://theuni.barbph.com/builds/044-world-history-map-v2.html","name":"World History · The Living Archive | THE UNI","headline":"World History · The Living Archive","description":"Explore World History · The Living Archive in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow…","inLanguage":"en","image":"https://theuni.barbph.com/social/044-world-history-map-v2.jpg","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"creator":{"@id":"https://theuni.barbph.com/#publisher"},"learningResourceType":"Interactive knowledge map","educationalUse":["instruction","self study","assessment"]}</script>
+<!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
+
+<style id="ikl-map-layout-repair-20260830">
+/* IKL Knowledge Map system repair: keep map UI zones from colliding. */
+#legend{max-width:min(430px,calc(100vw - 32px));}
+@media(max-width:820px){#legend{max-width:min(360px,calc(100vw - 20px));}}
+</style>
+
+<style id="ikl-mobile-map-header-collision-fix">
+@media(max-width:640px){
+  #panel{top:58px!important}
+  #toolbar.searching{left:10px!important;right:10px!important;width:auto!important}
+  #toolbar.searching #searchBox{display:flex!important;position:relative!important;left:auto!important;right:auto!important;top:auto!important;flex:1 1 auto!important}
+  #toolbar.searching #searchInput{width:100%!important}
+  #toolbar.searching .iconbtn:not(#mobileSearch){display:none!important}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+  
+  <div class="sheen-top"></div>
+  <div class="sheen-bottom"></div>
+  <div class="edge-line"></div>
+  <div class="sweep-wrap"><div class="sweep-band b1"></div></div>
+  <div class="sweep-wrap"><div class="sweep-band b2"></div></div>
+
+  <svg id="svg" aria-label="Interactive world history network"></svg>
+
+  <section id="panel" class="glass">
+    <h1>World History · The Living Archive</h1>
+    <p class="sub">Touch a node to follow how civilizations, ideas and events connect</p>
+    <div id="detail">
+      <div class="placeholder">Select a historical node to see what it is, when it belongs, what it connects to, and why.</div>
+    </div>
+  </section>
+
+  <div id="toolbar" class="glass">
+    <div id="searchBox">
+      <input id="searchInput" type="search" autocomplete="off" spellcheck="false" placeholder="Search history…" aria-label="Search world history">
+      <span id="searchIcon">⌕</span>
+    </div>
+    <button class="iconbtn" id="mobileSearch" title="Search" aria-label="Search">⌕</button>
+    <button class="iconbtn" id="soundToggle" title="Interface sound" aria-label="Toggle interface sound">◌</button>
+    <button class="iconbtn" id="resetView" title="Reset view" aria-label="Reset view">◎</button>
+  </div>
+
+  <div id="hint" class="glass">Drag nodes · scroll/pinch to zoom · touch a line for relationship evidence · use the chronology to move through time</div>
+  <div id="legend" class="glass"></div>
+
+  <aside id="drawer" class="glass" aria-live="polite" aria-label="Historical intelligence drawer">
+    <div class="drawer-head">
+      <div class="drawer-title">
+        <div class="drawer-kicker" id="drawerKicker">Historical intelligence</div>
+        <h2 id="drawerTitle">—</h2>
+      </div>
+      <button class="iconbtn drawer-close" id="drawerClose" title="Close" aria-label="Close">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <div id="pathbar" class="glass">
+    <span id="pathLabel">Exploration</span>
+    <span id="pathText"></span>
+    <button class="iconbtn" id="clearPath" title="Clear exploration path" aria-label="Clear exploration path">×</button>
+  </div>
+
+  <div id="chronobar" class="glass">
+    <div class="chrono-top">
+      <span class="chrono-title">Chronology Lens</span>
+      <button class="era active" id="allHistory">All History</button>
+      <span id="chronoReadout">All eras visible</span>
+    </div>
+    <div class="era-row" id="eraRow">
+      <button class="era" data-start="-3500" data-end="500">Ancient</button>
+      <button class="era" data-start="500" data-end="1450">Medieval</button>
+      <button class="era" data-start="1450" data-end="1750">Early Modern</button>
+      <button class="era" data-start="1750" data-end="1914">Industrial</button>
+      <button class="era" data-start="1914" data-end="1945">World Wars</button>
+      <button class="era" data-start="1945" data-end="1991">Cold War</button>
+      <button class="era" data-start="1991" data-end="2026">Contemporary</button>
+    </div>
+    <div class="slider-row">
+      <span class="slider-cap">3500 BCE</span>
+      <input type="range" id="yearSlider" min="-3500" max="2026" step="10" value="1500" aria-label="Historical year">
+      <span class="slider-cap">2026 CE</span>
+    </div>
+  </div>
+
+  <div id="toast" class="glass"></div>
+</div>
+
+<script>
+const categories = {
+  "origins": {
+    "label": "Origins & early civilizations",
+    "color": "#B97845"
+  },
+  "empires": {
+    "label": "States, empires & dynasties",
+    "color": "#C9A45E"
+  },
+  "belief": {
+    "label": "Religions & belief systems",
+    "color": "#8E6AAE"
+  },
+  "exchange": {
+    "label": "Trade, migration & exchange",
+    "color": "#3E8B82"
+  },
+  "ideas": {
+    "label": "Ideas, revolutions & social change",
+    "color": "#B85D58"
+  },
+  "technology": {
+    "label": "Science, technology & production",
+    "color": "#587DA0"
+  },
+  "conflict": {
+    "label": "War, conquest & geopolitics",
+    "color": "#8C444A"
+  },
+  "global": {
+    "label": "Global systems & contemporary order",
+    "color": "#535A62"
+  }
+};
+const relationshipTypes = {
+  "trade": {
+    "label": "Trade & exchange",
+    "color": "#C9A45E"
+  },
+  "diffusion": {
+    "label": "Cultural / religious diffusion",
+    "color": "#9B78B7"
+  },
+  "continuity": {
+    "label": "Political continuity / legacy",
+    "color": "#B77A45"
+  },
+  "conflict": {
+    "label": "Conflict / conquest",
+    "color": "#9A4B50"
+  },
+  "cause": {
+    "label": "Causal contribution / consequence",
+    "color": "#D08A56"
+  },
+  "institution": {
+    "label": "Institutional / legal legacy",
+    "color": "#6F7D88"
+  },
+  "technology": {
+    "label": "Technology / production",
+    "color": "#5E86A9"
+  },
+  "migration": {
+    "label": "Migration / population movement",
+    "color": "#6BA79B"
+  },
+  "ideas": {
+    "label": "Ideas / political influence",
+    "color": "#C16D68"
+  }
+};
+const nodes = [
+  {
+    "id": "Mesopotamian city-states",
+    "cat": "origins",
+    "start": -3500,
+    "end": -539,
+    "date": "c. 3500–539 BCE",
+    "desc": "Urban societies in Mesopotamia developed city-states, cuneiform writing, monumental institutions and long-distance exchange networks that shaped later West Asian history."
+  },
+  {
+    "id": "Ancient Egypt",
+    "cat": "origins",
+    "start": -3100,
+    "end": -30,
+    "date": "c. 3100–30 BCE",
+    "desc": "A Nile-centered civilization whose dynastic state, religious traditions, monumental building and regional diplomacy endured for millennia."
+  },
+  {
+    "id": "Indus Valley Civilization",
+    "cat": "origins",
+    "start": -2600,
+    "end": -1900,
+    "date": "c. 2600–1900 BCE",
+    "desc": "A highly urbanized civilization of South Asia known for planned cities, craft specialization and wide trade connections."
+  },
+  {
+    "id": "Shang & Zhou China",
+    "cat": "origins",
+    "start": -1600,
+    "end": -256,
+    "date": "c. 1600–256 BCE",
+    "desc": "Early Chinese dynastic eras in which bronze culture, writing, political institutions and influential ideas about rulership developed."
+  },
+  {
+    "id": "Achaemenid Persia",
+    "cat": "origins",
+    "start": -550,
+    "end": -330,
+    "date": "c. 550–330 BCE",
+    "desc": "A vast Persian imperial system linking West, Central and South Asia through roads, administration, tribute and military power."
+  },
+  {
+    "id": "Classical Greece",
+    "cat": "origins",
+    "start": -800,
+    "end": -146,
+    "date": "c. 800–146 BCE",
+    "desc": "A network of Greek-speaking poleis and kingdoms associated with influential political, philosophical, artistic and scientific traditions."
+  },
+  {
+    "id": "Roman Republic & Empire",
+    "cat": "origins",
+    "start": -509,
+    "end": 476,
+    "date": "509 BCE–476 CE",
+    "desc": "The Roman state expanded from an Italian republic into a Mediterranean empire whose law, institutions, infrastructure and culture had long afterlives."
+  },
+  {
+    "id": "Maurya & Gupta India",
+    "cat": "origins",
+    "start": -322,
+    "end": 550,
+    "date": "c. 322 BCE–550 CE",
+    "desc": "Major South Asian imperial formations associated with state-building, commerce, religious patronage, scholarship and cultural exchange."
+  },
+  {
+    "id": "Kingdom of Aksum",
+    "cat": "origins",
+    "start": 100,
+    "end": 940,
+    "date": "c. 1st–10th centuries CE",
+    "desc": "A powerful Red Sea kingdom in northeastern Africa connected to Mediterranean, Arabian and Indian Ocean commercial worlds."
+  },
+  {
+    "id": "Maya civilization",
+    "cat": "origins",
+    "start": -2000,
+    "end": 1697,
+    "date": "c. 2000 BCE–1697 CE",
+    "desc": "A diverse Mesoamerican civilization with major cities, writing, calendrical traditions, trade networks and long-lived political centers."
+  },
+  {
+    "id": "Byzantine Empire",
+    "cat": "empires",
+    "start": 330,
+    "end": 1453,
+    "date": "330–1453",
+    "desc": "The eastern continuation of the Roman imperial state centered on Constantinople, linking Mediterranean, Balkan and Near Eastern worlds."
+  },
+  {
+    "id": "Islamic Caliphates",
+    "cat": "empires",
+    "start": 632,
+    "end": 1258,
+    "date": "632–1258",
+    "desc": "Successive caliphal states that expanded across the Middle East, North Africa and beyond, fostering large political, commercial and intellectual networks."
+  },
+  {
+    "id": "Tang & Song China",
+    "cat": "empires",
+    "start": 618,
+    "end": 1279,
+    "date": "618–1279",
+    "desc": "Chinese dynastic eras marked by major urban growth, technological change, commerce, state institutions and international exchange."
+  },
+  {
+    "id": "Mongol Empire",
+    "cat": "empires",
+    "start": 1206,
+    "end": 1368,
+    "date": "1206–1368",
+    "desc": "A vast Eurasian imperial network created by Mongol conquests that intensified movement of people, goods, technologies and information across long distances."
+  },
+  {
+    "id": "Ottoman Empire",
+    "cat": "empires",
+    "start": 1299,
+    "end": 1922,
+    "date": "c. 1299–1922",
+    "desc": "A multiethnic empire spanning southeastern Europe, Anatolia, the Middle East and North Africa, positioned across major imperial and commercial crossroads."
+  },
+  {
+    "id": "Aztec Empire",
+    "cat": "empires",
+    "start": 1428,
+    "end": 1521,
+    "date": "1428–1521",
+    "desc": "A tribute-based Mesoamerican imperial polity centered on Tenochtitlan before the Spanish conquest."
+  },
+  {
+    "id": "Inca Empire",
+    "cat": "empires",
+    "start": 1438,
+    "end": 1533,
+    "date": "c. 1438–1533",
+    "desc": "A large Andean imperial state connected by roads, administrative centers, labor obligations and ecological exchange across varied environments."
+  },
+  {
+    "id": "Mughal Empire",
+    "cat": "empires",
+    "start": 1526,
+    "end": 1857,
+    "date": "1526–1857",
+    "desc": "A major South Asian empire known for military expansion, administrative integration, commercial growth and influential Indo-Persian culture."
+  },
+  {
+    "id": "Tokugawa Japan",
+    "cat": "empires",
+    "start": 1603,
+    "end": 1868,
+    "date": "1603–1868",
+    "desc": "A shogunal order that unified Japan politically, regulated foreign relations and presided over urban, commercial and cultural expansion."
+  },
+  {
+    "id": "British Empire",
+    "cat": "empires",
+    "start": 1583,
+    "end": 1997,
+    "date": "c. 1583–1997",
+    "desc": "A global imperial system built through maritime power, settlement, trade, conquest and colonial administration across multiple continents."
+  },
+  {
+    "id": "Hindu traditions",
+    "cat": "belief",
+    "start": -1500,
+    "end": 2026,
+    "date": "c. 1500 BCE–present",
+    "desc": "A diverse family of South Asian religious and philosophical traditions that developed over millennia and shaped societies across and beyond the subcontinent."
+  },
+  {
+    "id": "Buddhism",
+    "cat": "belief",
+    "start": -500,
+    "end": 2026,
+    "date": "c. 5th century BCE–present",
+    "desc": "A religious and philosophical tradition that originated in South Asia and spread widely through trade, pilgrimage, translation and state patronage."
+  },
+  {
+    "id": "Confucianism",
+    "cat": "belief",
+    "start": -500,
+    "end": 2026,
+    "date": "c. 5th century BCE–present",
+    "desc": "A tradition of ethical, social and political thought that deeply influenced education, governance and family life in East Asia."
+  },
+  {
+    "id": "Christianity",
+    "cat": "belief",
+    "start": 30,
+    "end": 2026,
+    "date": "1st century CE–present",
+    "desc": "A religion originating in the Roman Near East that spread through mission, empire, migration and institutional networks across the world."
+  },
+  {
+    "id": "Islam",
+    "cat": "belief",
+    "start": 610,
+    "end": 2026,
+    "date": "7th century CE–present",
+    "desc": "A monotheistic religion originating in Arabia that expanded across regions through communities, states, scholarship, commerce and migration."
+  },
+  {
+    "id": "Silk Roads",
+    "cat": "exchange",
+    "start": -130,
+    "end": 1450,
+    "date": "c. 2nd century BCE–15th century CE",
+    "desc": "Overlapping land and maritime routes across Eurasia that moved goods, people, technologies, religions and ideas rather than functioning as a single road."
+  },
+  {
+    "id": "Indian Ocean trade",
+    "cat": "exchange",
+    "start": -300,
+    "end": 1800,
+    "date": "ancient era–c. 1800",
+    "desc": "A long-running maritime commercial system linking East Africa, the Middle East, South Asia and Southeast Asia through monsoon navigation and port cities."
+  },
+  {
+    "id": "Trans-Saharan trade",
+    "cat": "exchange",
+    "start": 700,
+    "end": 1600,
+    "date": "c. 700–1600",
+    "desc": "Caravan networks across the Sahara that connected West Africa with North Africa and wider Mediterranean and Islamic commercial worlds."
+  },
+  {
+    "id": "Polynesian expansion",
+    "cat": "exchange",
+    "start": 800,
+    "end": 1300,
+    "date": "c. 800–1300",
+    "desc": "Long-distance Pacific voyaging and settlement that connected island societies across a vast oceanic region through navigation, migration and exchange."
+  },
+  {
+    "id": "Columbian Exchange",
+    "cat": "exchange",
+    "start": 1492,
+    "end": 1700,
+    "date": "from 1492",
+    "desc": "The large-scale movement of plants, animals, pathogens, people and commodities between the Americas and Afro-Eurasia after sustained Atlantic contact."
+  },
+  {
+    "id": "Atlantic slave trade",
+    "cat": "exchange",
+    "start": 1500,
+    "end": 1867,
+    "date": "c. 1500–1867",
+    "desc": "The forced transport of millions of Africans across the Atlantic within a violent commercial system linking Africa, Europe and the Americas."
+  },
+  {
+    "id": "Global migration & diaspora",
+    "cat": "exchange",
+    "start": 1800,
+    "end": 2026,
+    "date": "19th century–present",
+    "desc": "Large-scale movements of people driven by labor, empire, war, persecution, family networks and economic opportunity in an increasingly connected world."
+  },
+  {
+    "id": "Writing & record-keeping",
+    "cat": "technology",
+    "start": -3200,
+    "end": 2026,
+    "date": "c. 3200 BCE–present",
+    "desc": "Systems for recording language and information transformed administration, law, religion, trade, memory and state power."
+  },
+  {
+    "id": "Gunpowder technologies",
+    "cat": "technology",
+    "start": 900,
+    "end": 1700,
+    "date": "c. 10th–18th centuries",
+    "desc": "Gunpowder weapons spread across Eurasia and reshaped warfare, fortification, state capacity and imperial competition."
+  },
+  {
+    "id": "Printing press",
+    "cat": "technology",
+    "start": 1450,
+    "end": 1800,
+    "date": "from c. 1450",
+    "desc": "Movable-type printing in Europe greatly expanded the speed and scale of textual reproduction, helping reshape religion, scholarship and public debate."
+  },
+  {
+    "id": "Scientific Revolution",
+    "cat": "technology",
+    "start": 1543,
+    "end": 1700,
+    "date": "c. 1543–1700",
+    "desc": "Transformations in European natural philosophy emphasized observation, mathematics, experiment and new models of the cosmos and physical world."
+  },
+  {
+    "id": "Industrial Revolution",
+    "cat": "technology",
+    "start": 1760,
+    "end": 1914,
+    "date": "c. 1760–1914",
+    "desc": "Mechanized production, fossil-fuel energy and factory systems transformed economies, labor, cities, transport and global power."
+  },
+  {
+    "id": "Steam, rail & telegraph",
+    "cat": "technology",
+    "start": 1800,
+    "end": 1914,
+    "date": "19th–early 20th centuries",
+    "desc": "Steam transport, railways and telegraphy compressed travel and communication times, accelerating markets, migration, imperial administration and warfare."
+  },
+  {
+    "id": "Nuclear age",
+    "cat": "technology",
+    "start": 1945,
+    "end": 2026,
+    "date": "1945–present",
+    "desc": "Nuclear weapons and nuclear technologies transformed military strategy, diplomacy, energy politics and public fears after World War II."
+  },
+  {
+    "id": "Digital revolution",
+    "cat": "technology",
+    "start": 1970,
+    "end": 2026,
+    "date": "late 20th century–present",
+    "desc": "Computing, digital networks and the internet transformed communication, finance, work, culture, surveillance and globalization."
+  },
+  {
+    "id": "Renaissance",
+    "cat": "ideas",
+    "start": 1350,
+    "end": 1600,
+    "date": "c. 1350–1600",
+    "desc": "A period of cultural and intellectual transformation in parts of Europe associated with classical learning, artistic innovation, print and new forms of patronage."
+  },
+  {
+    "id": "Protestant Reformation",
+    "cat": "ideas",
+    "start": 1517,
+    "end": 1648,
+    "date": "1517–17th century",
+    "desc": "Religious reform movements fractured Western Latin Christianity and reshaped politics, literacy, institutions and confessional identities."
+  },
+  {
+    "id": "Enlightenment",
+    "cat": "ideas",
+    "start": 1650,
+    "end": 1800,
+    "date": "17th–18th centuries",
+    "desc": "An intellectual movement emphasizing reason, criticism, natural rights, reform and debate about authority, religion and government."
+  },
+  {
+    "id": "American Revolution",
+    "cat": "ideas",
+    "start": 1775,
+    "end": 1783,
+    "date": "1775–1783",
+    "desc": "The rebellion of Britain’s thirteen mainland North American colonies that created the United States and circulated influential republican and rights-based claims."
+  },
+  {
+    "id": "French Revolution",
+    "cat": "ideas",
+    "start": 1789,
+    "end": 1799,
+    "date": "1789–1799",
+    "desc": "A radical political and social upheaval that overthrew the French monarchy, redefined citizenship and accelerated revolutionary politics across Europe and beyond."
+  },
+  {
+    "id": "Haitian Revolution",
+    "cat": "ideas",
+    "start": 1791,
+    "end": 1804,
+    "date": "1791–1804",
+    "desc": "A successful anti-slavery and anti-colonial revolution led by enslaved and free people in Saint-Domingue that created independent Haiti."
+  },
+  {
+    "id": "Liberalism",
+    "cat": "ideas",
+    "start": 1700,
+    "end": 2026,
+    "date": "18th century–present",
+    "desc": "A broad political tradition associated with individual rights, constitutional government, legal equality and, in varying forms, market society."
+  },
+  {
+    "id": "Nationalism",
+    "cat": "ideas",
+    "start": 1800,
+    "end": 2026,
+    "date": "19th century–present",
+    "desc": "The idea that political community and sovereignty should be organized around nations became a powerful force in state-building, revolution and conflict."
+  },
+  {
+    "id": "Socialism & communism",
+    "cat": "ideas",
+    "start": 1848,
+    "end": 2026,
+    "date": "19th century–present",
+    "desc": "Traditions criticizing capitalist inequality and advocating social or collective control over economic life, ranging from reformist socialism to revolutionary communism."
+  },
+  {
+    "id": "Abolitionism",
+    "cat": "ideas",
+    "start": 1700,
+    "end": 1900,
+    "date": "18th–19th centuries",
+    "desc": "Movements seeking to abolish slavery and slave trading mobilized religious, political and humanitarian arguments across the Atlantic world and beyond."
+  },
+  {
+    "id": "Women's suffrage & feminism",
+    "cat": "ideas",
+    "start": 1848,
+    "end": 2026,
+    "date": "19th century–present",
+    "desc": "Movements for women’s political, legal, educational, economic and bodily rights developed across different national and global contexts."
+  },
+  {
+    "id": "Crusades",
+    "cat": "conflict",
+    "start": 1095,
+    "end": 1291,
+    "date": "1095–1291",
+    "desc": "A series of Latin Christian military expeditions and related conflicts centered especially on the eastern Mediterranean and shaped by religion, politics and power."
+  },
+  {
+    "id": "Black Death",
+    "cat": "conflict",
+    "start": 1346,
+    "end": 1353,
+    "date": "c. 1346–1353",
+    "desc": "A devastating plague pandemic across Eurasia and North Africa that caused enormous mortality and major social, economic and cultural disruption."
+  },
+  {
+    "id": "Napoleonic Wars",
+    "cat": "conflict",
+    "start": 1803,
+    "end": 1815,
+    "date": "1803–1815",
+    "desc": "Wars involving Napoleonic France and shifting European coalitions that redrew borders, spread reforms and intensified nationalism."
+  },
+  {
+    "id": "Imperialism & Scramble for Africa",
+    "cat": "conflict",
+    "start": 1880,
+    "end": 1914,
+    "date": "c. 1880–1914",
+    "desc": "An era of intensified European imperial conquest and partition in Africa, embedded in wider global systems of empire, extraction and racial hierarchy."
+  },
+  {
+    "id": "World War I",
+    "cat": "conflict",
+    "start": 1914,
+    "end": 1918,
+    "date": "1914–1918",
+    "desc": "A global industrial war centered on Europe that mobilized empires, devastated societies and accelerated the collapse of several imperial orders."
+  },
+  {
+    "id": "Russian Revolution",
+    "cat": "conflict",
+    "start": 1917,
+    "end": 1923,
+    "date": "1917–1923",
+    "desc": "Revolutions and civil war that ended the Russian imperial monarchy and produced the first durable communist state."
+  },
+  {
+    "id": "Fascism",
+    "cat": "conflict",
+    "start": 1919,
+    "end": 1945,
+    "date": "c. 1919–1945",
+    "desc": "Authoritarian ultranationalist movements and regimes that rejected liberal democracy and contributed centrally to interwar violence and World War II."
+  },
+  {
+    "id": "World War II",
+    "cat": "conflict",
+    "start": 1939,
+    "end": 1945,
+    "date": "1939–1945",
+    "desc": "A global war of unprecedented scale involving mass mobilization, occupation, genocide, strategic bombing and the use of atomic weapons."
+  },
+  {
+    "id": "Holocaust",
+    "cat": "conflict",
+    "start": 1941,
+    "end": 1945,
+    "date": "1941–1945",
+    "desc": "The systematic persecution and murder of six million European Jews by Nazi Germany and its allies and collaborators, alongside the persecution and murder of other targeted groups."
+  },
+  {
+    "id": "Decolonization",
+    "cat": "conflict",
+    "start": 1945,
+    "end": 1975,
+    "date": "c. 1945–1975",
+    "desc": "The dismantling of many European colonial empires through negotiated transfers, mass movements, political struggle and wars of independence."
+  },
+  {
+    "id": "Cold War",
+    "cat": "conflict",
+    "start": 1947,
+    "end": 1991,
+    "date": "c. 1947–1991",
+    "desc": "A global geopolitical rivalry led by the United States and Soviet Union, fought through alliances, arms races, ideological competition and proxy wars."
+  },
+  {
+    "id": "United Nations",
+    "cat": "global",
+    "start": 1945,
+    "end": 2026,
+    "date": "1945–present",
+    "desc": "An international organization created after World War II to support collective security, diplomacy, development, international law and cooperation."
+  },
+  {
+    "id": "Human rights order",
+    "cat": "global",
+    "start": 1948,
+    "end": 2026,
+    "date": "from 1948",
+    "desc": "A growing body of international norms, treaties and institutions centered on universal human rights after the adoption of the Universal Declaration of Human Rights."
+  },
+  {
+    "id": "Globalization",
+    "cat": "global",
+    "start": 1980,
+    "end": 2026,
+    "date": "late 20th century–present",
+    "desc": "Intensified global integration of production, finance, information, migration and culture, enabled by political choices and technological change."
+  }
+];
+const links = [
+  {
+    "source": "Mesopotamian city-states",
+    "target": "Writing & record-keeping",
+    "type": "institution",
+    "note": "Mesopotamian administrations were among the earliest users of writing for accounting, law, administration and institutional memory, making record-keeping central to complex urban government."
+  },
+  {
+    "source": "Mesopotamian city-states",
+    "target": "Ancient Egypt",
+    "type": "trade",
+    "note": "Egypt and Mesopotamia developed independently but participated in wider Near Eastern exchange systems that moved prestige goods, technologies and diplomatic practices."
+  },
+  {
+    "source": "Mesopotamian city-states",
+    "target": "Indus Valley Civilization",
+    "type": "trade",
+    "note": "Archaeological evidence indicates commercial links between Mesopotamia and the Indus region, including exchanged goods and references to distant trading partners."
+  },
+  {
+    "source": "Ancient Egypt",
+    "target": "Kingdom of Aksum",
+    "type": "trade",
+    "note": "Red Sea and Nile-linked exchange connected northeastern Africa with Egypt and the wider Mediterranean and Arabian worlds over long periods."
+  },
+  {
+    "source": "Indus Valley Civilization",
+    "target": "Indian Ocean trade",
+    "type": "trade",
+    "note": "Indus ports and coastal communities participated in early maritime exchange networks connecting South Asia with the Persian Gulf and Arabian Sea."
+  },
+  {
+    "source": "Shang & Zhou China",
+    "target": "Confucianism",
+    "type": "ideas",
+    "note": "Confucian thought emerged during the later Zhou world and addressed political order, ethics, education and social relationships within a long Chinese intellectual tradition."
+  },
+  {
+    "source": "Achaemenid Persia",
+    "target": "Classical Greece",
+    "type": "conflict",
+    "note": "Persian imperial expansion and the Greco-Persian wars profoundly shaped Greek political identities, interstate alliances and later Greek representations of empire."
+  },
+  {
+    "source": "Achaemenid Persia",
+    "target": "Silk Roads",
+    "type": "trade",
+    "note": "Persian imperial roads and West Asian commercial corridors formed part of the infrastructure and political geography later associated with trans-Eurasian exchange."
+  },
+  {
+    "source": "Classical Greece",
+    "target": "Roman Republic & Empire",
+    "type": "continuity",
+    "note": "Rome absorbed and reworked Greek philosophy, art, literature and education, making Greek culture a major component of elite life across the Roman Mediterranean."
+  },
+  {
+    "source": "Roman Republic & Empire",
+    "target": "Byzantine Empire",
+    "type": "continuity",
+    "note": "The Byzantine Empire was the eastern continuation of the Roman imperial state, preserving Roman law, institutions and imperial identity while changing over time."
+  },
+  {
+    "source": "Roman Republic & Empire",
+    "target": "Christianity",
+    "type": "diffusion",
+    "note": "Christianity emerged within the Roman world, spread along its cities and roads, and later gained imperial patronage before becoming deeply embedded in post-Roman societies."
+  },
+  {
+    "source": "Maurya & Gupta India",
+    "target": "Hindu traditions",
+    "type": "ideas",
+    "note": "Maurya- and Gupta-era South Asia shaped major religious, philosophical and cultural developments within the long history of Hindu traditions."
+  },
+  {
+    "source": "Maurya & Gupta India",
+    "target": "Buddhism",
+    "type": "diffusion",
+    "note": "Imperial patronage—especially under Ashoka—helped Buddhist institutions and missions expand within South Asia and toward other regions."
+  },
+  {
+    "source": "Maurya & Gupta India",
+    "target": "Indian Ocean trade",
+    "type": "trade",
+    "note": "South Asian states and port cities were deeply embedded in Indian Ocean commerce linking merchants, religious communities and commodities across regions."
+  },
+  {
+    "source": "Kingdom of Aksum",
+    "target": "Indian Ocean trade",
+    "type": "trade",
+    "note": "Aksum benefited from Red Sea commerce connecting northeastern Africa with Arabia, the Mediterranean and Indian Ocean networks."
+  },
+  {
+    "source": "Maya civilization",
+    "target": "Writing & record-keeping",
+    "type": "institution",
+    "note": "Maya elites used a sophisticated writing system and calendrical records to document dynasties, rituals, warfare and political authority."
+  },
+  {
+    "source": "Buddhism",
+    "target": "Silk Roads",
+    "type": "diffusion",
+    "note": "Buddhist monks, texts, art and institutions moved through Central Asian and trans-Eurasian networks, making the Silk Roads a major channel of religious transmission."
+  },
+  {
+    "source": "Buddhism",
+    "target": "Tang & Song China",
+    "type": "diffusion",
+    "note": "Buddhism became a major religious and cultural force in China through translation, monastic institutions, pilgrimage and state patronage, though its status varied by dynasty."
+  },
+  {
+    "source": "Confucianism",
+    "target": "Tang & Song China",
+    "type": "institution",
+    "note": "Confucian learning and examination traditions were central to state administration and elite education, especially as Neo-Confucian thought developed in the Song period."
+  },
+  {
+    "source": "Christianity",
+    "target": "Byzantine Empire",
+    "type": "institution",
+    "note": "Christian institutions and theology became deeply intertwined with Byzantine imperial life, law, art and diplomacy."
+  },
+  {
+    "source": "Islam",
+    "target": "Islamic Caliphates",
+    "type": "institution",
+    "note": "The caliphates were political formations that emerged within the early Islamic community and helped create large Arabic-speaking and Islamic institutional networks."
+  },
+  {
+    "source": "Islam",
+    "target": "Indian Ocean trade",
+    "type": "diffusion",
+    "note": "Muslim merchants, scholars and communities played major roles in Indian Ocean trade, contributing to the spread of Islam in coastal South and Southeast Asia and East Africa."
+  },
+  {
+    "source": "Islam",
+    "target": "Trans-Saharan trade",
+    "type": "diffusion",
+    "note": "Trade routes across the Sahara connected West African states with North African Muslim societies, facilitating the movement of scholars, texts and Islamic institutions."
+  },
+  {
+    "source": "Islamic Caliphates",
+    "target": "Silk Roads",
+    "type": "trade",
+    "note": "Caliphal cities and merchants occupied key nodes between Mediterranean, Indian Ocean and Central Asian exchange systems, linking Islamic societies to trans-Eurasian commerce."
+  },
+  {
+    "source": "Islamic Caliphates",
+    "target": "Crusades",
+    "type": "conflict",
+    "note": "The Crusades involved prolonged warfare and diplomacy between Latin Christian powers and Muslim states in the eastern Mediterranean, though alliances and rivalries cut across religious lines."
+  },
+  {
+    "source": "Byzantine Empire",
+    "target": "Crusades",
+    "type": "conflict",
+    "note": "Byzantium sought western military help against regional rivals, but crusading armies also created tensions that culminated dramatically in the sack of Constantinople in 1204."
+  },
+  {
+    "source": "Tang & Song China",
+    "target": "Gunpowder technologies",
+    "type": "technology",
+    "note": "Gunpowder developed in China and was increasingly adapted for military uses before related technologies spread across Eurasia."
+  },
+  {
+    "source": "Tang & Song China",
+    "target": "Silk Roads",
+    "type": "trade",
+    "note": "Tang and Song China participated in extensive overland and maritime exchange that moved goods, religions, diplomatic missions and technologies across Asia."
+  },
+  {
+    "source": "Mongol Empire",
+    "target": "Silk Roads",
+    "type": "trade",
+    "note": "Mongol rule connected large portions of Eurasia under related political authorities, facilitating long-distance travel and exchange while also exposing routes to warfare and epidemic transmission."
+  },
+  {
+    "source": "Mongol Empire",
+    "target": "Black Death",
+    "type": "cause",
+    "note": "The plague pandemic spread through interconnected Eurasian routes during and after the period of Mongol imperial integration; scholars debate precise pathways, but mobility and trade were important contexts."
+  },
+  {
+    "source": "Mongol Empire",
+    "target": "Islamic Caliphates",
+    "type": "conflict",
+    "note": "Mongol conquests destroyed the Abbasid caliphate in Baghdad in 1258 and reshaped political power across much of the Islamic world."
+  },
+  {
+    "source": "Mongol Empire",
+    "target": "Tang & Song China",
+    "type": "conflict",
+    "note": "Mongol conquest ended the Southern Song dynasty and incorporated China into the Yuan imperial order."
+  },
+  {
+    "source": "Ottoman Empire",
+    "target": "Byzantine Empire",
+    "type": "continuity",
+    "note": "The Ottoman capture of Constantinople in 1453 ended the Byzantine imperial state, while the Ottomans inherited and repurposed its strategic capital and regional imperial space."
+  },
+  {
+    "source": "Ottoman Empire",
+    "target": "Islam",
+    "type": "institution",
+    "note": "The Ottoman state was a major Muslim imperial power whose institutions, law, religious establishments and political legitimacy developed within Islamic traditions."
+  },
+  {
+    "source": "Ottoman Empire",
+    "target": "Silk Roads",
+    "type": "trade",
+    "note": "Ottoman territories sat across routes linking the Mediterranean, Black Sea, Middle East and inland Eurasia, making the empire part of long-distance commercial systems."
+  },
+  {
+    "source": "Trans-Saharan trade",
+    "target": "Islamic Caliphates",
+    "type": "trade",
+    "note": "North African Islamic polities and merchants connected trans-Saharan routes to Mediterranean and Middle Eastern commercial and intellectual networks."
+  },
+  {
+    "source": "Renaissance",
+    "target": "Printing press",
+    "type": "technology",
+    "note": "Printing greatly increased the circulation of classical texts, scholarship, maps and polemics, amplifying intellectual exchange associated with Renaissance Europe."
+  },
+  {
+    "source": "Renaissance",
+    "target": "Scientific Revolution",
+    "type": "ideas",
+    "note": "Renaissance humanism, classical recovery, artistic naturalism and expanding mathematical knowledge helped create contexts in which new approaches to nature and evidence developed."
+  },
+  {
+    "source": "Printing press",
+    "target": "Protestant Reformation",
+    "type": "cause",
+    "note": "Print allowed reformers and opponents to reproduce sermons, pamphlets and translations rapidly, accelerating religious controversy and widening participation in confessional debate."
+  },
+  {
+    "source": "Christianity",
+    "target": "Protestant Reformation",
+    "type": "conflict",
+    "note": "The Reformation fractured Western Latin Christianity into competing confessional traditions and reshaped church-state relations across Europe."
+  },
+  {
+    "source": "Protestant Reformation",
+    "target": "Enlightenment",
+    "type": "ideas",
+    "note": "The Reformation and the confessional conflicts that followed contributed to later debates about toleration, authority, conscience and the relationship between religion and state."
+  },
+  {
+    "source": "Scientific Revolution",
+    "target": "Enlightenment",
+    "type": "ideas",
+    "note": "Enlightenment thinkers drew on the prestige of scientific inquiry, natural law and reason when criticizing inherited authority and proposing social and political reforms."
+  },
+  {
+    "source": "Ottoman Empire",
+    "target": "Mughal Empire",
+    "type": "trade",
+    "note": "Ottoman and Mughal realms were linked through diplomacy, pilgrimage, commerce and wider Islamic cultural networks despite being politically distinct empires."
+  },
+  {
+    "source": "Mughal Empire",
+    "target": "Indian Ocean trade",
+    "type": "trade",
+    "note": "Mughal India was deeply integrated into Indian Ocean commerce, exporting textiles and other goods while attracting merchants and bullion from multiple regions."
+  },
+  {
+    "source": "Tokugawa Japan",
+    "target": "Indian Ocean trade",
+    "type": "trade",
+    "note": "Tokugawa Japan restricted some forms of foreign contact but remained connected to regional maritime commerce through regulated trade with Dutch, Chinese, Korean and other intermediaries."
+  },
+  {
+    "source": "Gunpowder technologies",
+    "target": "Ottoman Empire",
+    "type": "technology",
+    "note": "Ottoman armies used gunpowder artillery and firearms as part of a broader transformation in siege warfare and military organization."
+  },
+  {
+    "source": "Gunpowder technologies",
+    "target": "Mughal Empire",
+    "type": "technology",
+    "note": "Gunpowder weapons were important to Mughal military expansion and state formation, though the empire also relied on cavalry, fortifications and regional political alliances."
+  },
+  {
+    "source": "Aztec Empire",
+    "target": "Columbian Exchange",
+    "type": "conflict",
+    "note": "Spanish conquest of the Aztec Empire helped establish sustained Atlantic connections that accelerated biological, demographic and commercial exchange between the Americas and Afro-Eurasia."
+  },
+  {
+    "source": "Inca Empire",
+    "target": "Columbian Exchange",
+    "type": "conflict",
+    "note": "Spanish conquest of the Inca state similarly folded the Andes into new Atlantic and Pacific imperial networks accompanied by disease, forced labor and commodity flows."
+  },
+  {
+    "source": "British Empire",
+    "target": "Indian Ocean trade",
+    "type": "trade",
+    "note": "British imperial power expanded through Indian Ocean trade, naval force and colonial control, eventually restructuring many older commercial systems around imperial priorities."
+  },
+  {
+    "source": "British Empire",
+    "target": "Atlantic slave trade",
+    "type": "trade",
+    "note": "British merchants, ports and colonies became deeply involved in the transatlantic slave trade before Britain abolished its own slave trade in 1807 and slavery in most colonies later."
+  },
+  {
+    "source": "Atlantic slave trade",
+    "target": "Abolitionism",
+    "type": "conflict",
+    "note": "Abolitionist movements directly challenged the slave trade and slavery through petitions, publications, organizing, resistance and political campaigns."
+  },
+  {
+    "source": "Atlantic slave trade",
+    "target": "Haitian Revolution",
+    "type": "cause",
+    "note": "Saint-Domingue was a plantation colony dependent on enslaved labor; the Haitian Revolution destroyed slavery there and created an independent state."
+  },
+  {
+    "source": "Columbian Exchange",
+    "target": "Atlantic slave trade",
+    "type": "cause",
+    "note": "Disease-driven population loss, plantation expansion and Atlantic commodity systems contributed to massive demand for coerced labor and the growth of the transatlantic slave trade."
+  },
+  {
+    "source": "Columbian Exchange",
+    "target": "Global migration & diaspora",
+    "type": "migration",
+    "note": "Atlantic colonization initiated large forced and voluntary movements of Europeans, Africans and Indigenous peoples, establishing migration patterns that reshaped societies across oceans."
+  },
+  {
+    "source": "Enlightenment",
+    "target": "American Revolution",
+    "type": "ideas",
+    "note": "Revolutionary arguments in British North America drew on Enlightenment ideas about rights, sovereignty and government, alongside local constitutional traditions and material grievances."
+  },
+  {
+    "source": "American Revolution",
+    "target": "French Revolution",
+    "type": "ideas",
+    "note": "The American Revolution provided a recent example of colonial rebellion and republican state-making that influenced debate in France, although the French Revolution had distinct social and fiscal causes."
+  },
+  {
+    "source": "Enlightenment",
+    "target": "French Revolution",
+    "type": "ideas",
+    "note": "French revolutionaries drew on Enlightenment critiques of privilege and arguments about citizenship, rights and sovereignty while responding to a severe political and fiscal crisis."
+  },
+  {
+    "source": "French Revolution",
+    "target": "Haitian Revolution",
+    "type": "ideas",
+    "note": "The language of rights and upheaval in revolutionary France opened political space in Saint-Domingue, where enslaved and free people transformed those claims into a radically anti-slavery revolution."
+  },
+  {
+    "source": "French Revolution",
+    "target": "Napoleonic Wars",
+    "type": "cause",
+    "note": "The wars of revolutionary France evolved into the Napoleonic Wars as Napoleon consolidated power and expanded French influence across Europe."
+  },
+  {
+    "source": "Napoleonic Wars",
+    "target": "Nationalism",
+    "type": "cause",
+    "note": "Napoleonic conquest and resistance helped intensify national political identities in parts of Europe while also spreading administrative and legal reforms."
+  },
+  {
+    "source": "French Revolution",
+    "target": "Liberalism",
+    "type": "ideas",
+    "note": "Revolutionary debates about citizenship, legal equality and constitutionalism became central reference points for later liberal movements, both as inspiration and warning."
+  },
+  {
+    "source": "American Revolution",
+    "target": "Liberalism",
+    "type": "ideas",
+    "note": "The American constitutional experiment became one influential model in later liberal debates about representative government, rights and written constitutions."
+  },
+  {
+    "source": "Haitian Revolution",
+    "target": "Abolitionism",
+    "type": "ideas",
+    "note": "Haiti demonstrated that enslaved people could overthrow slavery and colonial rule, becoming a powerful—if often feared or suppressed—reference point in Atlantic abolition and anti-colonial politics."
+  },
+  {
+    "source": "Industrial Revolution",
+    "target": "British Empire",
+    "type": "cause",
+    "note": "Industrialization strengthened British production, shipping and finance, while empire supplied markets, raw materials and strategic advantages; the relationship was mutually reinforcing rather than one-directional."
+  },
+  {
+    "source": "Industrial Revolution",
+    "target": "Steam, rail & telegraph",
+    "type": "technology",
+    "note": "Industrialization accelerated the development and deployment of steam engines, railways and telegraph systems that transformed transport, communication and production."
+  },
+  {
+    "source": "Industrial Revolution",
+    "target": "Global migration & diaspora",
+    "type": "migration",
+    "note": "Industrial economies and settler frontiers generated huge labor demands and transport networks that enabled large voluntary and coerced migrations in the 19th century."
+  },
+  {
+    "source": "Industrial Revolution",
+    "target": "Imperialism & Scramble for Africa",
+    "type": "cause",
+    "note": "Industrial economies increased demand for raw materials, markets, strategic routes and new technologies of conquest, contributing to late-19th-century imperial expansion."
+  },
+  {
+    "source": "Steam, rail & telegraph",
+    "target": "Imperialism & Scramble for Africa",
+    "type": "technology",
+    "note": "Railways, steamships and telegraphy enabled faster movement of troops, commodities and information, strengthening imperial administration and extraction."
+  },
+  {
+    "source": "British Empire",
+    "target": "Imperialism & Scramble for Africa",
+    "type": "conflict",
+    "note": "Britain was one of several European powers that expanded territorial control in Africa during the late 19th century through warfare, treaties and colonial administration."
+  },
+  {
+    "source": "Imperialism & Scramble for Africa",
+    "target": "Nationalism",
+    "type": "conflict",
+    "note": "Colonial rule generated new political boundaries and institutions while also helping provoke anti-colonial nationalist movements that later sought self-government and independence."
+  },
+  {
+    "source": "Liberalism",
+    "target": "Nationalism",
+    "type": "ideas",
+    "note": "Liberal and nationalist movements often overlapped in 19th-century struggles for constitutions and self-rule, but they could also diverge when national projects excluded minorities or favored authoritarian state-building."
+  },
+  {
+    "source": "Socialism & communism",
+    "target": "Industrial Revolution",
+    "type": "cause",
+    "note": "Socialist thought developed partly as a response to industrial capitalism, wage labor, class inequality and the social dislocations associated with rapid economic change."
+  },
+  {
+    "source": "Women's suffrage & feminism",
+    "target": "Liberalism",
+    "type": "ideas",
+    "note": "Feminist and suffrage movements frequently used liberal arguments about individual rights and legal equality while criticizing liberal systems that excluded women from citizenship."
+  },
+  {
+    "source": "Abolitionism",
+    "target": "Liberalism",
+    "type": "ideas",
+    "note": "Abolitionists often drew on rights-based, religious and humanitarian arguments, exposing tensions between liberal claims of liberty and societies that maintained slavery."
+  },
+  {
+    "source": "Imperialism & Scramble for Africa",
+    "target": "World War I",
+    "type": "cause",
+    "note": "Imperial rivalry was one element in the international tensions preceding World War I, alongside alliance systems, militarism, nationalism and crises in Europe and beyond."
+  },
+  {
+    "source": "Nationalism",
+    "target": "World War I",
+    "type": "cause",
+    "note": "Nationalist competition and movements intensified rivalries within and between empires and contributed to the political climate in which the war began."
+  },
+  {
+    "source": "Ottoman Empire",
+    "target": "World War I",
+    "type": "conflict",
+    "note": "The Ottoman Empire entered World War I on the side of the Central Powers; military defeat accelerated its dissolution and reshaped the Middle East."
+  },
+  {
+    "source": "British Empire",
+    "target": "World War I",
+    "type": "conflict",
+    "note": "Britain mobilized soldiers, labor and resources across its empire, making the conflict global in scale and deepening colonial political expectations after the war."
+  },
+  {
+    "source": "World War I",
+    "target": "Russian Revolution",
+    "type": "cause",
+    "note": "Military losses, economic breakdown and political crisis during World War I helped trigger the Russian revolutions of 1917."
+  },
+  {
+    "source": "Russian Revolution",
+    "target": "Socialism & communism",
+    "type": "ideas",
+    "note": "The Bolshevik Revolution created a communist state that became a global center of revolutionary socialist politics and a model or threat to movements elsewhere."
+  },
+  {
+    "source": "World War I",
+    "target": "Fascism",
+    "type": "cause",
+    "note": "Postwar instability, mass politics, economic crisis, fear of revolution and unresolved nationalist grievances helped create conditions in which fascist movements grew."
+  },
+  {
+    "source": "Fascism",
+    "target": "World War II",
+    "type": "cause",
+    "note": "Fascist expansionism—especially Nazi Germany’s aggressive territorial ambitions—was central to the outbreak and character of World War II in Europe."
+  },
+  {
+    "source": "World War II",
+    "target": "Holocaust",
+    "type": "cause",
+    "note": "The Holocaust unfolded within Nazi rule and wartime occupation, as Germany and collaborators used state power, deportation systems and mass killing across conquered Europe."
+  },
+  {
+    "source": "World War II",
+    "target": "Nuclear age",
+    "type": "technology",
+    "note": "The Manhattan Project produced atomic bombs used against Hiroshima and Nagasaki in 1945, inaugurating the nuclear age and transforming postwar strategy."
+  },
+  {
+    "source": "World War II",
+    "target": "United Nations",
+    "type": "institution",
+    "note": "The United Nations was created in 1945 in direct response to the failure of interwar collective security and the devastation of World War II."
+  },
+  {
+    "source": "Holocaust",
+    "target": "Human rights order",
+    "type": "institution",
+    "note": "The Holocaust and other wartime atrocities profoundly influenced postwar efforts to codify human rights and international crimes, including genocide."
+  },
+  {
+    "source": "World War II",
+    "target": "Decolonization",
+    "type": "cause",
+    "note": "World War II weakened European empires, mobilized colonial populations and intensified anti-colonial expectations, helping accelerate decolonization after 1945."
+  },
+  {
+    "source": "British Empire",
+    "target": "Decolonization",
+    "type": "conflict",
+    "note": "Many territories of the British Empire achieved independence through negotiations, mass politics, insurgency or combinations of these processes after World War II."
+  },
+  {
+    "source": "Nationalism",
+    "target": "Decolonization",
+    "type": "ideas",
+    "note": "Anti-colonial leaders adapted nationalist ideas to claim sovereignty for colonized peoples and to mobilize independence movements."
+  },
+  {
+    "source": "Decolonization",
+    "target": "United Nations",
+    "type": "institution",
+    "note": "The United Nations became an important arena for newly independent states and for international norms supporting self-determination and decolonization."
+  },
+  {
+    "source": "United Nations",
+    "target": "Human rights order",
+    "type": "institution",
+    "note": "The UN system became central to international human-rights declarations, treaties, monitoring mechanisms and humanitarian institutions."
+  },
+  {
+    "source": "Russian Revolution",
+    "target": "Cold War",
+    "type": "continuity",
+    "note": "The Soviet state created by the revolutionary era later became one of the two principal superpowers in the Cold War."
+  },
+  {
+    "source": "World War II",
+    "target": "Cold War",
+    "type": "cause",
+    "note": "The wartime alliance against the Axis gave way quickly to rivalry between the United States and Soviet Union over security, ideology and postwar political orders."
+  },
+  {
+    "source": "Nuclear age",
+    "target": "Cold War",
+    "type": "conflict",
+    "note": "Nuclear weapons shaped deterrence, arms races, alliance strategy and repeated crises throughout the Cold War."
+  },
+  {
+    "source": "Cold War",
+    "target": "Decolonization",
+    "type": "conflict",
+    "note": "Many decolonizing states navigated superpower rivalry, received outside support or pressure, and sometimes became sites of proxy conflict while pursuing their own agendas."
+  },
+  {
+    "source": "Cold War",
+    "target": "Globalization",
+    "type": "cause",
+    "note": "Late-Cold-War and post-Cold-War political and economic changes helped expand global trade, investment and information networks, though globalization had much deeper historical roots."
+  },
+  {
+    "source": "Digital revolution",
+    "target": "Globalization",
+    "type": "technology",
+    "note": "Digital communication and computing dramatically lowered the cost and speed of moving information, coordinating production and connecting markets across borders."
+  },
+  {
+    "source": "Global migration & diaspora",
+    "target": "Globalization",
+    "type": "migration",
+    "note": "Global economic integration, transport and communications reshaped migration networks while diasporas linked societies through remittances, culture, politics and business."
+  },
+  {
+    "source": "Human rights order",
+    "target": "Women's suffrage & feminism",
+    "type": "ideas",
+    "note": "Postwar human-rights frameworks provided additional international language and institutions for feminist movements seeking political, legal and social equality."
+  },
+  {
+    "source": "Human rights order",
+    "target": "Decolonization",
+    "type": "ideas",
+    "note": "Anti-colonial leaders invoked self-determination and rights claims, while newly independent states reshaped debates about universal rights within international institutions."
+  },
+  {
+    "source": "Globalization",
+    "target": "United Nations",
+    "type": "institution",
+    "note": "The UN system operates within and responds to an increasingly interconnected world, addressing transnational problems such as development, health, migration, conflict and climate governance."
+  }
+];
+
+const reviewedDate="16 Aug 2026";
+
+const specialSources = {
+  "Silk Roads":[
+    {name:"About the Silk Roads",org:"UNESCO",type:"Intergovernmental historical reference",url:"https://www.unesco.org/en/silk-roads/about-silk-roads"}
+  ],
+  "Holocaust":[
+    {name:"Introduction to the Holocaust",org:"United States Holocaust Memorial Museum",type:"Authoritative Holocaust reference",url:"https://encyclopedia.ushmm.org/content/en/article/introduction-to-the-holocaust"}
+  ],
+  "United Nations":[
+    {name:"History of the United Nations",org:"United Nations",type:"Official institutional history",url:"https://www.un.org/en/about-us/history-of-the-un"}
+  ],
+  "Human rights order":[
+    {name:"History of the Universal Declaration of Human Rights",org:"United Nations",type:"Official historical reference",url:"https://www.un.org/en/about-us/udhr/history-of-the-declaration"},
+    {name:"Universal Declaration of Human Rights",org:"United Nations",type:"Primary international document",url:"https://www.un.org/en/about-us/universal-declaration-of-human-rights/"}
+  ]
+};
+
+const coreSources = {
+  ancient:[
+    {name:"World History, Volume 1: to 1500",org:"OpenStax · Rice University",type:"Peer-reviewed open textbook",url:"https://openstax.org/details/books/world-history-volume-1"},
+    {name:"Heilbrunn Timeline of Art History",org:"The Metropolitan Museum of Art",type:"Expert-authored chronology & essays",url:"https://www.metmuseum.org/essays/timeline-of-art-history"}
+  ],
+  modern:[
+    {name:"World History, Volume 2: from 1400",org:"OpenStax · Rice University",type:"Peer-reviewed open textbook",url:"https://openstax.org/details/books/world-history-volume-2"},
+    {name:"Heilbrunn Timeline of Art History",org:"The Metropolitan Museum of Art",type:"Expert-authored chronology & essays",url:"https://www.metmuseum.org/essays/timeline-of-art-history"}
+  ]
+};
+
+function britannicaSearch(topic){
+  return {name:`Britannica search: ${topic}`,org:"Encyclopaedia Britannica",type:"Reference lookup",url:`https://www.britannica.com/search?query=${encodeURIComponent(topic)}`};
+}
+function scholarSearch(a,b){
+  return {name:`Literature search: ${a} + ${b}`,org:"Google Scholar",type:"Further academic literature search",url:`https://scholar.google.com/scholar?q=${encodeURIComponent(a+" "+b)}`};
+}
+function nodeByName(id){return nodeById.get(id)}
+function sourcesForNode(id){
+  const n=nodeByName(id);
+  let items=[...(specialSources[id]||[])];
+  if(n.start<1500) items.push(...coreSources.ancient);
+  if(n.end>=1400) items.push(...coreSources.modern);
+  items.push(britannicaSearch(id));
+  const seen=new Set();
+  return items.filter(s=>!seen.has(s.url)&&seen.add(s.url)).slice(0,4);
+}
+function edgeKey(a,b){return [a,b].sort().join("|||")}
+const edgeByKey=new Map(links.map(l=>[edgeKey(l.source,l.target),l]));
+function edgeData(a,b){return edgeByKey.get(edgeKey(a,b))}
+function relationText(a,b){return edgeData(a,b)?.note || `${a} and ${b} are connected in this map because historians can trace a meaningful relationship through exchange, conflict, institutions, ideas, migration or historical consequence.`}
+function relationType(a,b){return edgeData(a,b)?.type || "ideas"}
+function sourcesForEdge(a,b){
+  const e=edgeData(a,b);
+  let items=[];
+  if(e){
+    if(a==="Silk Roads"||b==="Silk Roads") items.push(...(specialSources["Silk Roads"]||[]));
+    if(a==="Holocaust"||b==="Holocaust") items.push(...(specialSources["Holocaust"]||[]));
+    if(a==="United Nations"||b==="United Nations") items.push(...(specialSources["United Nations"]||[]));
+    if(a==="Human rights order"||b==="Human rights order") items.push(...(specialSources["Human rights order"]||[]));
+  }
+  const na=nodeByName(a), nb=nodeByName(b);
+  if(Math.min(na.start,nb.start)<1500) items.push(coreSources.ancient[0]);
+  if(Math.max(na.end,nb.end)>=1400) items.push(coreSources.modern[0]);
+  items.push(britannicaSearch(a),britannicaSearch(b),scholarSearch(a,b));
+  const seen=new Set();
+  return items.filter(s=>!seen.has(s.url)&&seen.add(s.url)).slice(0,5);
+}
+
+const nodeById=new Map(nodes.map(n=>[n.id,n]));
+const linkObjs=links.map((l,i)=>({...l,index:i}));
+const neighbors=new Map(nodes.map(n=>[n.id,new Set()]));
+linkObjs.forEach(l=>{neighbors.get(l.source).add(l.target);neighbors.get(l.target).add(l.source)});
+
+const svg=d3.select("#svg");
+const g=svg.append("g");
+const zoom=d3.zoom().scaleExtent([.28,3.2]).on("zoom",ev=>g.attr("transform",ev.transform));
+svg.call(zoom);
+function size(){return {w:window.innerWidth,h:window.innerHeight}}
+let {w,h}=size();
+
+const simulation=d3.forceSimulation(nodes)
+  .force("link",d3.forceLink(linkObjs).id(d=>d.id).distance(74).strength(.46))
+  .force("charge",d3.forceManyBody().strength(-210))
+  .force("center",d3.forceCenter(w/2,h/2))
+  .force("collision",d3.forceCollide().radius(42));
+
+const linkLayer=g.append("g");
+const visibleLink=linkLayer.selectAll("line.visible")
+  .data(linkObjs).join("line")
+  .attr("class","link visible")
+  .style("--rel",d=>relationshipTypes[d.type]?.color||"#c9a45e")
+  .attr("stroke-width",1);
+const hitLink=linkLayer.selectAll("line.hit")
+  .data(linkObjs).join("line")
+  .attr("class","link-hit hit")
+  .on("click",(ev,d)=>{ev.stopPropagation();selectRelationship(d,true)});
+
+const node=g.append("g").selectAll("g.node")
+  .data(nodes).join("g")
+  .attr("class","node")
+  .call(drag(simulation));
+
+node.append("circle").attr("class","halo").attr("r",11);
+node.append("circle").attr("class","core").attr("r",8.2).attr("fill",d=>categories[d.cat].color);
+node.append("text").attr("dy",-13).text(d=>d.id);
+node.on("click",(ev,d)=>{ev.stopPropagation();selectNode(d,false)});
+node.on("dblclick",(ev,d)=>{ev.stopPropagation();selectNode(d,true);focusNode(d)});
+
+svg.on("click",()=>clearSelection());
+
+simulation.on("tick",()=>{
+  visibleLink
+    .attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+    .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  hitLink
+    .attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+    .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  node.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+function drag(sim){
+  function started(ev,d){if(!ev.active)sim.alphaTarget(.24).restart();d.fx=d.x;d.fy=d.y}
+  function dragged(ev,d){d.fx=ev.x;d.fy=ev.y}
+  function ended(ev,d){if(!ev.active)sim.alphaTarget(0);d.fx=null;d.fy=null}
+  return d3.drag().on("start",started).on("drag",dragged).on("end",ended);
+}
+
+let currentNode=null,currentEdge=null,explorationPath=[],soundOn=false,audioCtx=null;
+let chronoMode="all", chronoRange=null;
+
+function uiTone(freq=560,duration=.035,volume=.02){
+  if(!soundOn)return;
+  try{
+    audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(),gain=audioCtx.createGain();
+    o.type="sine";o.frequency.value=freq;
+    gain.gain.setValueAtTime(volume,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);
+    o.connect(gain);gain.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration);
+  }catch(e){}
+}
+function addToPath(id){
+  if(!id)return;
+  if(explorationPath.length===0||explorationPath[explorationPath.length-1]!==id){
+    explorationPath.push(id);if(explorationPath.length>8)explorationPath.shift();
+  }
+  renderPath();
+}
+function renderPath(){
+  const bar=document.getElementById("pathbar");
+  if(explorationPath.length<2){bar.classList.remove("show");return}
+  document.getElementById("pathText").textContent=explorationPath.join("  →  ");
+  bar.classList.add("show");
+}
+document.getElementById("clearPath").addEventListener("click",()=>{explorationPath=[];renderPath();uiTone(390,.035,.02)});
+
+function linkNames(l){return [typeof l.source==="string"?l.source:l.source.id,typeof l.target==="string"?l.target:l.target.id]}
+function formatYear(y){
+  y=Number(y);
+  if(y<0)return `${Math.abs(y)} BCE`;
+  return `${y} CE`;
+}
+function activeInChrono(n){
+  if(chronoMode==="all"||!chronoRange)return true;
+  return n.end>=chronoRange[0]&&n.start<=chronoRange[1];
+}
+function applyChronology(){
+  const activeNodes=new Set(nodes.filter(activeInChrono).map(n=>n.id));
+  node.classed("time-dim",n=>!activeNodes.has(n.id));
+  visibleLink.classed("time-dim",l=>{
+    const [a,b]=linkNames(l);return !activeNodes.has(a)||!activeNodes.has(b);
+  });
+  hitLink.classed("time-dim",l=>{
+    const [a,b]=linkNames(l);return !activeNodes.has(a)||!activeNodes.has(b);
+  });
+  if(currentNode&&!activeNodes.has(currentNode.id))clearSelection();
+  if(currentEdge){
+    const [a,b]=linkNames(currentEdge);
+    if(!activeNodes.has(a)||!activeNodes.has(b))clearSelection();
+  }
+}
+function setChronoAll(){
+  chronoMode="all";chronoRange=null;
+  document.getElementById("chronoReadout").textContent="All eras visible";
+  document.querySelectorAll(".era").forEach(x=>x.classList.remove("active"));
+  document.getElementById("allHistory").classList.add("active");
+  applyChronology();showToast("All history visible");
+}
+function setEra(start,end,label,button){
+  chronoMode="era";chronoRange=[Number(start),Number(end)];
+  document.getElementById("chronoReadout").textContent=`${label} · ${formatYear(start)}–${formatYear(end)}`;
+  document.querySelectorAll(".era").forEach(x=>x.classList.remove("active"));
+  button.classList.add("active");
+  applyChronology();uiTone(500,.035,.018);
+}
+function setYearLens(year){
+  const y=Number(year);
+  const windowSize=y<0?110:70;
+  chronoMode="point";chronoRange=[y-windowSize,y+windowSize];
+  document.querySelectorAll(".era").forEach(x=>x.classList.remove("active"));
+  document.getElementById("chronoReadout").textContent=`Lens: ${formatYear(y)} · ±${windowSize} years`;
+  applyChronology();
+}
+document.getElementById("allHistory").addEventListener("click",setChronoAll);
+document.querySelectorAll("#eraRow .era").forEach(btn=>btn.addEventListener("click",()=>setEra(btn.dataset.start,btn.dataset.end,btn.textContent.trim(),btn)));
+document.getElementById("yearSlider").addEventListener("input",ev=>setYearLens(ev.target.value));
+
+function selectNode(d,openDrawer=false){
+  if(!activeInChrono(d))return;
+  currentNode=d;currentEdge=null;addToPath(d.id);
+  const active=new Set([d.id,...neighbors.get(d.id)]);
+  node.classed("dim",n=>!active.has(n.id)).classed("lit",n=>n.id===d.id).classed("connected",n=>n.id!==d.id&&active.has(n.id));
+  visibleLink.classed("dim",l=>{const[a,b]=linkNames(l);return a!==d.id&&b!==d.id}).classed("lit",l=>{const[a,b]=linkNames(l);return a===d.id||b===d.id}).classed("selected",false);
+  const related=[...neighbors.get(d.id)].sort();
+  document.getElementById("detail").innerHTML=`
+    <div class="name">${escapeHtml(d.id)}</div>
+    <div class="cat">${escapeHtml(categories[d.cat].label)}</div>
+    <div class="date">${escapeHtml(d.date)}</div>
+    <div class="desc">${escapeHtml(d.desc)}</div>
+    <div class="microline"><span class="status-dot"></span>${related.length} mapped connections · ${sourcesForNode(d.id).length} reference sources</div>
+    <button class="action primary" id="openField">Explore archive →</button>`;
+  document.getElementById("openField").onclick=()=>openFieldDrawer(d);
+  if(openDrawer)openFieldDrawer(d);
+  uiTone(560,.035,.022);
+}
+
+function openFieldDrawer(d){
+  const drawer=document.getElementById("drawer");
+  const related=[...neighbors.get(d.id)].sort();
+  document.getElementById("drawerKicker").textContent="Historical intelligence";
+  document.getElementById("drawerTitle").textContent=d.id;
+  const connectionCards=related.map(other=>{
+    const e=edgeData(d.id,other), t=relationshipTypes[e?.type||"ideas"];
+    return `<button class="connection" data-a="${attr(d.id)}" data-b="${attr(other)}">
+      <div class="to">${escapeHtml(other)}</div>
+      <div class="why">${escapeHtml(relationText(d.id,other))}</div>
+      <div class="rel-chip" style="--chip:${attr(t.color)}"><i></i>${escapeHtml(t.label)}</div>
+      <div class="arrow">›</div>
+    </button>`;
+  }).join("");
+  document.getElementById("drawerBody").innerHTML=`
+    <div class="section-title">${escapeHtml(categories[d.cat].label)}</div>
+    <div class="lead"><b style="color:#e1c99d">${escapeHtml(d.date)}</b><br>${escapeHtml(d.desc)}</div>
+    <div class="badge-row">
+      <span class="badge">${related.length} connections</span>
+      <span class="badge">Source-linked</span>
+      <span class="badge">Reviewed ${reviewedDate}</span>
+    </div>
+    <div class="section-title">Connections through history</div>
+    ${connectionCards||'<div class="lead">No mapped connections.</div>'}
+    <div class="section-title">Reference sources</div>
+    ${sourcesForNode(d.id).map(sourceCard).join("")}
+    <div class="source-note">History rarely has one simple cause. Relationship text uses cautious language such as “contributed to,” “interacted with,” or “helped create conditions for” where a single-cause claim would be misleading.</div>`;
+  drawer.classList.add("open");
+  drawer.querySelectorAll(".connection").forEach(btn=>btn.addEventListener("click",()=>{
+    const e=edgeData(btn.dataset.a,btn.dataset.b);if(e)selectRelationship(e,true);
+  }));
+}
+function selectRelationship(l,openDrawer=true){
+  currentEdge=l;currentNode=null;
+  const [a,b]=linkNames(l); const active=new Set([a,b]);
+  node.classed("dim",n=>!active.has(n.id)).classed("lit",n=>active.has(n.id)).classed("connected",false);
+  visibleLink.classed("dim",x=>x!==l).classed("lit",false).classed("selected",x=>x===l);
+  const t=relationshipTypes[l.type]||relationshipTypes.ideas;
+  document.getElementById("detail").innerHTML=`
+    <div class="name">${escapeHtml(a)} × ${escapeHtml(b)}</div>
+    <div class="cat">${escapeHtml(t.label)}</div>
+    <div class="desc">${escapeHtml(l.note)}</div>
+    <div class="microline"><span class="status-dot"></span>${sourcesForEdge(a,b).length} evidence / lookup sources</div>
+    <button class="action primary" id="openRelation">View relationship →</button>`;
+  document.getElementById("openRelation").onclick=()=>openRelationshipDrawer(l);
+  if(openDrawer)openRelationshipDrawer(l);
+  uiTone(650,.05,.023);
+}
+function openRelationshipDrawer(l){
+  const [a,b]=linkNames(l);const t=relationshipTypes[l.type]||relationshipTypes.ideas;
+  document.getElementById("drawerKicker").textContent="Relationship analysis";
+  document.getElementById("drawerTitle").textContent=`${a} × ${b}`;
+  document.getElementById("drawerBody").innerHTML=`
+    <div class="section-title">How these histories connect</div>
+    <div class="lead">${escapeHtml(l.note)}</div>
+    <div class="badge-row">
+      <span class="badge">${escapeHtml(t.label)}</span>
+      <span class="badge">${sourcesForEdge(a,b).length} sources / lookups</span>
+      <span class="badge">Reviewed ${reviewedDate}</span>
+    </div>
+    <div class="section-title">Evidence & sources</div>
+    ${sourcesForEdge(a,b).map(sourceCard).join("")}
+    <div class="section-title">Continue exploring</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+      <button class="action" id="goA">${escapeHtml(a)}</button>
+      <button class="action" id="goB">${escapeHtml(b)}</button>
+    </div>
+    <div class="source-note">The line is a historical relationship claim, not a statement that one event single-handedly caused another. Open the linked references and literature search to inspect broader context and competing interpretations.</div>`;
+  document.getElementById("drawer").classList.add("open");
+  document.getElementById("goA").onclick=()=>selectNode(nodeById.get(a),true);
+  document.getElementById("goB").onclick=()=>selectNode(nodeById.get(b),true);
+}
+function sourceCard(s){
+  return `<a class="source-card" href="${attr(s.url)}" target="_blank" rel="noopener noreferrer">
+    <div class="source-name">${escapeHtml(s.name)} ↗</div>
+    <div class="source-meta">${escapeHtml(s.org)} · ${escapeHtml(s.type)}</div>
+  </a>`;
+}
+function clearSelection(){
+  currentNode=null;currentEdge=null;
+  node.classed("dim",false).classed("lit",false).classed("connected",false);
+  visibleLink.classed("dim",false).classed("lit",false).classed("selected",false);
+  document.getElementById("detail").innerHTML='<div class="placeholder">Select a historical node to see what it is, when it belongs, what it connects to, and why.</div>';
+  closeDrawer();applyChronology();
+}
+function closeDrawer(){document.getElementById("drawer").classList.remove("open")}
+document.getElementById("drawerClose").addEventListener("click",()=>{closeDrawer();uiTone(430,.03,.018)});
+function escapeHtml(v){const map={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};return String(v).replace(/[&<>"']/g,c=>map[c])}
+function attr(v){return escapeHtml(v)}
+
+const searchInput=document.getElementById("searchInput");
+searchInput.addEventListener("input",()=>{
+  const q=searchInput.value.trim().toLowerCase();
+  if(!q){node.classed("search-dim",false).classed("search-hit",false);return}
+  node.classed("search-dim",d=>!d.id.toLowerCase().includes(q)).classed("search-hit",d=>d.id.toLowerCase().includes(q));
+});
+searchInput.addEventListener("keydown",ev=>{
+  if(ev.key==="Enter"){
+    const q=searchInput.value.trim().toLowerCase();
+    const hit=nodes.find(n=>n.id.toLowerCase().includes(q)&&activeInChrono(n));
+    if(hit){selectNode(hit,true);focusNode(hit);searchInput.blur();document.getElementById("toolbar").classList.remove("searching")}
+    else showToast("No visible match in the current chronology lens");
+  }
+  if(ev.key==="Escape"){searchInput.value="";node.classed("search-dim",false).classed("search-hit",false);searchInput.blur()}
+});
+document.getElementById("mobileSearch").addEventListener("click",()=>{
+  const tb=document.getElementById("toolbar");tb.classList.toggle("searching");
+  if(tb.classList.contains("searching"))setTimeout(()=>searchInput.focus(),50);
+});
+function focusNode(d){
+  const scale=1.42,tx=w/2-d.x*scale,ty=h/2-d.y*scale;
+  svg.transition().duration(650).call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
+}
+document.getElementById("resetView").addEventListener("click",()=>{svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);uiTone(470,.03,.018)});
+document.getElementById("soundToggle").addEventListener("click",ev=>{
+  soundOn=!soundOn;ev.currentTarget.classList.toggle("on",soundOn);ev.currentTarget.textContent=soundOn?"●":"◌";
+  if(soundOn)uiTone(600,.055,.025);showToast(soundOn?"Interface sound on":"Interface sound off");
+});
+function showToast(msg){
+  const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),1450);
+}
+
+const legend=document.getElementById("legend");
+Object.values(categories).forEach(c=>{
+  const item=document.createElement("div");item.className="item";
+  item.innerHTML=`<span class="dot" style="background:${c.color}"></span>${escapeHtml(c.label)}`;legend.appendChild(item);
+});
+window.addEventListener("resize",()=>{
+  const s=size();w=s.w;h=s.h;simulation.force("center",d3.forceCenter(w/2,h/2));simulation.alpha(.3).restart();
+});
+["panel","toolbar","drawer","legend","pathbar","chronobar"].forEach(id=>document.getElementById(id)?.addEventListener("click",ev=>ev.stopPropagation()));
+applyChronology();
+
+/* IKL Knowledge Map system repair 2026-08-30 */
+(function iklInstallMapLayoutRepair(){
+  let iklUserMoved=false;
+  let iklResizeTimer=null;
+  const svgEl=document.getElementById("svg");
+  if(!svgEl || typeof d3==="undefined" || typeof svg==="undefined" || typeof zoom==="undefined" || typeof nodes==="undefined") return;
+
+  function visibleRect(el){
+    if(!el) return null;
+    const cs=getComputedStyle(el);
+    if(cs.display==="none" || cs.visibility==="hidden" || Number(cs.opacity)===0) return null;
+    const r=el.getBoundingClientRect();
+    if(r.width<2 || r.height<2) return null;
+    return r;
+  }
+
+  function resolveDockLegendCollision(){
+    const legendEl=document.getElementById("legend");
+    const dock=document.getElementById("cdPublicDock");
+    if(!legendEl || !dock) return;
+    if(!legendEl.dataset.iklBaseBottom){
+      legendEl.dataset.iklBaseBottom=getComputedStyle(legendEl).bottom || "16px";
+    }
+    legendEl.style.bottom=legendEl.dataset.iklBaseBottom;
+    requestAnimationFrame(()=>{
+      const l=visibleRect(legendEl), d=visibleRect(dock);
+      if(!l || !d) return;
+      const overlap=!(l.right<d.left || l.left>d.right || l.bottom<d.top || l.top>d.bottom);
+      if(overlap){
+        const required=Math.max(12, window.innerHeight-d.top+14);
+        legendEl.style.bottom=required+"px";
+      }
+    });
+  }
+
+  function safeArea(){
+    const vw=window.innerWidth, vh=window.innerHeight;
+    let left=24, right=vw-24, top=76, bottom=vh-24;
+    const panel=visibleRect(document.getElementById("panel"));
+    const toolbar=visibleRect(document.getElementById("toolbar"));
+    const dock=visibleRect(document.getElementById("cdPublicDock"));
+    const legendRect=visibleRect(document.getElementById("legend"));
+    const chrono=visibleRect(document.getElementById("chronobar"));
+    const timeline=visibleRect(document.getElementById("timelineBox"));
+
+    if(vw>820){
+      if(panel) left=Math.max(left,panel.right+30);
+      if(toolbar) top=Math.max(top,toolbar.bottom+18);
+    }else{
+      if(panel) top=Math.max(top,panel.bottom+18);
+      if(toolbar) top=Math.max(top,toolbar.bottom+18);
+      left=18; right=vw-18;
+    }
+    if(dock) bottom=Math.min(bottom,dock.top-24);
+    if(legendRect) bottom=Math.min(bottom,legendRect.top-18);
+    if(chrono) bottom=Math.min(bottom,chrono.top-18);
+    if(timeline && timeline.top>vh*.45) bottom=Math.min(bottom,timeline.top-18);
+
+    if(right-left<240){left=18;right=vw-18;}
+    if(bottom-top<220){top=76;bottom=vh-82;}
+    return {left,right,top,bottom};
+  }
+
+  function fitMap(animate=true){
+    resolveDockLegendCollision();
+    requestAnimationFrame(()=>{
+      const xs=nodes.map(d=>Number(d.x)).filter(Number.isFinite);
+      const ys=nodes.map(d=>Number(d.y)).filter(Number.isFinite);
+      if(!xs.length || !ys.length) return;
+      const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+      const graphW=Math.max(120,maxX-minX), graphH=Math.max(120,maxY-minY);
+      const a=safeArea();
+      const safeW=Math.max(220,a.right-a.left), safeH=Math.max(220,a.bottom-a.top);
+      const padding=58;
+      let scale=Math.min((safeW-padding*2)/graphW,(safeH-padding*2)/graphH,1.25);
+      scale=Math.max(.30,Math.min(1.25,scale));
+      const graphCX=(minX+maxX)/2, graphCY=(minY+maxY)/2;
+      const safeCX=(a.left+a.right)/2, safeCY=(a.top+a.bottom)/2;
+      const tx=safeCX-graphCX*scale, ty=safeCY-graphCY*scale;
+      const t=d3.zoomIdentity.translate(tx,ty).scale(scale);
+      if(animate) svg.transition().duration(520).call(zoom.transform,t);
+      else svg.call(zoom.transform,t);
+    });
+  }
+
+  svgEl.addEventListener("pointerdown",()=>{iklUserMoved=true},{passive:true});
+  svgEl.addEventListener("wheel",()=>{iklUserMoved=true},{passive:true});
+  const reset=document.getElementById("resetView");
+  if(reset){
+    reset.addEventListener("click",ev=>{
+      ev.preventDefault(); ev.stopImmediatePropagation(); iklUserMoved=false; fitMap(true);
+    },true);
+  }
+
+  if(typeof simulation!=="undefined" && simulation && typeof simulation.on==="function")
+    simulation.on("end.iklLayoutRepair",()=>{if(!iklUserMoved) fitMap(true);});
+
+  setTimeout(()=>{if(!iklUserMoved) fitMap(false)},650);
+  setTimeout(()=>{if(!iklUserMoved) fitMap(true)},1500);
+  resolveDockLegendCollision();
+
+  window.addEventListener("resize",()=>{
+    clearTimeout(iklResizeTimer);
+    iklResizeTimer=setTimeout(()=>{resolveDockLegendCollision();fitMap(false)},180);
+  });
+  window.iklFitKnowledgeMap=()=>fitMap(true);
+})();
+</script>
+<nav id="cdPublicDock" aria-label="THE UNI public links">
+<a aria-label='Back to the Interactive Knowledge Library' class='cdDockWord' href='/' title='Back to the Interactive Knowledge Library'>Library</a>
+<a class="cdWatch" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a>
+<a class="cdContact" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact THE UNI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a>
+</nav>
+
+<style id="ikl-collision-guard-style">
+/* IKL production collision guard: only moves bottom UI when the public dock would cover it. */
+:root{--ikl-dock-safe-bottom:74px}
+@media(max-width:680px){:root{--ikl-dock-safe-bottom:62px}}
+</style>
+<script id="ikl-collision-guard">
+(()=>{
+ const MOVE=['#legend','.legend','#drawer','.drawer','#modebar','.modebar','.modeBar','.mode-bar','#timeline','.timeline','.pathbar','.pathBar','.path-bar','.timelineWrap','.timeline-wrap','.bottomBar','.bottom-bar','.statusbar','.status-bar','#status'];
+ const QUIET=['#legend','.legend','#watermark','.watermark','.badge'];
+ const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>2&&r.height>2};
+ const overlap=(a,b,pad=4)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>pad&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>pad;
+ let queued=false,applying=false;
+ const observer=new MutationObserver(muts=>{if(applying)return;for(const m of muts){if(m.type==='attributes'&&m.attributeName==='class'){run();break}}});
+ const observe=()=>observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+ function all(selectors){const out=[];selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!out.includes(el))out.push(el)}));return out}
+ function rememberMove(el){if(el.dataset.iklMoveRemembered)return;el.dataset.iklMoveRemembered='1';el.dataset.iklInlineBottom=el.style.bottom||'';el.dataset.iklInlineTransform=el.style.transform||'';el.dataset.iklInlineMaxHeight=el.style.maxHeight||''}
+ function restoreMove(el){if(el.dataset.iklAdjusted!=='1')return;if(el.dataset.iklInlineBottom==='')el.style.removeProperty('bottom');else el.style.bottom=el.dataset.iklInlineBottom;if(el.dataset.iklInlineTransform==='')el.style.removeProperty('transform');else el.style.transform=el.dataset.iklInlineTransform;if(el.dataset.iklInlineMaxHeight==='')el.style.removeProperty('max-height');else el.style.maxHeight=el.dataset.iklInlineMaxHeight;el.dataset.iklAdjusted='0'}
+ function rememberQuiet(el){if(el.dataset.iklQuietRemembered)return;el.dataset.iklQuietRemembered='1';el.dataset.iklInlineVisibility=el.style.visibility||'';el.dataset.iklInlineOpacity=el.style.opacity||''}
+ function restoreQuiet(el){if(el.dataset.iklQuieted!=='1')return;if(el.dataset.iklInlineVisibility==='')el.style.removeProperty('visibility');else el.style.visibility=el.dataset.iklInlineVisibility;if(el.dataset.iklInlineOpacity==='')el.style.removeProperty('opacity');else el.style.opacity=el.dataset.iklInlineOpacity;el.dataset.iklQuieted='0'}
+ function run(){if(queued||applying)return;queued=true;requestAnimationFrame(()=>{
+   applying=true;observer.disconnect();
+   const movers=all(MOVE),quiets=all(QUIET);movers.forEach(el=>{rememberMove(el);restoreMove(el)});quiets.forEach(el=>{rememberQuiet(el);restoreQuiet(el)});
+   const dock=document.getElementById('cdPublicDock');
+   if(dock&&visible(dock)){
+     const dr=dock.getBoundingClientRect(),safe=Math.max(12,innerHeight-dr.top+10);
+     movers.forEach(el=>{if(el===dock||!visible(el))return;const cs=getComputedStyle(el);if(cs.position!=='fixed'&&cs.position!=='absolute')return;const r=el.getBoundingClientRect();if(!overlap(r,dr))return;const b=parseFloat(cs.bottom);el.dataset.iklAdjusted='1';if(Number.isFinite(b))el.style.bottom=Math.max(b,safe)+'px';else if(r.bottom>dr.top){const base=el.style.transform||'';el.style.transform=(base?base+' ':'')+'translateY(-'+(r.bottom-dr.top+10)+'px)'}if(el.matches('#drawer,.drawer')){const top=el.getBoundingClientRect().top;el.style.maxHeight=Math.max(160,innerHeight-top-safe-10)+'px'}})
+   }
+   const drawers=all(['#drawer','.drawer']).filter(visible);
+   drawers.forEach(drawer=>{const rr=drawer.getBoundingClientRect();quiets.forEach(el=>{if(el===drawer||!visible(el))return;if(overlap(el.getBoundingClientRect(),rr,6)){el.dataset.iklQuieted='1';el.style.visibility='hidden';el.style.opacity='0'}})});
+   queued=false;
+   applying=false;observe();
+ });}
+ addEventListener('load',run);addEventListener('resize',run,{passive:true});addEventListener('orientationchange',run,{passive:true});
+ observe();
+ run();setTimeout(run,30);setTimeout(run,120);setTimeout(run,350);
+})();
+</script>
+</body>
+</html>

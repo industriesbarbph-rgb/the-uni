@@ -1,0 +1,1910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="up" href="/interactive-knowledge-library/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Psychology — Interactive Knowledge Map | THE UNI</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  :root{
+    --bg:#2a2931;
+    --panel:#272630;
+    --panel-border:rgba(220,214,232,.22);
+    --text:#f3f0f6;
+    --text-dim:#b7b0c0;
+    --line:#777181;
+    --glass:linear-gradient(155deg, rgba(46,44,56,.90), rgba(27,27,34,.78));
+    --shadow:0 16px 42px rgba(5,5,10,.28), 0 1px 8px rgba(210,195,230,.08);
+  }
+
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;height:100%;overflow:hidden;color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    background:radial-gradient(circle at 18% 18%, rgba(145,118,175,.32), transparent 32%),radial-gradient(circle at 78% 24%, rgba(72,143,138,.22), transparent 34%),linear-gradient(125deg,#1f1f25 0%,#393741 12%,#6d6975 25%,#aaa6b0 37%,#595661 50%,#8c8794 62%,#332f3a 76%,#706b78 88%,#232229 100%);
+    background-size:500% 500%;
+    animation:liquid 12s ease infinite;
+  }
+  body{overscroll-behavior:none}
+  button,input{font:inherit}
+
+  @keyframes liquid{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  @keyframes sweep{0%{transform:translateX(-160%) skewX(-14deg);opacity:0}25%{opacity:1}75%{opacity:.7}100%{transform:translateX(320%) skewX(-14deg);opacity:0}}
+  @keyframes cornerGlow{0%,100%{opacity:.7}50%{opacity:1}}
+  @keyframes flow{to{stroke-dashoffset:-28}}
+  @keyframes nodePulse{0%{opacity:.30;transform:scale(.78)}60%{opacity:.05;transform:scale(1.45)}100%{opacity:0;transform:scale(1.6)}}
+  @keyframes drawerIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes glint{0%,75%,100%{transform:translateX(-160%)}85%{transform:translateX(240%)}}
+
+  #wrap{position:relative;width:100vw;height:100vh}
+  #wrap::before{
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(circle at 0% 0%, rgba(205,187,230,.42) 0%, rgba(205,187,230,0) 38%),
+      radial-gradient(circle at 100% 0%, rgba(114,185,176,.30) 0%, rgba(114,185,176,0) 38%),
+      radial-gradient(circle at 0% 100%, rgba(188,145,175,.25) 0%, rgba(188,145,175,0) 38%),
+      radial-gradient(circle at 100% 100%, rgba(235,231,242,.24) 0%, rgba(235,231,242,0) 38%);
+    animation:cornerGlow 5s ease-in-out infinite;
+  }
+  .sheen-top{position:absolute;inset:0;pointer-events:none;z-index:0;background:linear-gradient(180deg,rgba(255,255,255,.45) 0%,rgba(255,255,255,.08) 35%,transparent 65%)}
+  .sheen-bottom{position:absolute;bottom:0;left:0;right:0;height:38%;pointer-events:none;z-index:0;background:linear-gradient(180deg,transparent,rgba(120,126,136,.30))}
+  .edge-line{position:absolute;top:0;left:0;right:0;height:1.5px;pointer-events:none;z-index:0;background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.95) 30%,rgba(255,255,255,.65) 50%,rgba(255,255,255,.95) 70%,transparent 95%)}
+  .sweep-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+  .sweep-band{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)}
+  .sweep-band.b1{width:46%;animation:sweep 6s 0s ease-in-out infinite}
+  .sweep-band.b2{width:28%;animation:sweep 9s 3s ease-in-out infinite}
+
+  svg{width:100%;height:100%;display:block;cursor:grab;position:relative;z-index:1;touch-action:none}
+  svg:active{cursor:grabbing}
+
+  .link{stroke:var(--line);stroke-opacity:.56;transition:stroke-opacity .25s,stroke-width .25s}
+  .link.dim{stroke-opacity:.045}
+  .link.lit{stroke:#b8a7c9;stroke-opacity:.96;stroke-width:2.2px;stroke-dasharray:8 6;animation:flow 1.05s linear infinite}
+  .link.selected{stroke:#eee8f2;stroke-opacity:1;stroke-width:2.8px;stroke-dasharray:10 5;animation:flow .75s linear infinite}
+  .link-hit{stroke:transparent;stroke-width:18px;pointer-events:stroke;cursor:pointer}
+
+  .node{transition:opacity .25s}
+  .node circle.core{stroke:var(--bg);stroke-width:1.5px;cursor:pointer;transition:opacity .22s,stroke .22s,stroke-width .22s,r .22s;filter:drop-shadow(0 1px 2px rgba(20,25,35,.12))}
+  .node text{
+    fill:var(--text);font-size:10.5px;pointer-events:none;text-anchor:middle;
+    paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round;
+    transition:opacity .22s,font-size .22s;
+  }
+  .node .halo{fill:none;stroke:#eee8f2;stroke-width:1px;opacity:0;pointer-events:none;transform-box:fill-box;transform-origin:center}
+  .node.dim circle.core,.node.dim text{opacity:.13}
+  .node.lit circle.core{stroke:#eee8f2;stroke-width:2.6px}
+  .node.lit text{font-size:11.5px;font-weight:650}
+  .node.lit .halo{animation:nodePulse 1.15s ease-out}
+  .node.connected circle.core{stroke:#9d95a5;stroke-width:2px}
+  .node.search-dim{opacity:.12}
+  .node.search-hit circle.core{stroke:#eee8f2;stroke-width:2.5px}
+  .node.search-hit .halo{opacity:.25}
+
+  .glass{
+    background:var(--glass);border:1px solid var(--panel-border);box-shadow:var(--shadow);
+    backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+  }
+
+  #panel{
+    position:absolute;top:16px;left:16px;z-index:5;width:300px;max-width:calc(100vw - 32px);
+    border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.5;
+  }
+  #panel h1{font-size:15px;font-weight:650;margin:0 0 3px;letter-spacing:.01em}
+  #panel p.sub{color:var(--text-dim);margin:0 0 10px;font-size:12px}
+  #detail{min-height:58px}
+  #detail .name{font-weight:700;font-size:14px;margin-bottom:3px}
+  #detail .cat{color:var(--text-dim);font-size:10.5px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.075em}
+  #detail .desc{color:var(--text-dim)}
+  #detail .placeholder{color:var(--text-dim);font-style:italic}
+  .microline{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px;color:var(--text-dim);font-size:10.5px}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:#b9a6ca;box-shadow:0 0 0 3px rgba(78,86,96,.10)}
+
+  .action{
+    border:1px solid rgba(82,88,98,.30);background:rgba(255,255,255,.07);color:var(--text);
+    border-radius:8px;padding:7px 10px;cursor:pointer;font-size:11px;font-weight:650;letter-spacing:.035em;
+    transition:background .2s,transform .2s,border-color .2s;
+  }
+  .action:hover{background:rgba(255,255,255,.13);border-color:rgba(60,65,75,.45)}
+  .action:active{transform:scale(.98)}
+  .action.primary{margin-top:10px;width:100%;text-transform:uppercase}
+
+  #toolbar{
+    position:absolute;top:16px;right:16px;z-index:7;display:flex;align-items:center;gap:7px;
+    padding:7px;border-radius:12px;
+  }
+  #searchBox{position:relative;display:flex;align-items:center}
+  #searchInput{
+    width:210px;border:0;outline:0;background:rgba(255,255,255,.06);border:1px solid rgba(82,88,98,.18);
+    border-radius:8px;padding:8px 34px 8px 10px;color:var(--text);font-size:12px;
+  }
+  #searchInput::placeholder{color:#a8a0b0}
+  #searchIcon{position:absolute;right:10px;font-size:13px;color:var(--text-dim);pointer-events:none}
+  .iconbtn{
+    width:32px;height:32px;border-radius:8px;border:1px solid rgba(82,88,98,.22);background:rgba(255,255,255,.07);
+    color:var(--text);display:grid;place-items:center;cursor:pointer;font-size:13px;font-weight:700;
+  }
+  .iconbtn.on{background:rgba(32,36,43,.88);color:white}
+
+  #hint{
+    position:absolute;top:68px;right:16px;z-index:4;padding:7px 10px;border-radius:9px;font-size:10.5px;
+    color:var(--text-dim);max-width:220px;
+  }
+
+  #legend{
+    position:absolute;bottom:16px;left:16px;z-index:4;padding:10px 13px;border-radius:11px;font-size:10.5px;
+    display:grid;grid-template-columns:repeat(2,auto);column-gap:14px;row-gap:5px;
+  }
+  #legend .item{display:flex;align-items:center;gap:6px;color:var(--text-dim);white-space:nowrap}
+  #legend .dot{width:8px;height:8px;border-radius:50%;flex:none}
+
+  #watermark{
+    position:absolute;bottom:18px;right:22px;z-index:2;font-size:10px;font-weight:600;letter-spacing:.14em;
+    text-transform:uppercase;color:rgba(225,214,235,.50);text-shadow:0 0 12px rgba(157,123,184,.20);
+    white-space:nowrap;pointer-events:none;user-select:none;
+  }
+
+  #drawer{
+    position:absolute;z-index:8;right:16px;top:68px;bottom:16px;width:min(400px,calc(100vw - 32px));
+    border-radius:14px;overflow:hidden;display:none;
+  }
+  #drawer.open{display:flex;flex-direction:column;animation:drawerIn .26s ease-out}
+  #drawer::after{
+    content:"";position:absolute;top:0;bottom:0;width:34%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent);
+    pointer-events:none;animation:glint 8s ease-in-out infinite;opacity:.45;
+  }
+  .drawer-head{padding:15px 16px 11px;border-bottom:1px solid rgba(90,96,106,.18);display:flex;gap:12px;align-items:flex-start;position:relative;z-index:1}
+  .drawer-title{flex:1;min-width:0}
+  .drawer-kicker{font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--text-dim);margin-bottom:4px}
+  .drawer-title h2{font-size:18px;line-height:1.15;margin:0;font-weight:720}
+  .drawer-close{flex:none}
+  .drawer-body{padding:14px 16px 20px;overflow:auto;position:relative;z-index:1;scrollbar-width:thin}
+  .section-title{font-size:9.5px;font-weight:750;letter-spacing:.13em;color:var(--text-dim);text-transform:uppercase;margin:16px 0 8px}
+  .section-title:first-child{margin-top:0}
+  .lead{font-size:12.5px;line-height:1.6;color:#d5d0da}
+  .badge-row{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+  .badge{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(82,88,98,.24);padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.06);color:#cbc4d2}
+  .connection{
+    width:100%;text-align:left;border:1px solid rgba(82,88,98,.18);background:rgba(255,255,255,.06);
+    border-radius:10px;padding:10px 11px;margin-bottom:7px;cursor:pointer;color:var(--text);position:relative;overflow:hidden;
+  }
+  .connection:hover{background:rgba(255,255,255,.12);border-color:rgba(82,88,98,.34)}
+  .connection .to{font-size:12px;font-weight:700;margin-bottom:3px;padding-right:18px}
+  .connection .why{font-size:10.5px;color:var(--text-dim);line-height:1.45}
+  .connection .arrow{position:absolute;right:10px;top:10px;color:var(--text-dim)}
+
+  .source-card{
+    display:block;text-decoration:none;color:inherit;border:1px solid rgba(82,88,98,.18);background:rgba(255,255,255,.25);
+    border-radius:10px;padding:10px 11px;margin-bottom:7px;transition:background .18s,border-color .18s;
+  }
+  .source-card:hover{background:rgba(255,255,255,.12);border-color:rgba(82,88,98,.34)}
+  .source-name{font-size:11.5px;font-weight:700;line-height:1.35}
+  .source-meta{font-size:9.5px;color:var(--text-dim);margin-top:3px;letter-spacing:.02em}
+  .source-note{font-size:10px;color:var(--text-dim);line-height:1.45;margin-top:8px}
+
+  #pathbar{
+    position:absolute;z-index:6;bottom:16px;left:50%;transform:translateX(-50%);
+    max-width:min(620px,calc(100vw - 430px));min-width:260px;border-radius:11px;padding:8px 10px;display:none;
+  }
+  #pathbar.show{display:flex;align-items:center;gap:8px}
+  #pathLabel{font-size:9px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap}
+  #pathText{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;color:#d5d0da}
+  #clearPath{flex:none}
+
+  #toast{
+    position:absolute;z-index:20;left:50%;top:20px;transform:translateX(-50%) translateY(-10px);
+    opacity:0;pointer-events:none;padding:7px 10px;border-radius:9px;font-size:10.5px;color:var(--text-dim);
+    transition:opacity .2s,transform .2s;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:820px){
+    #panel{width:270px}
+    #searchInput{width:150px}
+    #hint{display:none}
+    #drawer{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:68vh;border-radius:16px}
+    #drawer.open{animation:sheetIn .26s ease-out}
+    #pathbar{left:8px;right:8px;bottom:8px;transform:none;max-width:none;min-width:0}
+    #legend{bottom:12px}
+    #watermark{display:block;bottom:12px;right:14px;font-size:9px;letter-spacing:.12em;z-index:5}
+  }
+  @media(max-width:640px){
+    #panel{top:10px;left:10px;width:min(260px,calc(100vw - 82px));padding:11px 12px}
+    #panel h1{font-size:13px}
+    #panel p.sub{font-size:10.5px;margin-bottom:7px}
+    #detail{min-height:0}
+    #detail .desc{font-size:11px}
+    #toolbar{top:10px;right:10px;padding:5px}
+    #searchBox{display:none}
+    #toolbar.searching #searchBox{display:flex;position:fixed;left:10px;right:10px;top:58px}
+    #toolbar.searching #searchInput{width:100%;background:rgba(35,33,42,.96);box-shadow:var(--shadow)}
+    #legend{grid-template-columns:1fr;padding:8px 10px;font-size:9.5px;max-height:128px;overflow:auto}
+    .desktop-only{display:none}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}
+  }
+</style>
+<style id="coach-doll-public-dock-style">
+/* THE UNI — compact public jewel controls */
+#cdPublicDock{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:linear-gradient(145deg,rgba(18,22,27,.76),rgba(5,7,10,.66));box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#cdPublicDock a{position:relative;display:grid;place-items:center;color:#f0f4f5;text-decoration:none;border:1px solid rgba(255,255,255,.15);background:radial-gradient(circle at 33% 26%,rgba(255,255,255,.18),rgba(255,255,255,.055) 39%,rgba(0,0,0,.26) 79%);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 16px rgba(198,218,233,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+#cdPublicDock a:hover,#cdPublicDock a:focus-visible{transform:translateY(-2px);border-color:rgba(229,207,166,.50);box-shadow:inset 0 1px rgba(255,255,255,.16),0 0 22px rgba(222,193,141,.17);outline:none}
+#cdPublicDock .cdWatch{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.15),0 0 21px rgba(222,193,141,.13)}
+#cdPublicDock .cdContact{width:34px;height:34px;border-radius:50%}
+#cdPublicDock .cdWatch::before,#cdPublicDock .cdContact::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(229,204,151,.18);pointer-events:none}
+#cdPublicDock .cdWatch::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(226,199,146,.11);animation:cdJewelBreath 5.6s ease-in-out infinite;pointer-events:none}
+#cdPublicDock svg{width:16px;height:16px}.cdWatch svg{width:17px!important;height:17px!important}
+.cdDockWord{width:auto!important;height:34px!important;padding:0 12px!important;border-radius:999px!important;font-size:8.5px!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:#e9e1d7!important}
+@keyframes cdJewelBreath{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.04)}}
+@media(max-width:680px){#cdPublicDock{left:8px;bottom:8px;gap:5px;padding:4px 5px}#cdPublicDock .cdWatch{width:36px;height:36px}#cdPublicDock .cdContact{width:33px;height:33px}.cdDockWord{width:33px!important;height:33px!important;padding:0!important;font-size:0!important}.cdDockWord::after{content:"⌂";font-size:15px}}
+@media(prefers-reduced-motion:reduce){#cdPublicDock a{transition:none!important}#cdPublicDock .cdWatch::after{animation:none!important}}
+</style>
+<style id="coach-doll-node-dna-v2">
+/* Node DNA V2 — preserves each subject palette while sharpening the living-network look */
+.node circle.core{stroke:color-mix(in srgb,var(--accent) 44%,var(--bg));stroke-width:1.7px;filter:drop-shadow(0 0 4px rgba(255,255,255,.05)) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 23%,transparent))!important}
+.node .halo{stroke:var(--accent);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 32%,transparent))}
+.node:hover circle.core,.node.lit circle.core,.node.search-hit circle.core{stroke:var(--accent2);filter:drop-shadow(0 0 5px rgba(255,255,255,.14)) drop-shadow(0 0 16px color-mix(in srgb,var(--accent2) 40%,transparent))!important}
+.link{filter:drop-shadow(0 0 2px color-mix(in srgb,var(--accent) 18%,transparent))}
+.link.lit,.link.selected{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent2) 40%,transparent))}
+</style>
+
+<!-- IKL SEO + SOCIAL PUBLISHING LAYER -->
+<meta name="description" content="Explore Psychology in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning pathways.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://theuni.barbph.com/builds/040-psychology-map-v2.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="THE UNI — Interactive Knowledge Library">
+<meta property="og:title" content="Psychology — Interactive Knowledge Map | THE UNI">
+<meta property="og:description" content="Explore Psychology in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning pathways.">
+<meta property="og:url" content="https://theuni.barbph.com/builds/040-psychology-map-v2.html">
+<meta property="og:image" content="https://theuni.barbph.com/social/040-psychology-map-v2.jpg">
+<meta property="og:image:secure_url" content="https://theuni.barbph.com/social/040-psychology-map-v2.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Psychology — THE UNI interactive learning preview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Psychology — Interactive Knowledge Map | THE UNI">
+<meta name="twitter:description" content="Explore Psychology in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning pathways.">
+<meta name="twitter:image" content="https://theuni.barbph.com/social/040-psychology-map-v2.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebPage","LearningResource"],"@id":"https://theuni.barbph.com/builds/040-psychology-map-v2.html#learning-resource","url":"https://theuni.barbph.com/builds/040-psychology-map-v2.html","name":"Psychology — Interactive Knowledge Map | THE UNI","headline":"Psychology","description":"Explore Psychology in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning pathways.","inLanguage":"en","image":"https://theuni.barbph.com/social/040-psychology-map-v2.jpg","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"creator":{"@id":"https://theuni.barbph.com/#publisher"},"learningResourceType":"Interactive knowledge map","educationalUse":["instruction","self study","assessment"]}</script>
+<!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
+
+<style id="ikl-map-layout-repair-20260830">
+/* IKL Knowledge Map system repair: keep map UI zones from colliding. */
+#legend{max-width:min(430px,calc(100vw - 32px));}
+@media(max-width:820px){#legend{max-width:min(360px,calc(100vw - 20px));}}
+</style>
+
+<style id="ikl-mobile-map-header-collision-fix">
+@media(max-width:640px){
+  #panel{top:58px!important}
+  #toolbar.searching{left:10px!important;right:10px!important;width:auto!important}
+  #toolbar.searching #searchBox{display:flex!important;position:relative!important;left:auto!important;right:auto!important;top:auto!important;flex:1 1 auto!important}
+  #toolbar.searching #searchInput{width:100%!important}
+  #toolbar.searching .iconbtn:not(#mobileSearch){display:none!important}
+}
+</style>
+</head>
+
+<body>
+<div id="wrap">
+  
+  <div class="sheen-top"></div>
+  <div class="sheen-bottom"></div>
+  <div class="edge-line"></div>
+  <div class="sweep-wrap"><div class="sweep-band b1"></div></div>
+  <div class="sweep-wrap"><div class="sweep-band b2"></div></div>
+
+  <svg id="svg" aria-label="Interactive map of psychology"></svg>
+
+  <section id="panel" class="glass">
+    <h1>Psychology</h1><div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin:-1px 0 5px">Neural Aurora Observatory</div>
+    <p class="sub">Touch a node to explore the architecture of mind & behavior</p>
+    <div id="detail">
+      <div class="placeholder">Select a field or concept to see what it is, what it connects to, and why those connections exist.</div>
+    </div>
+  </section>
+
+  <div id="toolbar" class="glass">
+    <div id="searchBox">
+      <input id="searchInput" type="search" autocomplete="off" spellcheck="false" placeholder="Search psychology…" aria-label="Search psychology">
+      <span id="searchIcon">⌕</span>
+    </div>
+    <button class="iconbtn" id="mobileSearch" title="Search" aria-label="Search">⌕</button>
+    <button class="iconbtn" id="soundToggle" title="Interface sound" aria-label="Toggle interface sound">◌</button>
+    <button class="iconbtn" id="resetView" title="Reset view" aria-label="Reset view">◎</button>
+  </div>
+
+  <div id="hint" class="glass">Drag nodes · scroll/pinch to zoom · drag background to pan · touch a line for relationship evidence</div>
+  <div id="legend" class="glass"></div>
+
+  <aside id="drawer" class="glass" aria-live="polite" aria-label="Psychology intelligence drawer">
+    <div class="drawer-head">
+      <div class="drawer-title">
+        <div class="drawer-kicker" id="drawerKicker">Psychology intelligence</div>
+        <h2 id="drawerTitle">—</h2>
+      </div>
+      <button class="iconbtn drawer-close" id="drawerClose" title="Close" aria-label="Close">×</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <div id="pathbar" class="glass">
+    <span id="pathLabel">Exploration</span>
+    <span id="pathText"></span>
+    <button class="iconbtn" id="clearPath" title="Clear exploration path" aria-label="Clear exploration path">×</button>
+  </div>
+
+  <div id="toast" class="glass"></div>
+</div>
+
+<script>
+const categories = {
+  "foundations": {
+    "label": "Foundations & research",
+    "color": "#8B78A6"
+  },
+  "bio": {
+    "label": "Biological & neural psychology",
+    "color": "#4E918C"
+  },
+  "cognition": {
+    "label": "Cognition & perception",
+    "color": "#6F86B8"
+  },
+  "development": {
+    "label": "Development across the lifespan",
+    "color": "#C08098"
+  },
+  "social": {
+    "label": "Social psychology",
+    "color": "#C49A5A"
+  },
+  "personality": {
+    "label": "Personality, emotion & motivation",
+    "color": "#9A729D"
+  },
+  "clinical": {
+    "label": "Clinical psychology & mental health",
+    "color": "#B8646D"
+  },
+  "applied": {
+    "label": "Applied psychology",
+    "color": "#727985"
+  }
+};
+
+const nodes = [
+  {
+    "id": "Psychology",
+    "cat": "foundations",
+    "desc": "The scientific study of mind and behavior, spanning biological, cognitive, emotional, developmental, social and applied questions."
+  },
+  {
+    "id": "History of psychology",
+    "cat": "foundations",
+    "desc": "How psychology developed from philosophical questions into an empirical scientific discipline with multiple schools and methods."
+  },
+  {
+    "id": "Research methods",
+    "cat": "foundations",
+    "desc": "The experimental, observational, correlational and qualitative methods psychologists use to investigate behavior and mental processes."
+  },
+  {
+    "id": "Statistics",
+    "cat": "foundations",
+    "desc": "Methods for describing psychological data, estimating uncertainty, testing hypotheses and evaluating relationships or effects."
+  },
+  {
+    "id": "Psychometrics",
+    "cat": "foundations",
+    "desc": "The science of measuring psychological traits, abilities and states through reliable and valid tests and scales."
+  },
+  {
+    "id": "Replication & open science",
+    "cat": "foundations",
+    "desc": "Practices that strengthen psychological evidence through transparency, reproducibility, preregistration, data sharing and repeated testing."
+  },
+  {
+    "id": "Ethics in psychology",
+    "cat": "foundations",
+    "desc": "Principles that protect participants, clients and communities while guiding responsible psychological research and practice."
+  },
+  {
+    "id": "Behavioral neuroscience",
+    "cat": "bio",
+    "desc": "Studies how the brain, nervous system and biological processes contribute to behavior and mental activity."
+  },
+  {
+    "id": "Neurons & synapses",
+    "cat": "bio",
+    "desc": "The cellular communication systems through which neural signals are transmitted and integrated."
+  },
+  {
+    "id": "Brain networks",
+    "cat": "bio",
+    "desc": "Interacting neural systems that support perception, memory, emotion, attention and other psychological functions."
+  },
+  {
+    "id": "Neuroplasticity",
+    "cat": "bio",
+    "desc": "The nervous system's capacity to change its structure or function in response to experience, learning, injury or development."
+  },
+  {
+    "id": "Genetics & behavior",
+    "cat": "bio",
+    "desc": "Studies how genetic variation and gene–environment interaction contribute to psychological traits and behavior."
+  },
+  {
+    "id": "Hormones & behavior",
+    "cat": "bio",
+    "desc": "Examines how endocrine signaling interacts with the brain and behavior, including stress, reproduction, motivation and mood."
+  },
+  {
+    "id": "Sleep & circadian rhythms",
+    "cat": "bio",
+    "desc": "Studies sleep, biological timing and their relationships with cognition, emotion, health and performance."
+  },
+  {
+    "id": "Stress physiology",
+    "cat": "bio",
+    "desc": "The biological systems that respond to challenge and help explain how sustained stress can affect mind and body."
+  },
+  {
+    "id": "Cognitive psychology",
+    "cat": "cognition",
+    "desc": "Studies mental processes such as attention, memory, language, reasoning, learning and decision-making."
+  },
+  {
+    "id": "Sensation",
+    "cat": "cognition",
+    "desc": "How sensory receptors detect physical stimulation and convert it into signals the nervous system can process."
+  },
+  {
+    "id": "Perception",
+    "cat": "cognition",
+    "desc": "How the mind organizes and interprets sensory information into meaningful experiences of the world."
+  },
+  {
+    "id": "Attention",
+    "cat": "cognition",
+    "desc": "How limited cognitive resources are selected, sustained and shifted among competing information and tasks."
+  },
+  {
+    "id": "Memory",
+    "cat": "cognition",
+    "desc": "How information is encoded, stored, reconstructed and retrieved over time."
+  },
+  {
+    "id": "Learning",
+    "cat": "cognition",
+    "desc": "Relatively enduring change produced by experience, including conditioning, observation and cognitive learning."
+  },
+  {
+    "id": "Language",
+    "cat": "cognition",
+    "desc": "The psychological processes involved in understanding, producing and acquiring symbolic communication."
+  },
+  {
+    "id": "Thinking & reasoning",
+    "cat": "cognition",
+    "desc": "How people form concepts, solve problems, draw inferences and evaluate information."
+  },
+  {
+    "id": "Decision-making",
+    "cat": "cognition",
+    "desc": "How people choose among options under conditions involving goals, uncertainty, reward, risk and bias."
+  },
+  {
+    "id": "Intelligence",
+    "cat": "cognition",
+    "desc": "The study and measurement of cognitive abilities involved in learning, reasoning, problem solving and adaptation."
+  },
+  {
+    "id": "Consciousness",
+    "cat": "cognition",
+    "desc": "Research on awareness, subjective experience and changing states such as wakefulness, sleep and altered attention."
+  },
+  {
+    "id": "Developmental psychology",
+    "cat": "development",
+    "desc": "Studies physical, cognitive, emotional and social change from conception through old age."
+  },
+  {
+    "id": "Prenatal & infant development",
+    "cat": "development",
+    "desc": "Early biological, sensory, cognitive and social development from before birth through infancy."
+  },
+  {
+    "id": "Attachment",
+    "cat": "development",
+    "desc": "The development of enduring emotional bonds between children and caregivers and their implications for later relationships."
+  },
+  {
+    "id": "Childhood cognition",
+    "cat": "development",
+    "desc": "How children's memory, language, reasoning and understanding of the world change with age and experience."
+  },
+  {
+    "id": "Adolescence",
+    "cat": "development",
+    "desc": "A developmental period involving major biological, cognitive, identity and social transitions."
+  },
+  {
+    "id": "Identity development",
+    "cat": "development",
+    "desc": "How people form and revise their sense of self, roles, values and belonging across development."
+  },
+  {
+    "id": "Moral development",
+    "cat": "development",
+    "desc": "How judgments about right, wrong, fairness, care and social rules develop and vary."
+  },
+  {
+    "id": "Aging & cognition",
+    "cat": "development",
+    "desc": "How memory, attention, reasoning and other cognitive functions change across later adulthood."
+  },
+  {
+    "id": "Social psychology",
+    "cat": "social",
+    "desc": "Studies how people's thoughts, feelings and behavior are shaped by other people and social contexts."
+  },
+  {
+    "id": "Social cognition",
+    "cat": "social",
+    "desc": "How people perceive, interpret, remember and reason about themselves and other people."
+  },
+  {
+    "id": "Attitudes & persuasion",
+    "cat": "social",
+    "desc": "How evaluations form and change, and how communication, context and motivation influence beliefs and behavior."
+  },
+  {
+    "id": "Conformity & social influence",
+    "cat": "social",
+    "desc": "How group norms, authority, social pressure and information from others can shape behavior."
+  },
+  {
+    "id": "Group processes",
+    "cat": "social",
+    "desc": "How people behave in groups, including cooperation, leadership, conflict, identity and collective decision-making."
+  },
+  {
+    "id": "Prejudice & discrimination",
+    "cat": "social",
+    "desc": "Psychological processes involved in stereotypes, bias, intergroup attitudes and unequal treatment."
+  },
+  {
+    "id": "Relationships",
+    "cat": "social",
+    "desc": "Research on attraction, intimacy, attachment, communication, conflict and the maintenance of close relationships."
+  },
+  {
+    "id": "Culture & psychology",
+    "cat": "social",
+    "desc": "How cultural environments shape—and are shaped by—psychological processes, behavior, norms and meaning."
+  },
+  {
+    "id": "Personality psychology",
+    "cat": "personality",
+    "desc": "Studies relatively enduring patterns of thought, feeling and behavior and the ways individuals differ from one another."
+  },
+  {
+    "id": "Personality traits",
+    "cat": "personality",
+    "desc": "Dimensions used to describe consistent individual differences in characteristic patterns of behavior and experience."
+  },
+  {
+    "id": "Self-concept",
+    "cat": "personality",
+    "desc": "The beliefs, representations and evaluations people hold about who they are."
+  },
+  {
+    "id": "Motivation",
+    "cat": "personality",
+    "desc": "Processes that energize, direct and sustain goal-oriented behavior."
+  },
+  {
+    "id": "Emotion",
+    "cat": "personality",
+    "desc": "Coordinated subjective, physiological, cognitive and behavioral responses to meaningful events."
+  },
+  {
+    "id": "Emotion regulation",
+    "cat": "personality",
+    "desc": "Processes used to influence which emotions occur, when they occur and how they are experienced or expressed."
+  },
+  {
+    "id": "Resilience",
+    "cat": "personality",
+    "desc": "Patterns of adaptation and recovery in the face of stress, adversity or major challenge."
+  },
+  {
+    "id": "Clinical psychology",
+    "cat": "clinical",
+    "desc": "Assessment, research and psychological treatment related to mental, emotional and behavioral difficulties."
+  },
+  {
+    "id": "Psychopathology",
+    "cat": "clinical",
+    "desc": "The scientific study of patterns of psychological symptoms, impairment and mental disorders."
+  },
+  {
+    "id": "Anxiety disorders",
+    "cat": "clinical",
+    "desc": "Conditions involving excessive fear, anxiety, avoidance or related patterns that cause significant distress or impairment."
+  },
+  {
+    "id": "Mood disorders",
+    "cat": "clinical",
+    "desc": "Conditions characterized by significant disturbances in mood, including depressive and bipolar presentations."
+  },
+  {
+    "id": "Trauma & PTSD",
+    "cat": "clinical",
+    "desc": "Psychological responses to traumatic events, including post-traumatic stress symptoms and recovery processes."
+  },
+  {
+    "id": "Psychosis & schizophrenia",
+    "cat": "clinical",
+    "desc": "Research and clinical work involving psychotic experiences such as delusions, hallucinations and disorganized thinking."
+  },
+  {
+    "id": "Personality disorders",
+    "cat": "clinical",
+    "desc": "Enduring patterns of inner experience and behavior that can create substantial impairment across contexts."
+  },
+  {
+    "id": "Psychotherapy",
+    "cat": "clinical",
+    "desc": "Structured psychological treatment using therapeutic relationships and evidence-informed methods to improve functioning and well-being."
+  },
+  {
+    "id": "Cognitive behavioral therapy",
+    "cat": "clinical",
+    "desc": "A structured therapy family that targets relationships among thoughts, emotions and behavior through cognitive and behavioral methods."
+  },
+  {
+    "id": "Acceptance & commitment therapy",
+    "cat": "clinical",
+    "desc": "A contextual behavioral approach that builds psychological flexibility through acceptance, present-moment awareness and values-guided action."
+  },
+  {
+    "id": "Counseling psychology",
+    "cat": "applied",
+    "desc": "Applies psychological science to well-being, adjustment, development, relationships and life challenges."
+  },
+  {
+    "id": "Health psychology",
+    "cat": "applied",
+    "desc": "Studies how behavior, stress, cognition and social factors interact with physical health and health care."
+  },
+  {
+    "id": "Educational psychology",
+    "cat": "applied",
+    "desc": "Applies psychological science to learning, instruction, motivation, assessment and educational environments."
+  },
+  {
+    "id": "Industrial-organizational psychology",
+    "cat": "applied",
+    "desc": "Applies psychology to work, including selection, performance, leadership, teams, motivation and organizational systems."
+  },
+  {
+    "id": "Human factors psychology",
+    "cat": "applied",
+    "desc": "Designs tools, interfaces and environments around human perception, cognition, limitations and behavior."
+  },
+  {
+    "id": "Forensic psychology",
+    "cat": "applied",
+    "desc": "Applies psychological knowledge to legal questions, courts, assessment and justice-related contexts."
+  },
+  {
+    "id": "Neuropsychology",
+    "cat": "applied",
+    "desc": "Studies relationships between brain function and cognition or behavior, often through specialized assessment."
+  },
+  {
+    "id": "Sport & performance psychology",
+    "cat": "applied",
+    "desc": "Applies psychological principles to performance, motivation, focus, confidence, teamwork and well-being."
+  },
+  {
+    "id": "Community psychology",
+    "cat": "applied",
+    "desc": "Studies people within communities and systems, emphasizing prevention, participation, empowerment and social context."
+  },
+  {
+    "id": "Positive psychology",
+    "cat": "applied",
+    "desc": "Studies strengths, well-being, meaning, positive emotion and conditions that help people and communities flourish."
+  }
+];
+
+const links = [
+  [
+    "Psychology",
+    "History of psychology"
+  ],
+  [
+    "Psychology",
+    "Research methods"
+  ],
+  [
+    "Research methods",
+    "Statistics"
+  ],
+  [
+    "Research methods",
+    "Psychometrics"
+  ],
+  [
+    "Research methods",
+    "Replication & open science"
+  ],
+  [
+    "Research methods",
+    "Ethics in psychology"
+  ],
+  [
+    "Psychometrics",
+    "Intelligence"
+  ],
+  [
+    "Psychometrics",
+    "Personality traits"
+  ],
+  [
+    "Psychometrics",
+    "Clinical psychology"
+  ],
+  [
+    "Behavioral neuroscience",
+    "Neurons & synapses"
+  ],
+  [
+    "Behavioral neuroscience",
+    "Brain networks"
+  ],
+  [
+    "Behavioral neuroscience",
+    "Genetics & behavior"
+  ],
+  [
+    "Behavioral neuroscience",
+    "Hormones & behavior"
+  ],
+  [
+    "Behavioral neuroscience",
+    "Cognitive psychology"
+  ],
+  [
+    "Behavioral neuroscience",
+    "Neuropsychology"
+  ],
+  [
+    "Neurons & synapses",
+    "Neuroplasticity"
+  ],
+  [
+    "Brain networks",
+    "Attention"
+  ],
+  [
+    "Brain networks",
+    "Memory"
+  ],
+  [
+    "Brain networks",
+    "Emotion"
+  ],
+  [
+    "Neuroplasticity",
+    "Learning"
+  ],
+  [
+    "Sleep & circadian rhythms",
+    "Memory"
+  ],
+  [
+    "Sleep & circadian rhythms",
+    "Consciousness"
+  ],
+  [
+    "Stress physiology",
+    "Emotion"
+  ],
+  [
+    "Stress physiology",
+    "Health psychology"
+  ],
+  [
+    "Cognitive psychology",
+    "Sensation"
+  ],
+  [
+    "Sensation",
+    "Perception"
+  ],
+  [
+    "Perception",
+    "Attention"
+  ],
+  [
+    "Attention",
+    "Memory"
+  ],
+  [
+    "Memory",
+    "Learning"
+  ],
+  [
+    "Language",
+    "Memory"
+  ],
+  [
+    "Language",
+    "Thinking & reasoning"
+  ],
+  [
+    "Thinking & reasoning",
+    "Decision-making"
+  ],
+  [
+    "Decision-making",
+    "Emotion"
+  ],
+  [
+    "Thinking & reasoning",
+    "Intelligence"
+  ],
+  [
+    "Consciousness",
+    "Attention"
+  ],
+  [
+    "Developmental psychology",
+    "Prenatal & infant development"
+  ],
+  [
+    "Prenatal & infant development",
+    "Attachment"
+  ],
+  [
+    "Attachment",
+    "Relationships"
+  ],
+  [
+    "Developmental psychology",
+    "Childhood cognition"
+  ],
+  [
+    "Childhood cognition",
+    "Language"
+  ],
+  [
+    "Developmental psychology",
+    "Adolescence"
+  ],
+  [
+    "Adolescence",
+    "Identity development"
+  ],
+  [
+    "Identity development",
+    "Self-concept"
+  ],
+  [
+    "Developmental psychology",
+    "Moral development"
+  ],
+  [
+    "Developmental psychology",
+    "Aging & cognition"
+  ],
+  [
+    "Aging & cognition",
+    "Memory"
+  ],
+  [
+    "Aging & cognition",
+    "Neuropsychology"
+  ],
+  [
+    "Social psychology",
+    "Social cognition"
+  ],
+  [
+    "Social cognition",
+    "Attitudes & persuasion"
+  ],
+  [
+    "Attitudes & persuasion",
+    "Conformity & social influence"
+  ],
+  [
+    "Conformity & social influence",
+    "Group processes"
+  ],
+  [
+    "Group processes",
+    "Prejudice & discrimination"
+  ],
+  [
+    "Social cognition",
+    "Prejudice & discrimination"
+  ],
+  [
+    "Social psychology",
+    "Relationships"
+  ],
+  [
+    "Culture & psychology",
+    "Social psychology"
+  ],
+  [
+    "Culture & psychology",
+    "Developmental psychology"
+  ],
+  [
+    "Culture & psychology",
+    "Personality psychology"
+  ],
+  [
+    "Personality psychology",
+    "Personality traits"
+  ],
+  [
+    "Personality psychology",
+    "Self-concept"
+  ],
+  [
+    "Motivation",
+    "Decision-making"
+  ],
+  [
+    "Motivation",
+    "Learning"
+  ],
+  [
+    "Emotion",
+    "Emotion regulation"
+  ],
+  [
+    "Emotion",
+    "Motivation"
+  ],
+  [
+    "Resilience",
+    "Stress physiology"
+  ],
+  [
+    "Resilience",
+    "Positive psychology"
+  ],
+  [
+    "Clinical psychology",
+    "Psychopathology"
+  ],
+  [
+    "Psychopathology",
+    "Anxiety disorders"
+  ],
+  [
+    "Psychopathology",
+    "Mood disorders"
+  ],
+  [
+    "Psychopathology",
+    "Trauma & PTSD"
+  ],
+  [
+    "Psychopathology",
+    "Psychosis & schizophrenia"
+  ],
+  [
+    "Psychopathology",
+    "Personality disorders"
+  ],
+  [
+    "Personality psychology",
+    "Personality disorders"
+  ],
+  [
+    "Clinical psychology",
+    "Psychotherapy"
+  ],
+  [
+    "Psychotherapy",
+    "Cognitive behavioral therapy"
+  ],
+  [
+    "Psychotherapy",
+    "Acceptance & commitment therapy"
+  ],
+  [
+    "Cognitive behavioral therapy",
+    "Learning"
+  ],
+  [
+    "Cognitive behavioral therapy",
+    "Thinking & reasoning"
+  ],
+  [
+    "Acceptance & commitment therapy",
+    "Emotion regulation"
+  ],
+  [
+    "Anxiety disorders",
+    "Cognitive behavioral therapy"
+  ],
+  [
+    "Trauma & PTSD",
+    "Psychotherapy"
+  ],
+  [
+    "Counseling psychology",
+    "Psychotherapy"
+  ],
+  [
+    "Health psychology",
+    "Stress physiology"
+  ],
+  [
+    "Educational psychology",
+    "Learning"
+  ],
+  [
+    "Educational psychology",
+    "Motivation"
+  ],
+  [
+    "Industrial-organizational psychology",
+    "Motivation"
+  ],
+  [
+    "Industrial-organizational psychology",
+    "Group processes"
+  ],
+  [
+    "Human factors psychology",
+    "Attention"
+  ],
+  [
+    "Human factors psychology",
+    "Perception"
+  ],
+  [
+    "Forensic psychology",
+    "Psychometrics"
+  ],
+  [
+    "Forensic psychology",
+    "Clinical psychology"
+  ],
+  [
+    "Neuropsychology",
+    "Memory"
+  ],
+  [
+    "Neuropsychology",
+    "Attention"
+  ],
+  [
+    "Sport & performance psychology",
+    "Motivation"
+  ],
+  [
+    "Sport & performance psychology",
+    "Attention"
+  ],
+  [
+    "Community psychology",
+    "Culture & psychology"
+  ],
+  [
+    "Community psychology",
+    "Resilience"
+  ],
+  [
+    "Positive psychology",
+    "Emotion"
+  ],
+  [
+    "Positive psychology",
+    "Motivation"
+  ]
+];
+
+const relationshipNotes = {
+  "Psychology|||History of psychology": "History of psychology explains how the field's major questions, schools and methods developed into contemporary psychological science.",
+  "Psychology|||Research methods": "Psychology depends on systematic research methods to turn questions about mind and behavior into testable evidence.",
+  "Research methods|||Statistics": "Statistical methods help psychologists analyze observations, quantify uncertainty and evaluate whether patterns are consistent with research hypotheses.",
+  "Research methods|||Psychometrics": "Psychometrics develops measurement tools that psychological research uses to operationalize abilities, traits, symptoms and other constructs.",
+  "Research methods|||Replication & open science": "Replication and open-science practices test whether psychological findings are robust, reproducible and transparently reported.",
+  "Research methods|||Ethics in psychology": "Psychological research is governed by ethical principles concerning consent, risk, privacy, fairness and responsible conduct.",
+  "Psychometrics|||Intelligence": "Intelligence research relies heavily on psychometric theory to design, validate and interpret measures of cognitive ability.",
+  "Psychometrics|||Personality traits": "Personality traits are commonly studied through psychometric scales designed to measure stable patterns of individual difference.",
+  "Psychometrics|||Clinical psychology": "Clinical assessment often uses standardized psychological measures whose interpretation depends on psychometric reliability and validity.",
+  "Behavioral neuroscience|||Neurons & synapses": "Behavioral neuroscience connects behavior to the cellular communication processes of neurons and synapses.",
+  "Behavioral neuroscience|||Brain networks": "Psychological functions emerge from interacting neural systems, making brain-network organization central to behavioral neuroscience.",
+  "Behavioral neuroscience|||Genetics & behavior": "Genes can influence neural development and function, while behavioral outcomes reflect interaction between biology and environment.",
+  "Behavioral neuroscience|||Hormones & behavior": "Hormonal signals interact with neural systems involved in stress, reproduction, motivation, mood and social behavior.",
+  "Behavioral neuroscience|||Cognitive psychology": "Cognitive processes such as memory and attention are increasingly studied alongside the neural systems that support them.",
+  "Behavioral neuroscience|||Neuropsychology": "Neuropsychology uses patterns of cognitive and behavioral functioning to understand relationships between brain systems and psychological processes.",
+  "Neurons & synapses|||Neuroplasticity": "Changes in synaptic strength and neural connectivity are core mechanisms through which experience and learning can alter nervous-system function.",
+  "Brain networks|||Attention": "Attention depends on coordinated activity across interacting brain systems that prioritize and control information processing.",
+  "Brain networks|||Memory": "Memory relies on distributed neural systems involved in encoding, consolidation, storage and retrieval.",
+  "Brain networks|||Emotion": "Emotional responses arise through interacting neural systems involved in appraisal, salience, bodily regulation and action.",
+  "Neuroplasticity|||Learning": "Learning changes behavior through experience, and neuroplasticity provides biological mechanisms for lasting change in neural function.",
+  "Sleep & circadian rhythms|||Memory": "Sleep contributes to cognitive functioning and is closely connected with processes involved in memory consolidation and retrieval.",
+  "Sleep & circadian rhythms|||Consciousness": "Sleep is a major altered state of consciousness and provides a natural context for studying changing levels and contents of awareness.",
+  "Stress physiology|||Emotion": "Physiological stress systems interact with emotional appraisal and regulation during challenge or threat.",
+  "Stress physiology|||Health psychology": "Health psychology studies how stress responses, behavior and social context can influence physical health and illness.",
+  "Cognitive psychology|||Sensation": "Sensation supplies the incoming information that cognitive systems subsequently select, interpret, remember and use.",
+  "Sensation|||Perception": "Sensation concerns detection of stimulation, while perception concerns how that sensory information is organized and interpreted.",
+  "Perception|||Attention": "Attention influences which sensory information receives priority and therefore shapes what is consciously perceived.",
+  "Attention|||Memory": "Attention affects what information is encoded, maintained and later retrieved from memory.",
+  "Memory|||Learning": "Learning produces relatively lasting changes through experience, while memory allows information and acquired knowledge to persist over time.",
+  "Language|||Memory": "Understanding and producing language depend on stored semantic, lexical and episodic knowledge as well as working-memory processes.",
+  "Language|||Thinking & reasoning": "Language provides symbolic tools used in many forms of reasoning, categorization, planning and communication.",
+  "Thinking & reasoning|||Decision-making": "Decision-making draws on reasoning processes to compare options, predict consequences and evaluate evidence.",
+  "Decision-making|||Emotion": "Emotion can shape valuation, risk perception, attention and action tendencies during choices.",
+  "Thinking & reasoning|||Intelligence": "Many theories and measures of intelligence include reasoning, problem solving and flexible use of knowledge.",
+  "Consciousness|||Attention": "Attention and consciousness overlap but are not identical; both concern selection and access to information during ongoing mental processing.",
+  "Developmental psychology|||Prenatal & infant development": "Prenatal and infant development form the earliest part of the lifespan changes studied by developmental psychology.",
+  "Prenatal & infant development|||Attachment": "Early caregiver interactions contribute to the emergence of attachment relationships during infancy.",
+  "Attachment|||Relationships": "Attachment research informs understanding of how expectations and patterns in close relationships can develop and change.",
+  "Developmental psychology|||Childhood cognition": "Developmental psychology studies age-related changes in children's memory, language, reasoning and understanding.",
+  "Childhood cognition|||Language": "Language acquisition and development are major components of cognitive change during childhood.",
+  "Developmental psychology|||Adolescence": "Adolescence is a major lifespan transition studied through biological, cognitive, emotional and social development.",
+  "Adolescence|||Identity development": "Adolescence often involves intensified exploration of identity, roles, values and belonging.",
+  "Identity development|||Self-concept": "Identity development depends partly on how people construct, evaluate and integrate beliefs about themselves.",
+  "Developmental psychology|||Moral development": "Moral reasoning, values and social understanding change across development and experience.",
+  "Developmental psychology|||Aging & cognition": "Developmental psychology includes later adulthood and investigates how cognition and functioning change with age.",
+  "Aging & cognition|||Memory": "Memory systems can show different patterns of stability or change across later adulthood.",
+  "Aging & cognition|||Neuropsychology": "Neuropsychological assessment helps characterize cognitive changes associated with normal aging and neurological conditions.",
+  "Social psychology|||Social cognition": "Social cognition provides mechanisms for how people interpret themselves, others and social situations.",
+  "Social cognition|||Attitudes & persuasion": "Attitudes involve evaluations and beliefs that are formed, represented and changed through social-cognitive processes.",
+  "Attitudes & persuasion|||Conformity & social influence": "Persuasion and conformity both examine how social information and other people can change judgments or behavior.",
+  "Conformity & social influence|||Group processes": "Group norms, roles, leadership and collective identities are important sources of social influence.",
+  "Group processes|||Prejudice & discrimination": "Intergroup processes can contribute to stereotypes, bias, exclusion, cooperation or conflict between social groups.",
+  "Social cognition|||Prejudice & discrimination": "Categorization, attribution and stereotype processes help explain how bias can form and influence social judgment.",
+  "Social psychology|||Relationships": "Close relationships are studied as social systems involving attraction, communication, interdependence and conflict.",
+  "Culture & psychology|||Social psychology": "Social behavior occurs within cultural systems that shape norms, identities, meanings and expectations.",
+  "Culture & psychology|||Developmental psychology": "Development unfolds in cultural contexts that influence caregiving, learning, identity, values and social expectations.",
+  "Culture & psychology|||Personality psychology": "Personality is expressed and interpreted within cultural contexts that shape norms, trait meanings and behavioral expectations.",
+  "Personality psychology|||Personality traits": "Trait models provide one major framework for describing stable individual differences studied in personality psychology.",
+  "Personality psychology|||Self-concept": "Personality research intersects with how people understand themselves and organize beliefs about their characteristics and identities.",
+  "Motivation|||Decision-making": "Goals, needs and incentives influence which options people value and pursue during decision-making.",
+  "Motivation|||Learning": "Motivation affects attention, persistence, reinforcement and the likelihood that learned behavior is initiated or maintained.",
+  "Emotion|||Emotion regulation": "Emotion regulation concerns how people modify the onset, intensity, duration or expression of emotional responses.",
+  "Emotion|||Motivation": "Emotion and motivation interact because affective states can signal needs, shape goals and energize action.",
+  "Resilience|||Stress physiology": "Resilience research examines patterns of adaptation under stress and how biological, psychological and social resources contribute to recovery.",
+  "Resilience|||Positive psychology": "Positive psychology studies strengths and well-being, making resilience a major area of overlap.",
+  "Clinical psychology|||Psychopathology": "Clinical psychology uses research on psychopathology to understand, assess and treat patterns of significant psychological distress or impairment.",
+  "Psychopathology|||Anxiety disorders": "Anxiety disorders are an important domain within psychopathology involving maladaptive fear, anxiety and avoidance.",
+  "Psychopathology|||Mood disorders": "Mood disorders are studied within psychopathology as patterns involving significant disturbances in mood and functioning.",
+  "Psychopathology|||Trauma & PTSD": "Trauma-related symptoms and post-traumatic stress are studied within psychopathology and clinical research.",
+  "Psychopathology|||Psychosis & schizophrenia": "Psychotic symptoms and schizophrenia are major subjects of research on severe mental illness and psychopathology.",
+  "Psychopathology|||Personality disorders": "Personality disorders connect personality functioning with clinically significant, enduring patterns of impairment.",
+  "Personality psychology|||Personality disorders": "Research on normal personality dimensions can help clarify how enduring traits relate to maladaptive personality patterns.",
+  "Clinical psychology|||Psychotherapy": "Psychotherapy is one of the principal intervention domains within clinical psychology.",
+  "Psychotherapy|||Cognitive behavioral therapy": "Cognitive behavioral therapy is a major evidence-based family of psychotherapies that uses cognitive and behavioral strategies.",
+  "Psychotherapy|||Acceptance & commitment therapy": "Acceptance and commitment therapy is a psychotherapy approach within contextual behavioral science that targets psychological flexibility.",
+  "Cognitive behavioral therapy|||Learning": "Behavioral components of CBT draw on learning principles such as exposure, reinforcement and behavior change.",
+  "Cognitive behavioral therapy|||Thinking & reasoning": "Cognitive components of CBT examine and modify patterns of interpretation, belief and reasoning that can maintain distress.",
+  "Acceptance & commitment therapy|||Emotion regulation": "ACT changes a person's relationship with difficult internal experiences rather than simply trying to eliminate them, linking it with broader emotion-regulation processes.",
+  "Anxiety disorders|||Cognitive behavioral therapy": "CBT methods, including exposure-based approaches, are widely studied psychological treatments for anxiety-related problems.",
+  "Trauma & PTSD|||Psychotherapy": "Psychological treatment is a major component of care and research for trauma-related symptoms and PTSD.",
+  "Counseling psychology|||Psychotherapy": "Counseling psychology commonly uses psychotherapy and other psychological interventions to support adjustment, well-being and development.",
+  "Health psychology|||Stress physiology": "Health psychology links psychological stress and coping processes with physiological responses and health outcomes.",
+  "Educational psychology|||Learning": "Educational psychology applies research on learning, memory, motivation and development to educational settings.",
+  "Educational psychology|||Motivation": "Student engagement and persistence are strongly connected to motivational processes studied in educational psychology.",
+  "Industrial-organizational psychology|||Motivation": "Work motivation is a central topic in industrial-organizational psychology because it influences performance, persistence and job behavior.",
+  "Industrial-organizational psychology|||Group processes": "Teams, leadership, organizational climate and coordination connect workplace psychology with group-process research.",
+  "Human factors psychology|||Attention": "Human-factors design must account for limits of attention when creating interfaces, alerts, controls and work systems.",
+  "Human factors psychology|||Perception": "Effective interface and environment design depends on how people detect and interpret visual, auditory and other sensory information.",
+  "Forensic psychology|||Psychometrics": "Forensic psychological assessment often relies on standardized measurement and careful interpretation of test evidence.",
+  "Forensic psychology|||Clinical psychology": "Forensic practice can apply clinical assessment and psychological expertise to legal questions and justice settings.",
+  "Neuropsychology|||Memory": "Memory assessment is a major part of neuropsychology because different brain conditions can produce distinctive patterns of memory impairment.",
+  "Neuropsychology|||Attention": "Attention and executive control are frequently evaluated in neuropsychological assessment because they depend on distributed brain systems.",
+  "Sport & performance psychology|||Motivation": "Performance psychology applies motivational science to goal pursuit, persistence, confidence and preparation.",
+  "Sport & performance psychology|||Attention": "Selective and sustained attention are important to skilled performance under pressure.",
+  "Community psychology|||Culture & psychology": "Community psychology emphasizes social and cultural context when studying well-being, prevention and systems-level change.",
+  "Community psychology|||Resilience": "Community resources, social support and collective capacity can contribute to resilience under adversity.",
+  "Positive psychology|||Emotion": "Positive psychology studies positive emotions and how they relate to well-being, relationships and adaptive functioning.",
+  "Positive psychology|||Motivation": "Meaning, goals, strengths and engagement connect positive psychology with motivation research."
+};
+
+const sourceSets = {
+  "foundations": [
+    {
+      "name": "APA Dictionary of Psychology — Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/psychology"
+    },
+    {
+      "name": "APA PsycInfo Classification Categories and Codes",
+      "org": "American Psychological Association",
+      "type": "Discipline classification reference",
+      "url": "https://www.apa.org/pubs/databases/training/class-codes.html"
+    },
+    {
+      "name": "Psychology 2e — Research",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/books/psychology-2e/pages/2-introduction"
+    }
+  ],
+  "bio": [
+    {
+      "name": "Psychology 2e — Biopsychology",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/books/psychology-2e/pages/3-introduction"
+    },
+    {
+      "name": "Research Areas Overview",
+      "org": "National Institute of Mental Health",
+      "type": "U.S. government research source",
+      "url": "https://www.nimh.nih.gov/research/research-conducted-at-nimh/research-areas"
+    },
+    {
+      "name": "Cognitive Science",
+      "org": "National Library of Medicine / NIH",
+      "type": "Scientific reference",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK518721/"
+    }
+  ],
+  "cognition": [
+    {
+      "name": "Psychology 2e",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/details/books/psychology-2e"
+    },
+    {
+      "name": "Cognitive Science",
+      "org": "National Library of Medicine / NIH",
+      "type": "Scientific reference",
+      "url": "https://www.ncbi.nlm.nih.gov/books/NBK518721/"
+    },
+    {
+      "name": "Section on Behavioral Neuroscience",
+      "org": "National Institute of Mental Health",
+      "type": "U.S. government research source",
+      "url": "https://www.nimh.nih.gov/research/research-conducted-at-nimh/research-areas/clinics-and-labs/sbn"
+    }
+  ],
+  "development": [
+    {
+      "name": "APA Dictionary — Developmental Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/developmental-psychology"
+    },
+    {
+      "name": "Psychology 2e — Lifespan Development",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/details/books/psychology-2e"
+    }
+  ],
+  "social": [
+    {
+      "name": "APA Handbook of Personality and Social Psychology",
+      "org": "American Psychological Association",
+      "type": "Academic reference handbook",
+      "url": "https://www.apa.org/pubs/books/4311513.html"
+    },
+    {
+      "name": "Psychology 2e",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/details/books/psychology-2e"
+    }
+  ],
+  "personality": [
+    {
+      "name": "APA Handbook of Personality and Social Psychology",
+      "org": "American Psychological Association",
+      "type": "Academic reference handbook",
+      "url": "https://www.apa.org/pubs/books/4311513.html"
+    },
+    {
+      "name": "APA Dictionary — Personality Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/personality-psychology"
+    },
+    {
+      "name": "Psychology 2e",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/details/books/psychology-2e"
+    }
+  ],
+  "clinical": [
+    {
+      "name": "Research Areas Overview",
+      "org": "National Institute of Mental Health",
+      "type": "U.S. government research source",
+      "url": "https://www.nimh.nih.gov/research/research-conducted-at-nimh/research-areas"
+    },
+    {
+      "name": "Psychology 2e — Disorders, Therapy & Treatment",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/details/books/psychology-2e"
+    },
+    {
+      "name": "NCBI Bookshelf",
+      "org": "National Library of Medicine / NIH",
+      "type": "Biomedical reference library",
+      "url": "https://www.ncbi.nlm.nih.gov/books/"
+    }
+  ],
+  "applied": [
+    {
+      "name": "APA Dictionary of Psychology — Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/psychology"
+    },
+    {
+      "name": "APA PsycInfo Classification Categories and Codes",
+      "org": "American Psychological Association",
+      "type": "Discipline classification reference",
+      "url": "https://www.apa.org/pubs/databases/training/class-codes.html"
+    },
+    {
+      "name": "Psychology 2e",
+      "org": "OpenStax · Rice University",
+      "type": "Peer-reviewed open textbook",
+      "url": "https://openstax.org/details/books/psychology-2e"
+    }
+  ]
+};
+
+const specialSources = {
+  "Psychology": [
+    {
+      "name": "APA Dictionary of Psychology — Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/psychology"
+    }
+  ],
+  "Developmental psychology": [
+    {
+      "name": "APA Dictionary — Developmental Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/developmental-psychology"
+    }
+  ],
+  "Personality psychology": [
+    {
+      "name": "APA Dictionary — Personality Psychology",
+      "org": "American Psychological Association",
+      "type": "Authoritative psychology reference",
+      "url": "https://dictionary.apa.org/personality-psychology"
+    }
+  ],
+  "Behavioral neuroscience": [
+    {
+      "name": "Section on Behavioral Neuroscience",
+      "org": "National Institute of Mental Health",
+      "type": "U.S. government research source",
+      "url": "https://www.nimh.nih.gov/research/research-conducted-at-nimh/research-areas/clinics-and-labs/sbn"
+    }
+  ]
+};
+
+const nodeById = new Map(nodes.map(n => [n.id,n]));
+const linkObjs = links.map(([s,t],i) => ({source:s,target:t,index:i}));
+
+function edgeKey(a,b){
+  const direct = `${a}|||${b}`;
+  const reverse = `${b}|||${a}`;
+  return relationshipNotes[direct] ? direct : reverse;
+}
+function relationText(a,b){
+  return relationshipNotes[edgeKey(a,b)] || `${a} and ${b} overlap because methods, concepts or evidence from one field are used to investigate questions in the other.`;
+}
+function linkNames(l){
+  return [typeof l.source === "string" ? l.source : l.source.id, typeof l.target === "string" ? l.target : l.target.id];
+}
+function sourcesForNode(id){
+  const n = nodeById.get(id);
+  const items = [...(specialSources[id] || []), ...(sourceSets[n.cat] || [])];
+  const seen = new Set();
+  return items.filter(s => !seen.has(s.url) && seen.add(s.url)).slice(0,3);
+}
+function sourcesForEdge(a,b){
+  const items = [...sourcesForNode(a), ...sourcesForNode(b)];
+  const seen = new Set();
+  const deduped = items.filter(s => !seen.has(s.url) && seen.add(s.url)).slice(0,4);
+  deduped.push({
+    name:`Literature search: ${a} + ${b}`,
+    org:"Google Scholar",
+    type:"Further literature search",
+    url:`https://scholar.google.com/scholar?q=${encodeURIComponent(a+" "+b)}`
+  });
+  return deduped;
+}
+
+const neighbors = new Map(nodes.map(n => [n.id,new Set()]));
+linkObjs.forEach(l => {
+  neighbors.get(l.source).add(l.target);
+  neighbors.get(l.target).add(l.source);
+});
+
+const svg = d3.select("#svg");
+const g = svg.append("g");
+const zoom = d3.zoom().scaleExtent([0.3,3]).on("zoom", ev => g.attr("transform",ev.transform));
+svg.call(zoom);
+
+function size(){ return {w:window.innerWidth,h:window.innerHeight}; }
+let {w,h} = size();
+
+const simulation = d3.forceSimulation(nodes)
+  .force("link",d3.forceLink(linkObjs).id(d=>d.id).distance(74).strength(.5))
+  .force("charge",d3.forceManyBody().strength(-195))
+  .force("center",d3.forceCenter(w/2,h/2))
+  .force("collision",d3.forceCollide().radius(39));
+
+const visibleLink = g.append("g").attr("class","links-visible")
+  .selectAll("line").data(linkObjs).join("line")
+  .attr("class","link").attr("stroke-width",1);
+
+const hitLink = g.append("g").attr("class","links-hit")
+  .selectAll("line").data(linkObjs).join("line")
+  .attr("class","link-hit")
+  .on("click",(ev,d)=>{ ev.stopPropagation(); selectRelationship(d,true); });
+
+const node = g.append("g").attr("class","nodes")
+  .selectAll("g").data(nodes).join("g")
+  .attr("class","node").call(drag(simulation));
+
+node.append("circle").attr("class","halo").attr("r",16);
+node.append("circle").attr("class","core").attr("r",8).attr("fill",d=>categories[d.cat].color);
+node.append("text").attr("dy",-13).text(d=>d.id);
+
+node.on("click",(ev,d)=>{ ev.stopPropagation(); selectNode(d,true); });
+svg.on("click",()=>clearSelection());
+
+simulation.on("tick",()=>{
+  visibleLink
+    .attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+    .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  hitLink
+    .attr("x1",d=>d.source.x).attr("y1",d=>d.source.y)
+    .attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  node.attr("transform",d=>`translate(${d.x},${d.y})`);
+});
+
+function drag(sim){
+  function started(ev,d){
+    if(!ev.active) sim.alphaTarget(.25).restart();
+    d.fx=d.x; d.fy=d.y;
+  }
+  function dragged(ev,d){d.fx=ev.x;d.fy=ev.y}
+  function ended(ev,d){
+    if(!ev.active) sim.alphaTarget(0);
+    d.fx=null;d.fy=null;
+  }
+  return d3.drag().on("start",started).on("drag",dragged).on("end",ended);
+}
+
+let currentNode = null;
+let currentEdge = null;
+let explorationPath = [];
+let soundOn = false;
+let audioCtx = null;
+
+function uiTone(freq=520,duration=.035,volume=.025){
+  if(!soundOn) return;
+  try{
+    audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(), gain=audioCtx.createGain();
+    o.type="sine";o.frequency.value=freq;
+    gain.gain.setValueAtTime(volume,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);
+    o.connect(gain);gain.connect(audioCtx.destination);
+    o.start();o.stop(audioCtx.currentTime+duration);
+  }catch(e){}
+}
+
+function addToPath(id){
+  if(!id) return;
+  if(explorationPath.length===0 || explorationPath[explorationPath.length-1]!==id){
+    explorationPath.push(id);
+    if(explorationPath.length>8) explorationPath.shift();
+  }
+  renderPath();
+}
+function renderPath(){
+  const bar=document.getElementById("pathbar");
+  if(explorationPath.length<2){bar.classList.remove("show");return}
+  document.getElementById("pathText").textContent=explorationPath.join("  →  ");
+  bar.classList.add("show");
+}
+document.getElementById("clearPath").addEventListener("click",()=>{
+  explorationPath=[];renderPath();uiTone(390,.035,.02);
+});
+
+function selectNode(d,openDrawer=false){
+  currentNode=d;currentEdge=null;
+  addToPath(d.id);
+  const active = new Set([d.id,...neighbors.get(d.id)]);
+  node.classed("dim",n=>!active.has(n.id))
+      .classed("lit",n=>n.id===d.id)
+      .classed("connected",n=>n.id!==d.id && active.has(n.id));
+  visibleLink.classed("dim",l=>l.source.id!==d.id&&l.target.id!==d.id)
+      .classed("lit",l=>l.source.id===d.id||l.target.id===d.id)
+      .classed("selected",false);
+
+  const related=[...neighbors.get(d.id)].sort();
+  const sourceCount=sourcesForNode(d.id).length;
+  document.getElementById("detail").innerHTML=`
+    <div class="name">${escapeHtml(d.id)}</div>
+    <div class="cat">${escapeHtml(categories[d.cat].label)}</div>
+    <div class="desc">${escapeHtml(d.desc)}</div>
+    <div class="microline"><span class="status-dot"></span>${related.length} mapped connections · ${sourceCount} reference sources</div>
+    <button class="action primary" id="openField">Explore field →</button>
+  `;
+  document.getElementById("openField").onclick=()=>openFieldDrawer(d);
+  if(openDrawer) openFieldDrawer(d);
+  uiTone(560,.035,.022);
+}
+
+function openFieldDrawer(d){
+  const drawer=document.getElementById("drawer");
+  const related=[...neighbors.get(d.id)].sort();
+  document.getElementById("drawerKicker").textContent="Psychology intelligence";
+  document.getElementById("drawerTitle").textContent=d.id;
+  const sourceCards=sourcesForNode(d.id).map(sourceCard).join("");
+  const connectionCards=related.map(other=>`
+    <button class="connection" data-a="${attr(d.id)}" data-b="${attr(other)}">
+      <div class="to">${escapeHtml(other)}</div>
+      <div class="why">${escapeHtml(relationText(d.id,other))}</div>
+      <div class="arrow">›</div>
+    </button>`).join("");
+  document.getElementById("drawerBody").innerHTML=`
+    <div class="section-title">${escapeHtml(categories[d.cat].label)}</div>
+    <div class="lead">${escapeHtml(d.desc)}</div>
+    <div class="badge-row">
+      <span class="badge">${related.length} connections</span>
+      <span class="badge">Sourced reference set</span>
+      <span class="badge">Reviewed 16 Aug 2026</span>
+    </div>
+    <div class="section-title">Connections</div>
+    ${connectionCards || '<div class="lead">No mapped connections.</div>'}
+    <div class="section-title">Reference sources</div>
+    ${sourceCards}
+    <div class="source-note">Reference links support the psychology context. For publication-grade claims, add connection-specific papers or official references to the <code>specialSources</code> / evidence data in this file.</div>
+  `;
+  drawer.classList.add("open");
+  drawer.querySelectorAll(".connection").forEach(btn=>btn.addEventListener("click",()=>{
+    const edge=findEdge(btn.dataset.a,btn.dataset.b);
+    if(edge) selectRelationship(edge,true);
+  }));
+}
+
+function findEdge(a,b){
+  return linkObjs.find(l=>{
+    const [x,y]=linkNames(l);
+    return (x===a&&y===b)||(x===b&&y===a);
+  });
+}
+
+function selectRelationship(l,openDrawer=true){
+  currentEdge=l;currentNode=null;
+  const [a,b]=linkNames(l);
+  const active=new Set([a,b]);
+  node.classed("dim",n=>!active.has(n.id))
+      .classed("lit",n=>active.has(n.id))
+      .classed("connected",false);
+  visibleLink.classed("dim",x=>x!==l)
+      .classed("lit",false)
+      .classed("selected",x=>x===l);
+
+  document.getElementById("detail").innerHTML=`
+    <div class="name">${escapeHtml(a)} × ${escapeHtml(b)}</div>
+    <div class="cat">Relationship analysis</div>
+    <div class="desc">${escapeHtml(relationText(a,b))}</div>
+    <div class="microline"><span class="status-dot"></span>${sourcesForEdge(a,b).length-1} reference sources + literature search</div>
+    <button class="action primary" id="openRelation">View evidence →</button>
+  `;
+  document.getElementById("openRelation").onclick=()=>openRelationshipDrawer(a,b);
+  if(openDrawer) openRelationshipDrawer(a,b);
+  uiTone(650,.05,.023);
+}
+
+function openRelationshipDrawer(a,b){
+  const drawer=document.getElementById("drawer");
+  document.getElementById("drawerKicker").textContent="Relationship analysis";
+  document.getElementById("drawerTitle").textContent=`${a} × ${b}`;
+  const sources=sourcesForEdge(a,b);
+  document.getElementById("drawerBody").innerHTML=`
+    <div class="section-title">Why this connection exists</div>
+    <div class="lead">${escapeHtml(relationText(a,b))}</div>
+    <div class="badge-row">
+      <span class="badge">Mapped connection</span>
+      <span class="badge">${sources.length-1} reference sources</span>
+      <span class="badge">Literature search included</span>
+    </div>
+    <div class="section-title">Evidence & sources</div>
+    ${sources.map(sourceCard).join("")}
+    <div class="section-title">Continue exploring</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+      <button class="action" id="goA">${escapeHtml(a)}</button>
+      <button class="action" id="goB">${escapeHtml(b)}</button>
+    </div>
+    <div class="source-note">This edition keeps the relationship explanation and its references visible together so visitors can inspect the basis for the line instead of treating the line as an unexplained claim.</div>
+  `;
+  drawer.classList.add("open");
+  document.getElementById("goA").onclick=()=>selectNode(nodeById.get(a),true);
+  document.getElementById("goB").onclick=()=>selectNode(nodeById.get(b),true);
+}
+
+function sourceCard(s){
+  return `<a class="source-card" href="${attr(s.url)}" target="_blank" rel="noopener noreferrer">
+    <div class="source-name">${escapeHtml(s.name)} ↗</div>
+    <div class="source-meta">${escapeHtml(s.org)} · ${escapeHtml(s.type)}</div>
+  </a>`;
+}
+
+function clearSelection(){
+  currentNode=null;currentEdge=null;
+  node.classed("dim",false).classed("lit",false).classed("connected",false);
+  visibleLink.classed("dim",false).classed("lit",false).classed("selected",false);
+  document.getElementById("detail").innerHTML='<div class="placeholder">Select a field or concept to see what it is, what it connects to, and why those connections exist.</div>';
+  closeDrawer();
+}
+
+function closeDrawer(){document.getElementById("drawer").classList.remove("open")}
+document.getElementById("drawerClose").addEventListener("click",()=>{closeDrawer();uiTone(430,.03,.018)});
+
+function escapeHtml(v){
+  const map={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};
+  return String(v).replace(/[&<>"']/g,c=>map[c]);
+}
+function attr(v){return escapeHtml(v)}
+
+const searchInput=document.getElementById("searchInput");
+searchInput.addEventListener("input",()=>{
+  const q=searchInput.value.trim().toLowerCase();
+  if(!q){
+    node.classed("search-dim",false).classed("search-hit",false);
+    return;
+  }
+  node.classed("search-dim",d=>!d.id.toLowerCase().includes(q))
+      .classed("search-hit",d=>d.id.toLowerCase().includes(q));
+});
+searchInput.addEventListener("keydown",ev=>{
+  if(ev.key==="Enter"){
+    const q=searchInput.value.trim().toLowerCase();
+    const hit=nodes.find(n=>n.id.toLowerCase().includes(q));
+    if(hit){
+      selectNode(hit,true);focusNode(hit);
+      searchInput.blur();
+      document.getElementById("toolbar").classList.remove("searching");
+    }
+  }
+  if(ev.key==="Escape"){
+    searchInput.value="";node.classed("search-dim",false).classed("search-hit",false);searchInput.blur();
+  }
+});
+
+document.getElementById("mobileSearch").addEventListener("click",()=>{
+  const tb=document.getElementById("toolbar");
+  tb.classList.toggle("searching");
+  if(tb.classList.contains("searching")) setTimeout(()=>searchInput.focus(),50);
+});
+
+function focusNode(d){
+  const scale=1.45;
+  const tx=w/2-d.x*scale;
+  const ty=h/2-d.y*scale;
+  svg.transition().duration(650).call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale));
+}
+document.getElementById("resetView").addEventListener("click",()=>{
+  svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);
+  uiTone(470,.03,.018);
+});
+
+document.getElementById("soundToggle").addEventListener("click",ev=>{
+  soundOn=!soundOn;
+  ev.currentTarget.classList.toggle("on",soundOn);
+  ev.currentTarget.textContent=soundOn?"●":"◌";
+  if(soundOn) uiTone(600,.055,.025);
+  showToast(soundOn?"Interface sound on":"Interface sound off");
+});
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.textContent=msg;t.classList.add("show");
+  clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),1300);
+}
+
+const legend=document.getElementById("legend");
+Object.values(categories).forEach(c=>{
+  const item=document.createElement("div");
+  item.className="item";
+  item.innerHTML=`<span class="dot" style="background:${c.color}"></span>${escapeHtml(c.label)}`;
+  legend.appendChild(item);
+});
+
+window.addEventListener("resize",()=>{
+  const s=size();w=s.w;h=s.h;
+  simulation.force("center",d3.forceCenter(w/2,h/2));
+  simulation.alpha(.3).restart();
+});
+
+// Make touch targets calmer on mobile: tapping the drawer does not reset the graph.
+["panel","toolbar","drawer","legend","pathbar"].forEach(id=>{
+  document.getElementById(id)?.addEventListener("click",ev=>ev.stopPropagation());
+});
+
+/* IKL Knowledge Map system repair 2026-08-30 */
+(function iklInstallMapLayoutRepair(){
+  let iklUserMoved=false;
+  let iklResizeTimer=null;
+  const svgEl=document.getElementById("svg");
+  if(!svgEl || typeof d3==="undefined" || typeof svg==="undefined" || typeof zoom==="undefined" || typeof nodes==="undefined") return;
+
+  function visibleRect(el){
+    if(!el) return null;
+    const cs=getComputedStyle(el);
+    if(cs.display==="none" || cs.visibility==="hidden" || Number(cs.opacity)===0) return null;
+    const r=el.getBoundingClientRect();
+    if(r.width<2 || r.height<2) return null;
+    return r;
+  }
+
+  function resolveDockLegendCollision(){
+    const legendEl=document.getElementById("legend");
+    const dock=document.getElementById("cdPublicDock");
+    if(!legendEl || !dock) return;
+    if(!legendEl.dataset.iklBaseBottom){
+      legendEl.dataset.iklBaseBottom=getComputedStyle(legendEl).bottom || "16px";
+    }
+    legendEl.style.bottom=legendEl.dataset.iklBaseBottom;
+    requestAnimationFrame(()=>{
+      const l=visibleRect(legendEl), d=visibleRect(dock);
+      if(!l || !d) return;
+      const overlap=!(l.right<d.left || l.left>d.right || l.bottom<d.top || l.top>d.bottom);
+      if(overlap){
+        const required=Math.max(12, window.innerHeight-d.top+14);
+        legendEl.style.bottom=required+"px";
+      }
+    });
+  }
+
+  function safeArea(){
+    const vw=window.innerWidth, vh=window.innerHeight;
+    let left=24, right=vw-24, top=76, bottom=vh-24;
+    const panel=visibleRect(document.getElementById("panel"));
+    const toolbar=visibleRect(document.getElementById("toolbar"));
+    const dock=visibleRect(document.getElementById("cdPublicDock"));
+    const legendRect=visibleRect(document.getElementById("legend"));
+    const chrono=visibleRect(document.getElementById("chronobar"));
+    const timeline=visibleRect(document.getElementById("timelineBox"));
+
+    if(vw>820){
+      if(panel) left=Math.max(left,panel.right+30);
+      if(toolbar) top=Math.max(top,toolbar.bottom+18);
+    }else{
+      if(panel) top=Math.max(top,panel.bottom+18);
+      if(toolbar) top=Math.max(top,toolbar.bottom+18);
+      left=18; right=vw-18;
+    }
+    if(dock) bottom=Math.min(bottom,dock.top-24);
+    if(legendRect) bottom=Math.min(bottom,legendRect.top-18);
+    if(chrono) bottom=Math.min(bottom,chrono.top-18);
+    if(timeline && timeline.top>vh*.45) bottom=Math.min(bottom,timeline.top-18);
+
+    if(right-left<240){left=18;right=vw-18;}
+    if(bottom-top<220){top=76;bottom=vh-82;}
+    return {left,right,top,bottom};
+  }
+
+  function fitMap(animate=true){
+    resolveDockLegendCollision();
+    requestAnimationFrame(()=>{
+      const xs=nodes.map(d=>Number(d.x)).filter(Number.isFinite);
+      const ys=nodes.map(d=>Number(d.y)).filter(Number.isFinite);
+      if(!xs.length || !ys.length) return;
+      const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+      const graphW=Math.max(120,maxX-minX), graphH=Math.max(120,maxY-minY);
+      const a=safeArea();
+      const safeW=Math.max(220,a.right-a.left), safeH=Math.max(220,a.bottom-a.top);
+      const padding=58;
+      let scale=Math.min((safeW-padding*2)/graphW,(safeH-padding*2)/graphH,1.25);
+      scale=Math.max(.30,Math.min(1.25,scale));
+      const graphCX=(minX+maxX)/2, graphCY=(minY+maxY)/2;
+      const safeCX=(a.left+a.right)/2, safeCY=(a.top+a.bottom)/2;
+      const tx=safeCX-graphCX*scale, ty=safeCY-graphCY*scale;
+      const t=d3.zoomIdentity.translate(tx,ty).scale(scale);
+      if(animate) svg.transition().duration(520).call(zoom.transform,t);
+      else svg.call(zoom.transform,t);
+    });
+  }
+
+  svgEl.addEventListener("pointerdown",()=>{iklUserMoved=true},{passive:true});
+  svgEl.addEventListener("wheel",()=>{iklUserMoved=true},{passive:true});
+  const reset=document.getElementById("resetView");
+  if(reset){
+    reset.addEventListener("click",ev=>{
+      ev.preventDefault(); ev.stopImmediatePropagation(); iklUserMoved=false; fitMap(true);
+    },true);
+  }
+
+  if(typeof simulation!=="undefined" && simulation && typeof simulation.on==="function")
+    simulation.on("end.iklLayoutRepair",()=>{if(!iklUserMoved) fitMap(true);});
+
+  setTimeout(()=>{if(!iklUserMoved) fitMap(false)},650);
+  setTimeout(()=>{if(!iklUserMoved) fitMap(true)},1500);
+  resolveDockLegendCollision();
+
+  window.addEventListener("resize",()=>{
+    clearTimeout(iklResizeTimer);
+    iklResizeTimer=setTimeout(()=>{resolveDockLegendCollision();fitMap(false)},180);
+  });
+  window.iklFitKnowledgeMap=()=>fitMap(true);
+})();
+</script>
+<nav id="cdPublicDock" aria-label="THE UNI public links">
+<a aria-label='Back to the Interactive Knowledge Library' class='cdDockWord' href='/' title='Back to the Interactive Knowledge Library'>Library</a>
+<a class="cdWatch" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a>
+<a class="cdContact" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact THE UNI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a>
+</nav>
+
+<style id="ikl-collision-guard-style">
+/* IKL production collision guard: only moves bottom UI when the public dock would cover it. */
+:root{--ikl-dock-safe-bottom:74px}
+@media(max-width:680px){:root{--ikl-dock-safe-bottom:62px}}
+</style>
+<script id="ikl-collision-guard">
+(()=>{
+ const MOVE=['#legend','.legend','#drawer','.drawer','#modebar','.modebar','.modeBar','.mode-bar','#timeline','.timeline','.pathbar','.pathBar','.path-bar','.timelineWrap','.timeline-wrap','.bottomBar','.bottom-bar','.statusbar','.status-bar','#status'];
+ const QUIET=['#legend','.legend','#watermark','.watermark','.badge'];
+ const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>2&&r.height>2};
+ const overlap=(a,b,pad=4)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>pad&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>pad;
+ let queued=false,applying=false;
+ const observer=new MutationObserver(muts=>{if(applying)return;for(const m of muts){if(m.type==='attributes'&&m.attributeName==='class'){run();break}}});
+ const observe=()=>observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+ function all(selectors){const out=[];selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!out.includes(el))out.push(el)}));return out}
+ function rememberMove(el){if(el.dataset.iklMoveRemembered)return;el.dataset.iklMoveRemembered='1';el.dataset.iklInlineBottom=el.style.bottom||'';el.dataset.iklInlineTransform=el.style.transform||'';el.dataset.iklInlineMaxHeight=el.style.maxHeight||''}
+ function restoreMove(el){if(el.dataset.iklAdjusted!=='1')return;if(el.dataset.iklInlineBottom==='')el.style.removeProperty('bottom');else el.style.bottom=el.dataset.iklInlineBottom;if(el.dataset.iklInlineTransform==='')el.style.removeProperty('transform');else el.style.transform=el.dataset.iklInlineTransform;if(el.dataset.iklInlineMaxHeight==='')el.style.removeProperty('max-height');else el.style.maxHeight=el.dataset.iklInlineMaxHeight;el.dataset.iklAdjusted='0'}
+ function rememberQuiet(el){if(el.dataset.iklQuietRemembered)return;el.dataset.iklQuietRemembered='1';el.dataset.iklInlineVisibility=el.style.visibility||'';el.dataset.iklInlineOpacity=el.style.opacity||''}
+ function restoreQuiet(el){if(el.dataset.iklQuieted!=='1')return;if(el.dataset.iklInlineVisibility==='')el.style.removeProperty('visibility');else el.style.visibility=el.dataset.iklInlineVisibility;if(el.dataset.iklInlineOpacity==='')el.style.removeProperty('opacity');else el.style.opacity=el.dataset.iklInlineOpacity;el.dataset.iklQuieted='0'}
+ function run(){if(queued||applying)return;queued=true;requestAnimationFrame(()=>{
+   applying=true;observer.disconnect();
+   const movers=all(MOVE),quiets=all(QUIET);movers.forEach(el=>{rememberMove(el);restoreMove(el)});quiets.forEach(el=>{rememberQuiet(el);restoreQuiet(el)});
+   const dock=document.getElementById('cdPublicDock');
+   if(dock&&visible(dock)){
+     const dr=dock.getBoundingClientRect(),safe=Math.max(12,innerHeight-dr.top+10);
+     movers.forEach(el=>{if(el===dock||!visible(el))return;const cs=getComputedStyle(el);if(cs.position!=='fixed'&&cs.position!=='absolute')return;const r=el.getBoundingClientRect();if(!overlap(r,dr))return;const b=parseFloat(cs.bottom);el.dataset.iklAdjusted='1';if(Number.isFinite(b))el.style.bottom=Math.max(b,safe)+'px';else if(r.bottom>dr.top){const base=el.style.transform||'';el.style.transform=(base?base+' ':'')+'translateY(-'+(r.bottom-dr.top+10)+'px)'}if(el.matches('#drawer,.drawer')){const top=el.getBoundingClientRect().top;el.style.maxHeight=Math.max(160,innerHeight-top-safe-10)+'px'}})
+   }
+   const drawers=all(['#drawer','.drawer']).filter(visible);
+   drawers.forEach(drawer=>{const rr=drawer.getBoundingClientRect();quiets.forEach(el=>{if(el===drawer||!visible(el))return;if(overlap(el.getBoundingClientRect(),rr,6)){el.dataset.iklQuieted='1';el.style.visibility='hidden';el.style.opacity='0'}})});
+   queued=false;
+   applying=false;observe();
+ });}
+ addEventListener('load',run);addEventListener('resize',run,{passive:true});addEventListener('orientationchange',run,{passive:true});
+ observe();
+ run();setTimeout(run,30);setTimeout(run,120);setTimeout(run,350);
+})();
+</script>
+</body>
+</html>

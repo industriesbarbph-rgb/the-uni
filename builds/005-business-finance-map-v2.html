@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<link rel="up" href="/interactive-knowledge-library/"><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Business &amp; Finance — Interactive Knowledge Map | THE UNI</title><script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root{
+  --bg:#ffffff;--panel:#f7f7f9;--panel-border:#e2e4ea;--text:#1b1e27;--text-dim:#6b7280;--line:#c7cbd6;--accent-line:#555a66;
+  --glass:linear-gradient(155deg, rgba(255,255,255,.94), rgba(242,242,244,.80));--shadow:0 14px 34px rgba(35,36,42,.10), 0 1px 5px rgba(20,20,30,.06);
+}
+*{box-sizing:border-box} html,body{margin:0;padding:0;height:100%;overflow:hidden;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:linear-gradient(125deg,#ececef 0%,#ffffff 12%,#f4f3f1 24%,#ffffff 36%,#e8e9ed 48%,#fbfbfc 60%,#efedef 72%,#ffffff 84%,#f2f3f5 94%,#e9eaed 100%);background-size:500% 500%;animation:liquid 13s ease infinite} body{overscroll-behavior:none} button,input{font:inherit}
+@keyframes liquid{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes sweep{0%{transform:translateX(-160%) skewX(-14deg);opacity:0}25%{opacity:1}75%{opacity:.65}100%{transform:translateX(320%) skewX(-14deg);opacity:0}}
+@keyframes cornerGlow{0%,100%{opacity:.60}50%{opacity:1}} @keyframes flow{to{stroke-dashoffset:-28}}
+@keyframes nodePulse{0%{opacity:.30;transform:scale(.78)}60%{opacity:.05;transform:scale(1.45)}100%{opacity:0;transform:scale(1.6)}}
+@keyframes drawerIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:translateX(0)}} @keyframes sheetIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glint{0%,75%,100%{transform:translateX(-160%)}85%{transform:translateX(240%)}}
+#wrap{position:relative;width:100vw;height:100vh} #wrap::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 0% 0%, rgba(255,255,255,.95) 0%, transparent 36%),radial-gradient(circle at 100% 0%, rgba(255,255,255,.95) 0%, transparent 36%),radial-gradient(circle at 0% 100%, rgba(255,255,255,.95) 0%, transparent 36%),radial-gradient(circle at 100% 100%, rgba(255,255,255,.95) 0%, transparent 36%);animation:cornerGlow 5.5s ease-in-out infinite}
+.sheen-top{position:absolute;inset:0;pointer-events:none;z-index:0;background:linear-gradient(180deg,rgba(255,255,255,.72) 0%,transparent 58%)} .sheen-bottom{position:absolute;bottom:0;left:0;right:0;height:40%;pointer-events:none;z-index:0;background:linear-gradient(180deg,transparent,rgba(115,116,122,.10))}
+.edge-line{position:absolute;top:0;left:0;right:0;height:1.5px;pointer-events:none;z-index:0;background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,.72) 30%,transparent 50%,rgba(255,255,255,.72) 70%,transparent 95%)}
+.sweep-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}.sweep-band{position:absolute;top:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);opacity:.55}.sweep-band.b1{width:46%;animation:sweep 7s 0s ease-in-out infinite}.sweep-band.b2{width:28%;animation:sweep 10s 3s ease-in-out infinite}
+svg{width:100%;height:100%;display:block;cursor:grab;position:relative;z-index:1;touch-action:none}svg:active{cursor:grabbing}
+.link{stroke:var(--line);stroke-opacity:.56;transition:stroke-opacity .25s,stroke-width .25s}.link.dim{stroke-opacity:.045}.link.lit{stroke:var(--accent-line);stroke-opacity:.96;stroke-width:2.2px;stroke-dasharray:8 6;animation:flow 1.05s linear infinite}.link.selected{stroke:var(--text);stroke-opacity:1;stroke-width:2.8px;stroke-dasharray:10 5;animation:flow .75s linear infinite}.link-hit{stroke:transparent;stroke-width:18px;pointer-events:stroke;cursor:pointer}
+.node{transition:opacity .25s}.node circle.core{stroke:var(--bg);stroke-width:1.5px;cursor:pointer;transition:opacity .22s,stroke .22s,stroke-width .22s,r .22s;filter:drop-shadow(0 1px 2px rgba(0,0,0,.16))}.node text{fill:var(--text);font-size:10.5px;pointer-events:none;text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round;transition:opacity .22s,font-size .22s}.node .halo{fill:none;stroke:var(--text);stroke-width:1px;opacity:0;pointer-events:none;transform-box:fill-box;transform-origin:center}.node.dim circle.core,.node.dim text{opacity:.13}.node.lit circle.core{stroke:var(--text);stroke-width:2.6px}.node.lit text{font-size:11.5px;font-weight:650}.node.lit .halo{animation:nodePulse 1.15s ease-out}.node.connected circle.core{stroke:var(--accent-line);stroke-width:2px}.node.search-dim{opacity:.12}.node.search-hit circle.core{stroke:var(--text);stroke-width:2.5px}.node.search-hit .halo{opacity:.25}
+.glass{background:var(--glass);border:1px solid var(--panel-border);box-shadow:var(--shadow);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#panel{position:absolute;top:16px;left:16px;z-index:5;width:300px;max-width:calc(100vw - 32px);border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.5}#panel h1{font-size:15px;font-weight:650;margin:0 0 3px;letter-spacing:.01em}#panel p.sub{color:var(--text-dim);margin:0 0 10px;font-size:12px}#detail{min-height:58px}#detail .name{font-weight:700;font-size:14px;margin-bottom:3px}#detail .cat{color:var(--text-dim);font-size:10.5px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.075em}#detail .desc{color:var(--text-dim)}#detail .placeholder{color:var(--text-dim);font-style:italic}.microline{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px;color:var(--text-dim);font-size:10.5px}.status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-line);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-line) 16%, transparent)}
+.action{border:1px solid color-mix(in srgb,var(--text) 22%,transparent);background:rgba(255,255,255,.42);color:var(--text);border-radius:8px;padding:7px 10px;cursor:pointer;font-size:11px;font-weight:650;letter-spacing:.035em;transition:background .2s,transform .2s,border-color .2s}.action:hover{background:color-mix(in srgb,var(--panel) 88%,transparent);border-color:color-mix(in srgb,var(--text) 38%,transparent)}.action:active{transform:scale(.98)}.action.primary{margin-top:10px;width:100%;text-transform:uppercase}
+#toolbar{position:absolute;top:16px;right:16px;z-index:7;display:flex;align-items:center;gap:7px;padding:7px;border-radius:12px}#searchBox{position:relative;display:flex;align-items:center}#searchInput{width:210px;border:0;outline:0;background:rgba(255,255,255,.42);border:1px solid color-mix(in srgb,var(--text) 14%,transparent);border-radius:8px;padding:8px 34px 8px 10px;color:var(--text);font-size:12px}#searchInput::placeholder{color:var(--text-dim)}#searchIcon{position:absolute;right:10px;font-size:13px;color:var(--text-dim);pointer-events:none}.iconbtn{width:32px;height:32px;border-radius:8px;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);background:rgba(255,255,255,.42);color:var(--text);display:grid;place-items:center;cursor:pointer;font-size:13px;font-weight:700}.iconbtn.on{background:var(--text);color:var(--bg)}
+#hint{position:absolute;top:68px;right:16px;z-index:4;padding:7px 10px;border-radius:9px;font-size:10.5px;color:var(--text-dim);max-width:230px}#legend{position:absolute;bottom:16px;left:16px;z-index:4;padding:10px 13px;border-radius:11px;font-size:10.5px;display:grid;grid-template-columns:repeat(2,auto);column-gap:14px;row-gap:5px}#legend .item{display:flex;align-items:center;gap:6px;color:var(--text-dim);white-space:nowrap}#legend .dot{width:8px;height:8px;border-radius:50%;flex:none}
+#watermark{position:absolute;bottom:18px;right:22px;z-index:6;font-size:10px;font-weight:650;letter-spacing:.14em;text-transform:uppercase;color:color-mix(in srgb,var(--text-dim) 62%,transparent);text-shadow:0 0 8px color-mix(in srgb,var(--panel) 60%,transparent);white-space:nowrap;pointer-events:none;user-select:none}
+#drawer{position:absolute;z-index:8;right:16px;top:68px;bottom:16px;width:min(410px,calc(100vw - 32px));border-radius:14px;overflow:hidden;display:none}#drawer.open{display:flex;flex-direction:column;animation:drawerIn .26s ease-out}#drawer::after{content:"";position:absolute;top:0;bottom:0;width:34%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.72),transparent);pointer-events:none;animation:glint 8s ease-in-out infinite;opacity:.25}.drawer-head{padding:15px 16px 11px;border-bottom:1px solid color-mix(in srgb,var(--text) 14%,transparent);display:flex;gap:12px;align-items:flex-start;position:relative;z-index:1}.drawer-title{flex:1;min-width:0}.drawer-kicker{font-size:9.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--text-dim);margin-bottom:4px}.drawer-title h2{font-size:18px;line-height:1.15;margin:0;font-weight:720}.drawer-close{flex:none}.drawer-body{padding:14px 16px 20px;overflow:auto;position:relative;z-index:1;scrollbar-width:thin}.section-title{font-size:9.5px;font-weight:750;letter-spacing:.13em;color:var(--text-dim);text-transform:uppercase;margin:16px 0 8px}.section-title:first-child{margin-top:0}.lead{font-size:12.5px;line-height:1.6;color:var(--text)}.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}.badge{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid color-mix(in srgb,var(--text) 18%,transparent);padding:4px 7px;border-radius:999px;background:rgba(255,255,255,.42);color:var(--text-dim)}
+.connection{width:100%;text-align:left;border:1px solid color-mix(in srgb,var(--text) 16%,transparent);background:rgba(255,255,255,.42);border-radius:10px;padding:10px 11px;margin-bottom:7px;cursor:pointer;color:var(--text);position:relative;overflow:hidden}.connection:hover{background:color-mix(in srgb,var(--panel) 86%,transparent);border-color:color-mix(in srgb,var(--text) 28%,transparent)}.connection .to{font-size:12px;font-weight:700;margin-bottom:3px;padding-right:18px}.connection .why{font-size:10.5px;color:var(--text-dim);line-height:1.45}.connection .arrow{position:absolute;right:10px;top:10px;color:var(--text-dim)}
+.source-card{display:block;text-decoration:none;color:inherit;border:1px solid color-mix(in srgb,var(--text) 16%,transparent);background:rgba(255,255,255,.42);border-radius:10px;padding:10px 11px;margin-bottom:7px;transition:background .18s,border-color .18s}.source-card:hover{background:color-mix(in srgb,var(--panel) 86%,transparent);border-color:color-mix(in srgb,var(--text) 28%,transparent)}.source-name{font-size:11.5px;font-weight:700;line-height:1.35}.source-meta{font-size:9.5px;color:var(--text-dim);margin-top:3px;letter-spacing:.02em}.source-note{font-size:10px;color:var(--text-dim);line-height:1.45;margin-top:8px}
+#pathbar{position:absolute;z-index:6;bottom:16px;left:50%;transform:translateX(-50%);max-width:min(620px,calc(100vw - 430px));min-width:260px;border-radius:11px;padding:8px 10px;display:none}#pathbar.show{display:flex;align-items:center;gap:8px}#pathLabel{font-size:9px;font-weight:750;letter-spacing:.11em;text-transform:uppercase;color:var(--text-dim);white-space:nowrap}#pathText{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10.5px;color:var(--text)}#clearPath{flex:none}
+#toast{position:absolute;z-index:20;left:50%;top:20px;transform:translateX(-50%) translateY(-10px);opacity:0;pointer-events:none;padding:7px 10px;border-radius:9px;font-size:10.5px;color:var(--text-dim);transition:opacity .2s,transform .2s}#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:820px){#panel{width:270px}#searchInput{width:150px}#hint{display:none}#drawer{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:68vh;border-radius:16px}#drawer.open{animation:sheetIn .26s ease-out}#pathbar{left:8px;right:8px;bottom:8px;transform:none;max-width:none;min-width:0}#legend{bottom:12px}#watermark{display:block;bottom:12px;right:14px;font-size:9px;letter-spacing:.12em;z-index:7}}
+@media(max-width:640px){#panel{top:10px;left:10px;width:min(260px,calc(100vw - 82px));padding:11px 12px}#panel h1{font-size:13px}#panel p.sub{font-size:10.5px;margin-bottom:7px}#detail{min-height:0}#detail .desc{font-size:11px}#toolbar{top:10px;right:10px;padding:5px}#searchBox{display:none}#toolbar.searching #searchBox{display:flex;position:fixed;left:10px;right:10px;top:58px}#toolbar.searching #searchInput{width:100%;background:var(--panel);box-shadow:var(--shadow)}#legend{grid-template-columns:1fr;padding:8px 10px;font-size:9.5px;max-height:128px;overflow:auto}.desktop-only{display:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+</style><style id="coach-doll-public-dock-style">
+/* THE UNI — compact public jewel controls */
+#cdPublicDock{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:linear-gradient(145deg,rgba(18,22,27,.76),rgba(5,7,10,.66));box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#cdPublicDock a{position:relative;display:grid;place-items:center;color:#f0f4f5;text-decoration:none;border:1px solid rgba(255,255,255,.15);background:radial-gradient(circle at 33% 26%,rgba(255,255,255,.18),rgba(255,255,255,.055) 39%,rgba(0,0,0,.26) 79%);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 16px rgba(198,218,233,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+#cdPublicDock a:hover,#cdPublicDock a:focus-visible{transform:translateY(-2px);border-color:rgba(229,207,166,.50);box-shadow:inset 0 1px rgba(255,255,255,.16),0 0 22px rgba(222,193,141,.17);outline:none}
+#cdPublicDock .cdWatch{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.15),0 0 21px rgba(222,193,141,.13)}
+#cdPublicDock .cdContact{width:34px;height:34px;border-radius:50%}
+#cdPublicDock .cdWatch::before,#cdPublicDock .cdContact::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(229,204,151,.18);pointer-events:none}
+#cdPublicDock .cdWatch::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(226,199,146,.11);animation:cdJewelBreath 5.6s ease-in-out infinite;pointer-events:none}
+#cdPublicDock svg{width:16px;height:16px}.cdWatch svg{width:17px!important;height:17px!important}
+.cdDockWord{width:auto!important;height:34px!important;padding:0 12px!important;border-radius:999px!important;font-size:8.5px!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:#e9e1d7!important}
+@keyframes cdJewelBreath{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.04)}}
+@media(max-width:680px){#cdPublicDock{left:8px;bottom:8px;gap:5px;padding:4px 5px}#cdPublicDock .cdWatch{width:36px;height:36px}#cdPublicDock .cdContact{width:33px;height:33px}.cdDockWord{width:33px!important;height:33px!important;padding:0!important;font-size:0!important}.cdDockWord::after{content:"⌂";font-size:15px}}
+@media(prefers-reduced-motion:reduce){#cdPublicDock a{transition:none!important}#cdPublicDock .cdWatch::after{animation:none!important}}
+</style>
+<style id="coach-doll-node-dna-v2">
+/* Node DNA V2 — preserves each subject palette while sharpening the living-network look */
+.node circle.core{stroke:color-mix(in srgb,var(--accent) 44%,var(--bg));stroke-width:1.7px;filter:drop-shadow(0 0 4px rgba(255,255,255,.05)) drop-shadow(0 0 10px color-mix(in srgb,var(--accent) 23%,transparent))!important}
+.node .halo{stroke:var(--accent);filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 32%,transparent))}
+.node:hover circle.core,.node.lit circle.core,.node.search-hit circle.core{stroke:var(--accent2);filter:drop-shadow(0 0 5px rgba(255,255,255,.14)) drop-shadow(0 0 16px color-mix(in srgb,var(--accent2) 40%,transparent))!important}
+.link{filter:drop-shadow(0 0 2px color-mix(in srgb,var(--accent) 18%,transparent))}
+.link.lit,.link.selected{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent2) 40%,transparent))}
+</style>
+
+<!-- IKL SEO + SOCIAL PUBLISHING LAYER -->
+<meta name="description" content="Explore Business &amp; Finance in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning…">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://theuni.barbph.com/builds/005-business-finance-map-v2.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="THE UNI — Interactive Knowledge Library">
+<meta property="og:title" content="Business &amp; Finance — Interactive Knowledge Map | THE UNI">
+<meta property="og:description" content="Explore Business &amp; Finance in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning…">
+<meta property="og:url" content="https://theuni.barbph.com/builds/005-business-finance-map-v2.html">
+<meta property="og:image" content="https://theuni.barbph.com/social/005-business-finance-map-v2.jpg">
+<meta property="og:image:secure_url" content="https://theuni.barbph.com/social/005-business-finance-map-v2.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Business &amp; Finance — THE UNI interactive learning preview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Business &amp; Finance — Interactive Knowledge Map | THE UNI">
+<meta name="twitter:description" content="Explore Business &amp; Finance in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning…">
+<meta name="twitter:image" content="https://theuni.barbph.com/social/005-business-finance-map-v2.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebPage","LearningResource"],"@id":"https://theuni.barbph.com/builds/005-business-finance-map-v2.html#learning-resource","url":"https://theuni.barbph.com/builds/005-business-finance-map-v2.html","name":"Business & Finance — Interactive Knowledge Map | THE UNI","headline":"Business & Finance","description":"Explore Business & Finance in an interactive THE UNI knowledge map. Trace connections, inspect relationships, and follow source-backed learning…","inLanguage":"en","image":"https://theuni.barbph.com/social/005-business-finance-map-v2.jpg","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"creator":{"@id":"https://theuni.barbph.com/#publisher"},"learningResourceType":"Interactive knowledge map","educationalUse":["instruction","self study","assessment"]}</script>
+<!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
+
+<style id="ikl-map-layout-repair-20260830">
+/* IKL Knowledge Map system repair: keep map UI zones from colliding. */
+#legend{max-width:min(430px,calc(100vw - 32px));}
+@media(max-width:820px){#legend{max-width:min(360px,calc(100vw - 20px));}}
+</style>
+
+<style id="ikl-mobile-map-header-collision-fix">
+@media(max-width:640px){
+  #panel{top:58px!important}
+  #toolbar.searching{left:10px!important;right:10px!important;width:auto!important}
+  #toolbar.searching #searchBox{display:flex!important;position:relative!important;left:auto!important;right:auto!important;top:auto!important;flex:1 1 auto!important}
+  #toolbar.searching #searchInput{width:100%!important}
+  #toolbar.searching .iconbtn:not(#mobileSearch){display:none!important}
+}
+</style>
+</head>
+<body><div id="wrap"><div class="sheen-top"></div><div class="sheen-bottom"></div><div class="edge-line"></div><div class="sweep-wrap"><div class="sweep-band b1"></div></div><div class="sweep-wrap"><div class="sweep-band b2"></div></div>
+<svg id="svg" aria-label="Interactive map of business and finance fields"></svg>
+<section id="panel" class="glass"><h1>Business & Finance</h1><p class="sub">Touch a node to reveal its knowledge network</p><div id="detail"><div class="placeholder">Select a field to see what it is, what it overlaps with, and why those connections exist.</div></div></section>
+<div id="toolbar" class="glass"><div id="searchBox"><input id="searchInput" type="search" autocomplete="off" spellcheck="false" placeholder="Search business & finance…" aria-label="Search business and finance fields"><span id="searchIcon">⌕</span></div><button class="iconbtn" id="mobileSearch" title="Search" aria-label="Search">⌕</button><button class="iconbtn" id="soundToggle" title="Interface sound" aria-label="Toggle interface sound">◌</button><button class="iconbtn" id="resetView" title="Reset view" aria-label="Reset view">◎</button></div>
+<div id="hint" class="glass">Drag nodes · scroll/pinch to zoom · drag background to pan · touch a line for relationship evidence</div><div id="legend" class="glass"></div>
+<aside id="drawer" class="glass" aria-live="polite" aria-label="Field intelligence drawer"><div class="drawer-head"><div class="drawer-title"><div class="drawer-kicker" id="drawerKicker">Field intelligence</div><h2 id="drawerTitle">—</h2></div><button class="iconbtn drawer-close" id="drawerClose" title="Close" aria-label="Close">×</button></div><div class="drawer-body" id="drawerBody"></div></aside>
+<div id="pathbar" class="glass"><span id="pathLabel">Exploration</span><span id="pathText"></span><button class="iconbtn" id="clearPath" title="Clear exploration path" aria-label="Clear exploration path">×</button></div><div id="toast" class="glass"></div></div>
+<script>
+const categories={
+  "econ": {
+    "label": "Economics & theory",
+    "color": "#7F77DD"
+  },
+  "corp": {
+    "label": "Corporate finance & accounting",
+    "color": "#1D9E75"
+  },
+  "mgmt": {
+    "label": "Management & strategy",
+    "color": "#D85A30"
+  },
+  "invest": {
+    "label": "Finance & investment",
+    "color": "#D4537E"
+  },
+  "risk": {
+    "label": "Risk & compliance",
+    "color": "#E24B4A"
+  },
+  "ops": {
+    "label": "Operations & supply chain",
+    "color": "#378ADD"
+  },
+  "mktg": {
+    "label": "Marketing & customer experience",
+    "color": "#BA7517"
+  },
+  "applied": {
+    "label": "Applied / interdisciplinary",
+    "color": "#6b6a63"
+  }
+};
+const nodes=[
+  {
+    "id": "Microeconomics",
+    "cat": "econ",
+    "desc": "Studies how individuals and firms make decisions to allocate scarce resources, and how those choices interact in markets."
+  },
+  {
+    "id": "Macroeconomics",
+    "cat": "econ",
+    "desc": "Looks at economies as a whole — growth, inflation, unemployment and the policies that shape them."
+  },
+  {
+    "id": "Econometrics",
+    "cat": "econ",
+    "desc": "Applies statistical methods to economic data to test theories and estimate relationships."
+  },
+  {
+    "id": "Game theory",
+    "cat": "econ",
+    "desc": "Mathematical study of strategic decision-making between rational agents."
+  },
+  {
+    "id": "Behavioral economics",
+    "cat": "econ",
+    "desc": "Examines how psychology and cognitive bias shape real-world economic decisions."
+  },
+  {
+    "id": "Monetary theory",
+    "cat": "econ",
+    "desc": "Studies money, interest rates and how central banks influence the economy."
+  },
+  {
+    "id": "International economics",
+    "cat": "econ",
+    "desc": "Trade, exchange rates and capital flows between countries."
+  },
+  {
+    "id": "Development economics",
+    "cat": "econ",
+    "desc": "Focuses on improving living standards and growth in lower-income economies."
+  },
+  {
+    "id": "Economic history",
+    "cat": "econ",
+    "desc": "How economies and institutions have evolved over time, and what it teaches us."
+  },
+  {
+    "id": "Corporate finance",
+    "cat": "corp",
+    "desc": "How companies raise capital, allocate it, and manage financial risk."
+  },
+  {
+    "id": "Financial accounting",
+    "cat": "corp",
+    "desc": "Recording and reporting a company's financial position to external stakeholders."
+  },
+  {
+    "id": "Managerial accounting",
+    "cat": "corp",
+    "desc": "Using cost and performance data to guide internal business decisions."
+  },
+  {
+    "id": "Auditing",
+    "cat": "corp",
+    "desc": "Independently verifying that financial statements are accurate and compliant."
+  },
+  {
+    "id": "Corporate tax",
+    "cat": "corp",
+    "desc": "Planning and complying with the tax obligations of a business."
+  },
+  {
+    "id": "Treasury management",
+    "cat": "corp",
+    "desc": "Managing a company's cash, liquidity and financial risk day to day."
+  },
+  {
+    "id": "Mergers & acquisitions",
+    "cat": "corp",
+    "desc": "Combining, acquiring or divesting companies to create strategic or financial value."
+  },
+  {
+    "id": "Corporate governance",
+    "cat": "corp",
+    "desc": "The rules and structures that guide how a company is directed and controlled."
+  },
+  {
+    "id": "Strategic management",
+    "cat": "mgmt",
+    "desc": "Setting a company's long-term direction and the choices that get it there."
+  },
+  {
+    "id": "Operations management",
+    "cat": "mgmt",
+    "desc": "Designing and running the processes that turn inputs into a company's products or services."
+  },
+  {
+    "id": "Organizational behavior",
+    "cat": "mgmt",
+    "desc": "How individuals and groups behave within organizations, and how to lead them well."
+  },
+  {
+    "id": "Human resource management",
+    "cat": "mgmt",
+    "desc": "Recruiting, developing and managing an organization's people."
+  },
+  {
+    "id": "Entrepreneurship",
+    "cat": "mgmt",
+    "desc": "Founding and growing new ventures under uncertainty."
+  },
+  {
+    "id": "Change management",
+    "cat": "mgmt",
+    "desc": "Guiding organizations through transitions in structure, process or culture."
+  },
+  {
+    "id": "Project management",
+    "cat": "mgmt",
+    "desc": "Planning and coordinating work to deliver a defined outcome on time and budget."
+  },
+  {
+    "id": "Business process design",
+    "cat": "mgmt",
+    "desc": "Mapping and improving the workflows an organization runs on."
+  },
+  {
+    "id": "Investment banking",
+    "cat": "invest",
+    "desc": "Advises companies on raising capital and executing major financial transactions."
+  },
+  {
+    "id": "Asset management",
+    "cat": "invest",
+    "desc": "Investing pooled capital on behalf of clients to meet return objectives."
+  },
+  {
+    "id": "Portfolio theory",
+    "cat": "invest",
+    "desc": "The mathematics of balancing risk and return across a collection of investments."
+  },
+  {
+    "id": "Equity research",
+    "cat": "invest",
+    "desc": "Analyzing public companies to form investment views on their stock."
+  },
+  {
+    "id": "Fixed income",
+    "cat": "invest",
+    "desc": "The study and trading of bonds and other debt instruments."
+  },
+  {
+    "id": "Derivatives",
+    "cat": "invest",
+    "desc": "Financial contracts whose value is based on an underlying asset, used to hedge or speculate."
+  },
+  {
+    "id": "Quantitative finance",
+    "cat": "invest",
+    "desc": "Applies mathematical and statistical models to pricing, trading and risk."
+  },
+  {
+    "id": "Financial modeling",
+    "cat": "invest",
+    "desc": "Building spreadsheet models to forecast a company's financial performance."
+  },
+  {
+    "id": "Venture capital & private equity",
+    "cat": "invest",
+    "desc": "Investing in private companies, from early-stage startups to mature buyouts."
+  },
+  {
+    "id": "FinTech",
+    "cat": "invest",
+    "desc": "Technology-driven innovation in financial services, from payments to trading."
+  },
+  {
+    "id": "Risk management",
+    "cat": "risk",
+    "desc": "Identifying, measuring and mitigating the risks an organization faces."
+  },
+  {
+    "id": "Regulatory compliance",
+    "cat": "risk",
+    "desc": "Ensuring a company's operations follow the laws and rules that govern it."
+  },
+  {
+    "id": "Financial regulation",
+    "cat": "risk",
+    "desc": "The laws and bodies that oversee banks, markets and financial institutions."
+  },
+  {
+    "id": "Credit risk",
+    "cat": "risk",
+    "desc": "Assessing the likelihood that a borrower fails to repay what they owe."
+  },
+  {
+    "id": "Insurance & actuarial science",
+    "cat": "risk",
+    "desc": "Pricing and managing financial risk through pooled, statistically modeled coverage."
+  },
+  {
+    "id": "Forensic accounting",
+    "cat": "risk",
+    "desc": "Investigating financial records to uncover fraud or misconduct."
+  },
+  {
+    "id": "Supply chain management",
+    "cat": "ops",
+    "desc": "Coordinating the flow of goods, information and money from raw material to customer."
+  },
+  {
+    "id": "Logistics",
+    "cat": "ops",
+    "desc": "Planning and moving goods efficiently from origin to destination."
+  },
+  {
+    "id": "Procurement",
+    "cat": "ops",
+    "desc": "Sourcing and purchasing the goods and services an organization needs."
+  },
+  {
+    "id": "Business analytics",
+    "cat": "ops",
+    "desc": "Using data analysis to inform business decisions and strategy."
+  },
+  {
+    "id": "Enterprise resource planning",
+    "cat": "ops",
+    "desc": "Integrated software systems that run a company's core business processes."
+  },
+  {
+    "id": "Quality management",
+    "cat": "ops",
+    "desc": "Systems and practices for ensuring products and services meet consistent standards."
+  },
+  {
+    "id": "Marketing",
+    "cat": "mktg",
+    "desc": "Understanding customer needs and communicating value to meet them."
+  },
+  {
+    "id": "Brand management",
+    "cat": "mktg",
+    "desc": "Building and protecting how a company or product is perceived over time."
+  },
+  {
+    "id": "Consumer behavior",
+    "cat": "mktg",
+    "desc": "Studies why and how people decide what to buy."
+  },
+  {
+    "id": "Market research",
+    "cat": "mktg",
+    "desc": "Gathering and analyzing data about customers and markets to guide decisions."
+  },
+  {
+    "id": "Digital marketing",
+    "cat": "mktg",
+    "desc": "Reaching and engaging customers through online channels and platforms."
+  },
+  {
+    "id": "Sales management",
+    "cat": "mktg",
+    "desc": "Leading the team and process that converts prospects into customers."
+  },
+  {
+    "id": "Customer experience",
+    "cat": "mktg",
+    "desc": "Designing every touchpoint a customer has with a company to build satisfaction and loyalty."
+  },
+  {
+    "id": "Real estate & property finance",
+    "cat": "applied",
+    "desc": "Financing, valuing and investing in land and buildings."
+  },
+  {
+    "id": "International business",
+    "cat": "applied",
+    "desc": "Managing operations and strategy across different countries and markets."
+  },
+  {
+    "id": "Business law",
+    "cat": "applied",
+    "desc": "The legal rules governing contracts, companies and commercial conduct."
+  },
+  {
+    "id": "Sustainability & ESG",
+    "cat": "applied",
+    "desc": "Integrating environmental, social and governance factors into business decisions."
+  },
+  {
+    "id": "Business ethics",
+    "cat": "applied",
+    "desc": "Reasoning through what a company and its people ought to do, beyond what's merely legal."
+  },
+  {
+    "id": "Data-driven business & BI",
+    "cat": "applied",
+    "desc": "Using data infrastructure and analytics to support ongoing business decisions."
+  }
+];
+const links=[
+  [
+    "Microeconomics",
+    "Macroeconomics"
+  ],
+  [
+    "Microeconomics",
+    "Game theory"
+  ],
+  [
+    "Microeconomics",
+    "Behavioral economics"
+  ],
+  [
+    "Macroeconomics",
+    "Monetary theory"
+  ],
+  [
+    "Macroeconomics",
+    "International economics"
+  ],
+  [
+    "Macroeconomics",
+    "Development economics"
+  ],
+  [
+    "Macroeconomics",
+    "Economic history"
+  ],
+  [
+    "Econometrics",
+    "Microeconomics"
+  ],
+  [
+    "Econometrics",
+    "Business analytics"
+  ],
+  [
+    "Econometrics",
+    "Quantitative finance"
+  ],
+  [
+    "Game theory",
+    "Portfolio theory"
+  ],
+  [
+    "Behavioral economics",
+    "Consumer behavior"
+  ],
+  [
+    "Development economics",
+    "International business"
+  ],
+  [
+    "Monetary theory",
+    "Financial regulation"
+  ],
+  [
+    "International economics",
+    "International business"
+  ],
+  [
+    "Corporate finance",
+    "Financial accounting"
+  ],
+  [
+    "Corporate finance",
+    "Treasury management"
+  ],
+  [
+    "Corporate finance",
+    "Mergers & acquisitions"
+  ],
+  [
+    "Corporate finance",
+    "Financial modeling"
+  ],
+  [
+    "Corporate finance",
+    "Strategic management"
+  ],
+  [
+    "Corporate finance",
+    "Real estate & property finance"
+  ],
+  [
+    "Financial accounting",
+    "Managerial accounting"
+  ],
+  [
+    "Financial accounting",
+    "Auditing"
+  ],
+  [
+    "Financial accounting",
+    "Corporate tax"
+  ],
+  [
+    "Auditing",
+    "Forensic accounting"
+  ],
+  [
+    "Corporate governance",
+    "Corporate finance"
+  ],
+  [
+    "Corporate governance",
+    "Business law"
+  ],
+  [
+    "Corporate governance",
+    "Change management"
+  ],
+  [
+    "Corporate governance",
+    "Sustainability & ESG"
+  ],
+  [
+    "Corporate governance",
+    "Business ethics"
+  ],
+  [
+    "Mergers & acquisitions",
+    "Investment banking"
+  ],
+  [
+    "Treasury management",
+    "Risk management"
+  ],
+  [
+    "Strategic management",
+    "Operations management"
+  ],
+  [
+    "Strategic management",
+    "Entrepreneurship"
+  ],
+  [
+    "Operations management",
+    "Business process design"
+  ],
+  [
+    "Operations management",
+    "Supply chain management"
+  ],
+  [
+    "Operations management",
+    "Quality management"
+  ],
+  [
+    "Organizational behavior",
+    "Human resource management"
+  ],
+  [
+    "Organizational behavior",
+    "Change management"
+  ],
+  [
+    "Human resource management",
+    "Change management"
+  ],
+  [
+    "Entrepreneurship",
+    "Venture capital & private equity"
+  ],
+  [
+    "Project management",
+    "Business process design"
+  ],
+  [
+    "Business process design",
+    "Enterprise resource planning"
+  ],
+  [
+    "Business process design",
+    "Customer experience"
+  ],
+  [
+    "Investment banking",
+    "Equity research"
+  ],
+  [
+    "Asset management",
+    "Portfolio theory"
+  ],
+  [
+    "Asset management",
+    "Fixed income"
+  ],
+  [
+    "Asset management",
+    "Risk management"
+  ],
+  [
+    "Asset management",
+    "Real estate & property finance"
+  ],
+  [
+    "Portfolio theory",
+    "Derivatives"
+  ],
+  [
+    "Equity research",
+    "Financial modeling"
+  ],
+  [
+    "Fixed income",
+    "Derivatives"
+  ],
+  [
+    "Fixed income",
+    "Credit risk"
+  ],
+  [
+    "Derivatives",
+    "Quantitative finance"
+  ],
+  [
+    "Quantitative finance",
+    "Financial modeling"
+  ],
+  [
+    "Venture capital & private equity",
+    "FinTech"
+  ],
+  [
+    "FinTech",
+    "Business analytics"
+  ],
+  [
+    "FinTech",
+    "Regulatory compliance"
+  ],
+  [
+    "FinTech",
+    "Data-driven business & BI"
+  ],
+  [
+    "Risk management",
+    "Regulatory compliance"
+  ],
+  [
+    "Risk management",
+    "Credit risk"
+  ],
+  [
+    "Risk management",
+    "Insurance & actuarial science"
+  ],
+  [
+    "Risk management",
+    "Sustainability & ESG"
+  ],
+  [
+    "Regulatory compliance",
+    "Financial regulation"
+  ],
+  [
+    "Financial regulation",
+    "Investment banking"
+  ],
+  [
+    "Forensic accounting",
+    "Business law"
+  ],
+  [
+    "Supply chain management",
+    "Logistics"
+  ],
+  [
+    "Supply chain management",
+    "Procurement"
+  ],
+  [
+    "Supply chain management",
+    "International business"
+  ],
+  [
+    "Supply chain management",
+    "Quality management"
+  ],
+  [
+    "Logistics",
+    "International business"
+  ],
+  [
+    "Procurement",
+    "Enterprise resource planning"
+  ],
+  [
+    "Business analytics",
+    "Data-driven business & BI"
+  ],
+  [
+    "Business analytics",
+    "Market research"
+  ],
+  [
+    "Marketing",
+    "Brand management"
+  ],
+  [
+    "Marketing",
+    "Consumer behavior"
+  ],
+  [
+    "Marketing",
+    "Market research"
+  ],
+  [
+    "Marketing",
+    "Digital marketing"
+  ],
+  [
+    "Marketing",
+    "International business"
+  ],
+  [
+    "Brand management",
+    "Customer experience"
+  ],
+  [
+    "Digital marketing",
+    "Sales management"
+  ],
+  [
+    "Sales management",
+    "Customer experience"
+  ],
+  [
+    "Business law",
+    "Business ethics"
+  ],
+  [
+    "Sustainability & ESG",
+    "Business ethics"
+  ]
+];
+const sourceSets={
+  "econ": [
+    {
+      "name": "Federal Reserve Board",
+      "org": "Board of Governors of the Federal Reserve System",
+      "type": "Government economic source",
+      "url": "https://www.federalreserve.gov/"
+    },
+    {
+      "name": "IMF Data and Research",
+      "org": "International Monetary Fund",
+      "type": "International economic source",
+      "url": "https://www.imf.org/en/Data"
+    }
+  ],
+  "corp": [
+    {
+      "name": "FASB",
+      "org": "Financial Accounting Standards Board",
+      "type": "Accounting standards source",
+      "url": "https://www.fasb.org/"
+    },
+    {
+      "name": "IFRS Foundation",
+      "org": "International Financial Reporting Standards Foundation",
+      "type": "Accounting standards source",
+      "url": "https://www.ifrs.org/"
+    },
+    {
+      "name": "SEC — Company Filings",
+      "org": "U.S. Securities and Exchange Commission",
+      "type": "Government financial disclosure source",
+      "url": "https://www.sec.gov/edgar/search-and-access"
+    }
+  ],
+  "mgmt": [
+    {
+      "name": "OECD — Corporate Governance",
+      "org": "Organisation for Economic Co-operation and Development",
+      "type": "International governance reference",
+      "url": "https://www.oecd.org/corporate/"
+    },
+    {
+      "name": "Project Management Institute",
+      "org": "PMI",
+      "type": "Professional management organization",
+      "url": "https://www.pmi.org/"
+    }
+  ],
+  "invest": [
+    {
+      "name": "Investor.gov",
+      "org": "U.S. Securities and Exchange Commission",
+      "type": "Government investor education source",
+      "url": "https://www.investor.gov/"
+    },
+    {
+      "name": "CFA Institute — Research & Policy Center",
+      "org": "CFA Institute",
+      "type": "Professional investment research",
+      "url": "https://rpc.cfainstitute.org/"
+    }
+  ],
+  "risk": [
+    {
+      "name": "Basel Committee on Banking Supervision",
+      "org": "Bank for International Settlements",
+      "type": "International financial-regulation source",
+      "url": "https://www.bis.org/bcbs/"
+    },
+    {
+      "name": "COSO",
+      "org": "Committee of Sponsoring Organizations of the Treadway Commission",
+      "type": "Enterprise risk framework source",
+      "url": "https://www.coso.org/"
+    }
+  ],
+  "ops": [
+    {
+      "name": "Manufacturing",
+      "org": "NIST",
+      "type": "Government operations reference",
+      "url": "https://www.nist.gov/topics/manufacturing"
+    },
+    {
+      "name": "ISO — Quality Management",
+      "org": "International Organization for Standardization",
+      "type": "International standards source",
+      "url": "https://www.iso.org/quality-management.html"
+    }
+  ],
+  "mktg": [
+    {
+      "name": "Advertising and Marketing",
+      "org": "Federal Trade Commission",
+      "type": "Government business guidance",
+      "url": "https://www.ftc.gov/business-guidance/advertising-marketing"
+    },
+    {
+      "name": "American Marketing Association",
+      "org": "AMA",
+      "type": "Professional marketing organization",
+      "url": "https://www.ama.org/"
+    }
+  ],
+  "applied": [
+    {
+      "name": "World Bank Data",
+      "org": "World Bank",
+      "type": "International development & business data",
+      "url": "https://data.worldbank.org/"
+    },
+    {
+      "name": "OECD",
+      "org": "Organisation for Economic Co-operation and Development",
+      "type": "International policy & business source",
+      "url": "https://www.oecd.org/"
+    }
+  ]
+};
+const specialSources={};
+
+const nodeById = new Map(nodes.map(n=>[n.id,n]));
+const linkObjs = links.map(([s,t],i)=>({source:s,target:t,index:i}));
+function linkNames(l){return [typeof l.source==="string"?l.source:l.source.id,typeof l.target==="string"?l.target:l.target.id]}
+function relationText(a,b){
+  const A=nodeById.get(a),B=nodeById.get(b); if(!A||!B)return `${a} and ${b} are mapped as connected fields.`;
+  const ca=categories[A.cat]?.label||A.cat, cb=categories[B.cat]?.label||B.cat;
+  if(A.cat===B.cat){
+    return `This line connects two areas within ${ca}. ${a}: ${A.desc} ${b}: ${B.desc} The overlap represents work where these scopes share concepts, methods, systems, evidence, constraints, or decisions.`;
+  }
+  return `This line bridges ${ca} and ${cb}. ${a}: ${A.desc} ${b}: ${B.desc} The overlap represents problems where both scopes must be considered together or where one supplies concepts, methods, data, systems, constraints, or evidence used by the other.`;
+}
+function sourcesForNode(id){const n=nodeById.get(id);const items=[...(specialSources[id]||[]),...(sourceSets[n.cat]||[])];const seen=new Set();return items.filter(s=>!seen.has(s.url)&&seen.add(s.url)).slice(0,3)}
+function sourcesForEdge(a,b){const items=[...sourcesForNode(a),...sourcesForNode(b)];const seen=new Set();const deduped=items.filter(s=>!seen.has(s.url)&&seen.add(s.url)).slice(0,4);deduped.push({name:`Literature search: ${a} + ${b}`,org:"Google Scholar",type:"Further literature search",url:`https://scholar.google.com/scholar?q=${encodeURIComponent(a+" "+b)}`});return deduped}
+const neighbors=new Map(nodes.map(n=>[n.id,new Set()]));linkObjs.forEach(l=>{neighbors.get(l.source).add(l.target);neighbors.get(l.target).add(l.source)});
+const svg=d3.select("#svg"),g=svg.append("g");const zoom=d3.zoom().scaleExtent([.3,3]).on("zoom",ev=>g.attr("transform",ev.transform));svg.call(zoom);
+function size(){return{w:window.innerWidth,h:window.innerHeight}}let{w,h}=size();
+const simulation=d3.forceSimulation(nodes).force("link",d3.forceLink(linkObjs).id(d=>d.id).distance(74).strength(.5)).force("charge",d3.forceManyBody().strength(-195)).force("center",d3.forceCenter(w/2,h/2)).force("collision",d3.forceCollide().radius(39));
+const visibleLink=g.append("g").attr("class","links-visible").selectAll("line").data(linkObjs).join("line").attr("class","link").attr("stroke-width",1);
+const hitLink=g.append("g").attr("class","links-hit").selectAll("line").data(linkObjs).join("line").attr("class","link-hit").on("click",(ev,d)=>{ev.stopPropagation();selectRelationship(d,true)});
+const node=g.append("g").attr("class","nodes").selectAll("g").data(nodes).join("g").attr("class","node").call(drag(simulation));
+node.append("circle").attr("class","halo").attr("r",16);node.append("circle").attr("class","core").attr("r",8).attr("fill",d=>categories[d.cat].color);node.append("text").attr("dy",-13).text(d=>d.id);
+node.on("click",(ev,d)=>{ev.stopPropagation();selectNode(d,true)});svg.on("click",()=>clearSelection());
+simulation.on("tick",()=>{visibleLink.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);hitLink.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);node.attr("transform",d=>`translate(${d.x},${d.y})`)});
+function drag(sim){function started(ev,d){if(!ev.active)sim.alphaTarget(.25).restart();d.fx=d.x;d.fy=d.y}function dragged(ev,d){d.fx=ev.x;d.fy=ev.y}function ended(ev,d){if(!ev.active)sim.alphaTarget(0);d.fx=null;d.fy=null}return d3.drag().on("start",started).on("drag",dragged).on("end",ended)}
+let currentNode=null,currentEdge=null,explorationPath=[],soundOn=false,audioCtx=null;
+function uiTone(freq=520,duration=.035,volume=.025){if(!soundOn)return;try{audioCtx||=new(window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),gain=audioCtx.createGain();o.type="sine";o.frequency.value=freq;gain.gain.setValueAtTime(volume,audioCtx.currentTime);gain.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);o.connect(gain);gain.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}}
+function addToPath(id){if(!id)return;if(explorationPath.length===0||explorationPath[explorationPath.length-1]!==id){explorationPath.push(id);if(explorationPath.length>8)explorationPath.shift()}renderPath()}
+function renderPath(){const bar=document.getElementById("pathbar");if(explorationPath.length<2){bar.classList.remove("show");return}document.getElementById("pathText").textContent=explorationPath.join("  →  ");bar.classList.add("show")}
+document.getElementById("clearPath").addEventListener("click",()=>{explorationPath=[];renderPath();uiTone(390,.035,.02)});
+function selectNode(d,openDrawer=false){currentNode=d;currentEdge=null;addToPath(d.id);const active=new Set([d.id,...neighbors.get(d.id)]);node.classed("dim",n=>!active.has(n.id)).classed("lit",n=>n.id===d.id).classed("connected",n=>n.id!==d.id&&active.has(n.id));visibleLink.classed("dim",l=>l.source.id!==d.id&&l.target.id!==d.id).classed("lit",l=>l.source.id===d.id||l.target.id===d.id).classed("selected",false);const related=[...neighbors.get(d.id)].sort(),sourceCount=sourcesForNode(d.id).length;document.getElementById("detail").innerHTML=`<div class="name">${escapeHtml(d.id)}</div><div class="cat">${escapeHtml(categories[d.cat].label)}</div><div class="desc">${escapeHtml(d.desc)}</div><div class="microline"><span class="status-dot"></span>${related.length} mapped connections · ${sourceCount} reference sources</div><button class="action primary" id="openField">Explore field →</button>`;document.getElementById("openField").onclick=()=>openFieldDrawer(d);if(openDrawer)openFieldDrawer(d);uiTone(560,.035,.022)}
+function openFieldDrawer(d){const drawer=document.getElementById("drawer"),related=[...neighbors.get(d.id)].sort();document.getElementById("drawerKicker").textContent="Field intelligence";document.getElementById("drawerTitle").textContent=d.id;const sourceCards=sourcesForNode(d.id).map(sourceCard).join("");const connectionCards=related.map(other=>`<button class="connection" data-a="${attr(d.id)}" data-b="${attr(other)}"><div class="to">${escapeHtml(other)}</div><div class="why">${escapeHtml(relationText(d.id,other))}</div><div class="arrow">›</div></button>`).join("");document.getElementById("drawerBody").innerHTML=`<div class="section-title">${escapeHtml(categories[d.cat].label)}</div><div class="lead">${escapeHtml(d.desc)}</div><div class="badge-row"><span class="badge">${related.length} connections</span><span class="badge">Sourced reference set</span><span class="badge">Reviewed 16 Aug 2026</span></div><div class="section-title">Connections</div>${connectionCards||'<div class="lead">No mapped connections.</div>'}<div class="section-title">Reference sources</div>${sourceCards}<div class="source-note">Reference links support the field context. Relationship views also include a direct literature search so visitors can inspect supporting scholarship. This build does not label every line as independently peer-reviewed.</div>`;drawer.classList.add("open");drawer.querySelectorAll(".connection").forEach(btn=>btn.addEventListener("click",()=>{const edge=findEdge(btn.dataset.a,btn.dataset.b);if(edge)selectRelationship(edge,true)}))}
+function findEdge(a,b){return linkObjs.find(l=>{const[x,y]=linkNames(l);return(x===a&&y===b)||(x===b&&y===a)})}
+function selectRelationship(l,openDrawer=true){currentEdge=l;currentNode=null;const[a,b]=linkNames(l),active=new Set([a,b]);node.classed("dim",n=>!active.has(n.id)).classed("lit",n=>active.has(n.id)).classed("connected",false);visibleLink.classed("dim",x=>x!==l).classed("lit",false).classed("selected",x=>x===l);document.getElementById("detail").innerHTML=`<div class="name">${escapeHtml(a)} × ${escapeHtml(b)}</div><div class="cat">Relationship analysis</div><div class="desc">${escapeHtml(relationText(a,b))}</div><div class="microline"><span class="status-dot"></span>${sourcesForEdge(a,b).length-1} reference sources + literature search</div><button class="action primary" id="openRelation">View evidence →</button>`;document.getElementById("openRelation").onclick=()=>openRelationshipDrawer(a,b);if(openDrawer)openRelationshipDrawer(a,b);uiTone(650,.05,.023)}
+function openRelationshipDrawer(a,b){const drawer=document.getElementById("drawer");document.getElementById("drawerKicker").textContent="Relationship analysis";document.getElementById("drawerTitle").textContent=`${a} × ${b}`;const sources=sourcesForEdge(a,b);document.getElementById("drawerBody").innerHTML=`<div class="section-title">Why this connection exists</div><div class="lead">${escapeHtml(relationText(a,b))}</div><div class="badge-row"><span class="badge">Mapped connection</span><span class="badge">${sources.length-1} reference sources</span><span class="badge">Literature search included</span></div><div class="section-title">Evidence & sources</div>${sources.map(sourceCard).join("")}<div class="section-title">Continue exploring</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px"><button class="action" id="goA">${escapeHtml(a)}</button><button class="action" id="goB">${escapeHtml(b)}</button></div><div class="source-note">The explanation, reference set and literature search are kept together so the relationship can be inspected instead of appearing as an unexplained line.</div>`;drawer.classList.add("open");document.getElementById("goA").onclick=()=>selectNode(nodeById.get(a),true);document.getElementById("goB").onclick=()=>selectNode(nodeById.get(b),true)}
+function sourceCard(s){return `<a class="source-card" href="${attr(s.url)}" target="_blank" rel="noopener noreferrer"><div class="source-name">${escapeHtml(s.name)} ↗</div><div class="source-meta">${escapeHtml(s.org)} · ${escapeHtml(s.type)}</div></a>`}
+function clearSelection(){currentNode=null;currentEdge=null;node.classed("dim",false).classed("lit",false).classed("connected",false);visibleLink.classed("dim",false).classed("lit",false).classed("selected",false);document.getElementById("detail").innerHTML='<div class="placeholder">Select a field to see what it is, what it overlaps with, and why those connections exist.</div>';closeDrawer()}
+function closeDrawer(){document.getElementById("drawer").classList.remove("open")}document.getElementById("drawerClose").addEventListener("click",()=>{closeDrawer();uiTone(430,.03,.018)});
+function escapeHtml(v){const map={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"};return String(v).replace(/[&<>"']/g,c=>map[c])}function attr(v){return escapeHtml(v)}
+const searchInput=document.getElementById("searchInput");searchInput.addEventListener("input",()=>{const q=searchInput.value.trim().toLowerCase();if(!q){node.classed("search-dim",false).classed("search-hit",false);return}node.classed("search-dim",d=>!d.id.toLowerCase().includes(q)).classed("search-hit",d=>d.id.toLowerCase().includes(q))});searchInput.addEventListener("keydown",ev=>{if(ev.key==="Enter"){const q=searchInput.value.trim().toLowerCase(),hit=nodes.find(n=>n.id.toLowerCase().includes(q));if(hit){selectNode(hit,true);focusNode(hit);searchInput.blur();document.getElementById("toolbar").classList.remove("searching")}}if(ev.key==="Escape"){searchInput.value="";node.classed("search-dim",false).classed("search-hit",false);searchInput.blur()}});
+document.getElementById("mobileSearch").addEventListener("click",()=>{const tb=document.getElementById("toolbar");tb.classList.toggle("searching");if(tb.classList.contains("searching"))setTimeout(()=>searchInput.focus(),50)});
+function focusNode(d){const scale=1.45,tx=w/2-d.x*scale,ty=h/2-d.y*scale;svg.transition().duration(650).call(zoom.transform,d3.zoomIdentity.translate(tx,ty).scale(scale))}document.getElementById("resetView").addEventListener("click",()=>{svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);uiTone(470,.03,.018)});
+document.getElementById("soundToggle").addEventListener("click",ev=>{soundOn=!soundOn;ev.currentTarget.classList.toggle("on",soundOn);ev.currentTarget.textContent=soundOn?"●":"◌";if(soundOn)uiTone(600,.055,.025);showToast(soundOn?"Interface sound on":"Interface sound off")});function showToast(msg){const t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>t.classList.remove("show"),1300)}
+const legend=document.getElementById("legend");Object.values(categories).forEach(c=>{const item=document.createElement("div");item.className="item";item.innerHTML=`<span class="dot" style="background:${c.color}"></span>${escapeHtml(c.label)}`;legend.appendChild(item)});
+window.addEventListener("resize",()=>{const s=size();w=s.w;h=s.h;simulation.force("center",d3.forceCenter(w/2,h/2));simulation.alpha(.3).restart()});["panel","toolbar","drawer","legend","pathbar"].forEach(id=>{document.getElementById(id)?.addEventListener("click",ev=>ev.stopPropagation())});
+
+
+/* IKL Knowledge Map system repair 2026-08-30 */
+(function iklInstallMapLayoutRepair(){
+  let iklUserMoved=false;
+  let iklResizeTimer=null;
+  const svgEl=document.getElementById("svg");
+  if(!svgEl || typeof d3==="undefined" || typeof svg==="undefined" || typeof zoom==="undefined" || typeof nodes==="undefined") return;
+
+  function visibleRect(el){
+    if(!el) return null;
+    const cs=getComputedStyle(el);
+    if(cs.display==="none" || cs.visibility==="hidden" || Number(cs.opacity)===0) return null;
+    const r=el.getBoundingClientRect();
+    if(r.width<2 || r.height<2) return null;
+    return r;
+  }
+
+  function resolveDockLegendCollision(){
+    const legendEl=document.getElementById("legend");
+    const dock=document.getElementById("cdPublicDock");
+    if(!legendEl || !dock) return;
+    if(!legendEl.dataset.iklBaseBottom){
+      legendEl.dataset.iklBaseBottom=getComputedStyle(legendEl).bottom || "16px";
+    }
+    legendEl.style.bottom=legendEl.dataset.iklBaseBottom;
+    requestAnimationFrame(()=>{
+      const l=visibleRect(legendEl), d=visibleRect(dock);
+      if(!l || !d) return;
+      const overlap=!(l.right<d.left || l.left>d.right || l.bottom<d.top || l.top>d.bottom);
+      if(overlap){
+        const required=Math.max(12, window.innerHeight-d.top+14);
+        legendEl.style.bottom=required+"px";
+      }
+    });
+  }
+
+  function safeArea(){
+    const vw=window.innerWidth, vh=window.innerHeight;
+    let left=24, right=vw-24, top=76, bottom=vh-24;
+    const panel=visibleRect(document.getElementById("panel"));
+    const toolbar=visibleRect(document.getElementById("toolbar"));
+    const dock=visibleRect(document.getElementById("cdPublicDock"));
+    const legendRect=visibleRect(document.getElementById("legend"));
+    const chrono=visibleRect(document.getElementById("chronobar"));
+    const timeline=visibleRect(document.getElementById("timelineBox"));
+
+    if(vw>820){
+      if(panel) left=Math.max(left,panel.right+30);
+      if(toolbar) top=Math.max(top,toolbar.bottom+18);
+    }else{
+      if(panel) top=Math.max(top,panel.bottom+18);
+      if(toolbar) top=Math.max(top,toolbar.bottom+18);
+      left=18; right=vw-18;
+    }
+    if(dock) bottom=Math.min(bottom,dock.top-24);
+    if(legendRect) bottom=Math.min(bottom,legendRect.top-18);
+    if(chrono) bottom=Math.min(bottom,chrono.top-18);
+    if(timeline && timeline.top>vh*.45) bottom=Math.min(bottom,timeline.top-18);
+
+    if(right-left<240){left=18;right=vw-18;}
+    if(bottom-top<220){top=76;bottom=vh-82;}
+    return {left,right,top,bottom};
+  }
+
+  function fitMap(animate=true){
+    resolveDockLegendCollision();
+    requestAnimationFrame(()=>{
+      const xs=nodes.map(d=>Number(d.x)).filter(Number.isFinite);
+      const ys=nodes.map(d=>Number(d.y)).filter(Number.isFinite);
+      if(!xs.length || !ys.length) return;
+      const minX=Math.min(...xs), maxX=Math.max(...xs), minY=Math.min(...ys), maxY=Math.max(...ys);
+      const graphW=Math.max(120,maxX-minX), graphH=Math.max(120,maxY-minY);
+      const a=safeArea();
+      const safeW=Math.max(220,a.right-a.left), safeH=Math.max(220,a.bottom-a.top);
+      const padding=58;
+      let scale=Math.min((safeW-padding*2)/graphW,(safeH-padding*2)/graphH,1.25);
+      scale=Math.max(.30,Math.min(1.25,scale));
+      const graphCX=(minX+maxX)/2, graphCY=(minY+maxY)/2;
+      const safeCX=(a.left+a.right)/2, safeCY=(a.top+a.bottom)/2;
+      const tx=safeCX-graphCX*scale, ty=safeCY-graphCY*scale;
+      const t=d3.zoomIdentity.translate(tx,ty).scale(scale);
+      if(animate) svg.transition().duration(520).call(zoom.transform,t);
+      else svg.call(zoom.transform,t);
+    });
+  }
+
+  svgEl.addEventListener("pointerdown",()=>{iklUserMoved=true},{passive:true});
+  svgEl.addEventListener("wheel",()=>{iklUserMoved=true},{passive:true});
+  const reset=document.getElementById("resetView");
+  if(reset){
+    reset.addEventListener("click",ev=>{
+      ev.preventDefault(); ev.stopImmediatePropagation(); iklUserMoved=false; fitMap(true);
+    },true);
+  }
+
+  if(typeof simulation!=="undefined" && simulation && typeof simulation.on==="function")
+    simulation.on("end.iklLayoutRepair",()=>{if(!iklUserMoved) fitMap(true);});
+
+  setTimeout(()=>{if(!iklUserMoved) fitMap(false)},650);
+  setTimeout(()=>{if(!iklUserMoved) fitMap(true)},1500);
+  resolveDockLegendCollision();
+
+  window.addEventListener("resize",()=>{
+    clearTimeout(iklResizeTimer);
+    iklResizeTimer=setTimeout(()=>{resolveDockLegendCollision();fitMap(false)},180);
+  });
+  window.iklFitKnowledgeMap=()=>fitMap(true);
+})();
+</script><nav id="cdPublicDock" aria-label="THE UNI public links">
+<a aria-label='Back to the Interactive Knowledge Library' class='cdDockWord' href='/' title='Back to the Interactive Knowledge Library'>Library</a>
+<a class="cdWatch" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a>
+<a class="cdContact" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact THE UNI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a>
+</nav>
+
+<style id="ikl-collision-guard-style">
+/* IKL production collision guard: only moves bottom UI when the public dock would cover it. */
+:root{--ikl-dock-safe-bottom:74px}
+@media(max-width:680px){:root{--ikl-dock-safe-bottom:62px}}
+</style>
+<script id="ikl-collision-guard">
+(()=>{
+ const MOVE=['#legend','.legend','#drawer','.drawer','#modebar','.modebar','.modeBar','.mode-bar','#timeline','.timeline','.pathbar','.pathBar','.path-bar','.timelineWrap','.timeline-wrap','.bottomBar','.bottom-bar','.statusbar','.status-bar','#status'];
+ const QUIET=['#legend','.legend','#watermark','.watermark','.badge'];
+ const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>2&&r.height>2};
+ const overlap=(a,b,pad=4)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>pad&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>pad;
+ let queued=false,applying=false;
+ const observer=new MutationObserver(muts=>{if(applying)return;for(const m of muts){if(m.type==='attributes'&&m.attributeName==='class'){run();break}}});
+ const observe=()=>observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+ function all(selectors){const out=[];selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!out.includes(el))out.push(el)}));return out}
+ function rememberMove(el){if(el.dataset.iklMoveRemembered)return;el.dataset.iklMoveRemembered='1';el.dataset.iklInlineBottom=el.style.bottom||'';el.dataset.iklInlineTransform=el.style.transform||'';el.dataset.iklInlineMaxHeight=el.style.maxHeight||''}
+ function restoreMove(el){if(el.dataset.iklAdjusted!=='1')return;if(el.dataset.iklInlineBottom==='')el.style.removeProperty('bottom');else el.style.bottom=el.dataset.iklInlineBottom;if(el.dataset.iklInlineTransform==='')el.style.removeProperty('transform');else el.style.transform=el.dataset.iklInlineTransform;if(el.dataset.iklInlineMaxHeight==='')el.style.removeProperty('max-height');else el.style.maxHeight=el.dataset.iklInlineMaxHeight;el.dataset.iklAdjusted='0'}
+ function rememberQuiet(el){if(el.dataset.iklQuietRemembered)return;el.dataset.iklQuietRemembered='1';el.dataset.iklInlineVisibility=el.style.visibility||'';el.dataset.iklInlineOpacity=el.style.opacity||''}
+ function restoreQuiet(el){if(el.dataset.iklQuieted!=='1')return;if(el.dataset.iklInlineVisibility==='')el.style.removeProperty('visibility');else el.style.visibility=el.dataset.iklInlineVisibility;if(el.dataset.iklInlineOpacity==='')el.style.removeProperty('opacity');else el.style.opacity=el.dataset.iklInlineOpacity;el.dataset.iklQuieted='0'}
+ function run(){if(queued||applying)return;queued=true;requestAnimationFrame(()=>{
+   applying=true;observer.disconnect();
+   const movers=all(MOVE),quiets=all(QUIET);movers.forEach(el=>{rememberMove(el);restoreMove(el)});quiets.forEach(el=>{rememberQuiet(el);restoreQuiet(el)});
+   const dock=document.getElementById('cdPublicDock');
+   if(dock&&visible(dock)){
+     const dr=dock.getBoundingClientRect(),safe=Math.max(12,innerHeight-dr.top+10);
+     movers.forEach(el=>{if(el===dock||!visible(el))return;const cs=getComputedStyle(el);if(cs.position!=='fixed'&&cs.position!=='absolute')return;const r=el.getBoundingClientRect();if(!overlap(r,dr))return;const b=parseFloat(cs.bottom);el.dataset.iklAdjusted='1';if(Number.isFinite(b))el.style.bottom=Math.max(b,safe)+'px';else if(r.bottom>dr.top){const base=el.style.transform||'';el.style.transform=(base?base+' ':'')+'translateY(-'+(r.bottom-dr.top+10)+'px)'}if(el.matches('#drawer,.drawer')){const top=el.getBoundingClientRect().top;el.style.maxHeight=Math.max(160,innerHeight-top-safe-10)+'px'}})
+   }
+   const drawers=all(['#drawer','.drawer']).filter(visible);
+   drawers.forEach(drawer=>{const rr=drawer.getBoundingClientRect();quiets.forEach(el=>{if(el===drawer||!visible(el))return;if(overlap(el.getBoundingClientRect(),rr,6)){el.dataset.iklQuieted='1';el.style.visibility='hidden';el.style.opacity='0'}})});
+   queued=false;
+   applying=false;observe();
+ });}
+ addEventListener('load',run);addEventListener('resize',run,{passive:true});addEventListener('orientationchange',run,{passive:true});
+ observe();
+ run();setTimeout(run,30);setTimeout(run,120);setTimeout(run,350);
+})();
+</script>
+</body></html>

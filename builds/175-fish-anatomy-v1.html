@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="up" href="/interactive-knowledge-library/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Fish Anatomy — Blue Current | THE UNI</title>
+<style>
+:root{
+  --bg:#07151b;
+  --panel:rgba(10,28,35,.88);
+  --panel2:rgba(6,20,27,.80);
+  --border:rgba(190,226,238,.18);
+  --text:#eef8fb;
+  --muted:#a8c2cb;
+  --cyan:#62b9cf;
+  --blue:#4f82ab;
+  --silver:#a9c8d2;
+  --gold:#d2ad67;
+  --rose:#c68191;
+  --green:#68a384;
+  --glass:linear-gradient(155deg,rgba(24,50,59,.86),rgba(8,23,30,.78));
+  --shadow:0 18px 48px rgba(0,0,0,.30),0 1px 9px rgba(139,205,223,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#07151b;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+body{
+  background:
+    radial-gradient(circle at 18% 12%,rgba(65,141,159,.24),transparent 30%),
+    radial-gradient(circle at 82% 16%,rgba(72,96,145,.20),transparent 34%),
+    radial-gradient(circle at 48% 90%,rgba(41,97,116,.14),transparent 34%),
+    linear-gradient(130deg,#061219 0%,#0e2631 22%,#173845 40%,#0a1b23 57%,#102a35 77%,#06141a 100%);
+  background-size:170% 170%;
+  animation:oceanDrift 25s ease-in-out infinite;
+}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+@keyframes oceanDrift{0%,100%{background-position:0% 45%}50%{background-position:100% 56%}}
+@keyframes caustic{0%{transform:translateX(-22%) rotate(-8deg);opacity:.13}50%{opacity:.27}100%{transform:translateX(32%) rotate(-8deg);opacity:.12}}
+@keyframes breathe{0%,100%{opacity:.24}50%{opacity:.55}}
+@keyframes pulse{0%,100%{filter:drop-shadow(0 0 0 rgba(165,227,244,0))}50%{filter:drop-shadow(0 0 11px rgba(165,227,244,.7))}}
+@keyframes waterflow{to{stroke-dashoffset:-36}}
+@keyframes finwave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(1.8deg)}}
+@keyframes drawerIn{from{opacity:0;transform:translateX(25px)}to{opacity:1;transform:none}}
+@keyframes sheetIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+#app{position:relative;width:100vw;height:100vh;isolation:isolate}
+.ambient{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.ambient::before{
+  content:"";position:absolute;inset:-20%;
+  background:
+    repeating-linear-gradient(100deg,transparent 0 9%,rgba(172,226,235,.055) 10%,transparent 12% 20%);
+  animation:caustic 18s ease-in-out infinite;
+}
+.ambient::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(circle at 0 0,rgba(95,179,195,.30),transparent 34%),
+    radial-gradient(circle at 100% 0,rgba(92,118,175,.22),transparent 34%),
+    radial-gradient(circle at 0 100%,rgba(73,136,153,.17),transparent 34%),
+    radial-gradient(circle at 100% 100%,rgba(75,133,159,.18),transparent 34%);
+  animation:breathe 17s ease-in-out infinite;
+}
+.glass{background:var(--glass);border:1px solid var(--border);box-shadow:var(--shadow);backdrop-filter:blur(13px);-webkit-backdrop-filter:blur(13px)}
+#canvasWrap{position:absolute;inset:0;z-index:1}
+#fishSvg{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#fishSvg:active{cursor:grabbing}
+.anatomy-group{transition:opacity .25s}
+.hidden-layer{opacity:0;pointer-events:none}
+.visible-layer{opacity:1}
+.part{cursor:pointer;transition:opacity .2s}
+.part .shape{transition:stroke-width .2s,opacity .2s,filter .2s}
+.part:hover .shape{filter:drop-shadow(0 0 8px rgba(184,233,244,.35))}
+.part.dim{opacity:.10}
+.part.selected .shape{stroke:#f1fbff!important;stroke-width:3px!important;filter:drop-shadow(0 0 13px rgba(166,226,242,.75));animation:pulse 1.8s ease-in-out infinite}
+.part.related .shape{stroke:rgba(194,232,240,.74)!important;stroke-width:2px!important;filter:drop-shadow(0 0 7px rgba(146,207,220,.30))}
+.pathway-target .shape{stroke:#f1db9a!important;stroke-width:3px!important;filter:drop-shadow(0 0 12px rgba(231,194,108,.78))}
+.label-text{fill:#dceef3;font-size:11.5px;font-weight:650;paint-order:stroke;stroke:#06151b;stroke-width:4px;pointer-events:none}
+.label-sub{fill:#91afb8;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;paint-order:stroke;stroke:#06151b;stroke-width:3px;pointer-events:none}
+.leader{stroke:rgba(205,234,241,.40);stroke-width:1.1;fill:none}
+.labels.hidden{display:none}
+#waterPath{fill:none;stroke:#7ed3e6;stroke-width:5;stroke-linecap:round;stroke-dasharray:10 8;opacity:0;pointer-events:none}
+#waterPath.active{opacity:.95;animation:waterflow 1s linear infinite}
+#bloodPath{fill:none;stroke:#d27d8b;stroke-width:4;stroke-linecap:round;stroke-dasharray:9 7;opacity:0;pointer-events:none}
+#bloodPath.active{opacity:.9;animation:waterflow 1.1s linear infinite}
+.fin-anim{transform-box:fill-box;transform-origin:center;animation:finwave 5s ease-in-out infinite}
+#intro{position:absolute;z-index:5;top:16px;left:16px;width:345px;max-width:calc(100vw - 32px);border-radius:14px;padding:14px 15px}
+.kicker{font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:#aac8d2;margin-bottom:4px}
+#intro h1{font-size:17px;margin:0 0 3px;font-weight:750}
+#intro .sub{font-size:11px;line-height:1.45;color:var(--muted);margin:0 0 10px}
+.layer-row,.mode-row{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:6px}
+.mode-row{grid-template-columns:repeat(3,1fr);margin-bottom:0}
+.layerbtn,.mode{border:1px solid rgba(207,235,242,.15);background:rgba(255,255,255,.04);border-radius:9px;padding:7px 5px;font-size:10px}
+.layerbtn.active,.mode.active{background:rgba(72,145,163,.22);border-color:rgba(137,206,220,.42)}
+#quickInfo{margin-top:10px;border-top:1px solid rgba(207,235,242,.10);padding-top:9px;min-height:53px;font-size:11px;line-height:1.45;color:var(--muted)}
+#quickInfo strong{color:var(--text);font-size:12px}
+#pathPanel,#quizPanel{display:none;margin-top:9px;padding:9px 10px;border-radius:10px;border:1px solid rgba(210,173,103,.20);background:rgba(210,173,103,.055)}
+#pathPanel.show,#quizPanel.show{display:block}
+.small-title{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#d3b779;margin-bottom:5px}
+#pathStep,#quizPrompt{font-size:11px;line-height:1.45}
+#quizFeedback{font-size:10px;margin-top:6px;color:var(--muted)}
+#quizMeta{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:7px}
+.actions{display:flex;gap:6px;margin-top:7px}
+.action{border:1px solid rgba(207,235,242,.14);background:rgba(255,255,255,.04);border-radius:8px;padding:7px 9px;font-size:10px}
+.action.primary{background:rgba(72,145,163,.19);border-color:rgba(137,206,220,.34)}
+#toolbar{position:absolute;z-index:6;top:16px;right:16px;display:flex;gap:6px;align-items:center;border-radius:12px;padding:6px}
+#searchBox{position:relative}
+#searchInput{width:205px;border:1px solid rgba(207,235,242,.13);outline:none;background:rgba(255,255,255,.04);border-radius:8px;padding:8px 30px 8px 9px;font-size:11px}
+#searchInput::placeholder{color:#88a8b2}
+#searchMark{position:absolute;right:9px;top:7px;color:var(--muted);font-size:12px}
+.iconbtn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(207,235,242,.14);background:rgba(255,255,255,.04);display:grid;place-items:center}
+.iconbtn.on{background:rgba(72,145,163,.28);border-color:rgba(137,206,220,.42)}
+#legend{position:absolute;z-index:4;left:16px;bottom:16px;border-radius:12px;padding:9px 11px;display:grid;grid-template-columns:repeat(2,auto);column-gap:14px;row-gap:5px;font-size:9.5px;color:var(--muted)}
+.legend-item{display:flex;gap:6px;align-items:center;white-space:nowrap}.dot{width:8px;height:8px;border-radius:50%}
+#badge{position:absolute;z-index:4;left:50%;bottom:16px;transform:translateX(-50%);border-radius:999px;padding:7px 11px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#b8cbd2}
+#watermark{position:absolute;z-index:7;right:20px;bottom:18px;font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:650;color:rgba(205,231,238,.46);text-shadow:0 0 12px rgba(101,183,203,.18);pointer-events:none;user-select:none;white-space:nowrap}
+#drawer{position:absolute;z-index:9;right:16px;top:62px;bottom:16px;width:min(420px,calc(100vw - 32px));border-radius:15px;display:none;overflow:hidden}
+#drawer.open{display:flex;flex-direction:column;animation:drawerIn .25s ease-out}
+.drawer-head{display:flex;gap:12px;padding:14px 15px 11px;border-bottom:1px solid rgba(207,235,242,.10)}
+.drawer-title{flex:1;min-width:0}.drawer-kicker{font-size:9px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin-bottom:4px}.drawer-title h2{font-size:18px;line-height:1.15;margin:0}
+.drawer-body{overflow:auto;padding:13px 15px 20px;scrollbar-width:thin}
+.section-title{font-size:9px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:15px 0 7px}.section-title:first-child{margin-top:0}
+.lead{font-size:12px;line-height:1.55;color:#d8e6ea}
+.fact-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px}
+.fact{padding:9px;border-radius:10px;border:1px solid rgba(207,235,242,.10);background:rgba(255,255,255,.03)}
+.f-label{font-size:8px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.f-text{font-size:10.5px;line-height:1.45;color:#dbe7eb}
+.pearl,.trap{border-radius:10px;padding:10px 11px;margin-top:8px}.pearl{border:1px solid rgba(210,173,103,.20);background:rgba(210,173,103,.055)}.trap{border:1px solid rgba(198,129,145,.20);background:rgba(198,129,145,.05)}
+.pearl b,.trap b{display:block;font-size:9px;letter-spacing:.11em;text-transform:uppercase;margin-bottom:4px}.pearl b{color:#d5b979}.trap b{color:#d799aa}.pearl div,.trap div{font-size:10.5px;line-height:1.5;color:#e1e1dd}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.badge{font-size:8.5px;text-transform:uppercase;letter-spacing:.06em;border:1px solid rgba(207,235,242,.12);border-radius:999px;padding:4px 7px;color:#b6c9cf;background:rgba(255,255,255,.03)}
+.related-grid{display:flex;flex-wrap:wrap;gap:6px}.related-btn{border:1px solid rgba(207,235,242,.12);background:rgba(255,255,255,.03);border-radius:999px;padding:6px 8px;font-size:9.5px}
+.source-card{display:block;text-decoration:none;color:inherit;border:1px solid rgba(207,235,242,.10);background:rgba(255,255,255,.025);border-radius:10px;padding:9px 10px;margin-bottom:7px}
+.source-card:hover{background:rgba(255,255,255,.06)}.source-name{font-size:10.5px;font-weight:700;line-height:1.35}.source-meta{font-size:8.5px;color:var(--muted);margin-top:3px}
+.note{font-size:9.5px;line-height:1.5;color:var(--muted);margin-top:10px}
+.compare-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}.compare-box{border:1px solid rgba(207,235,242,.10);border-radius:10px;padding:10px;background:rgba(255,255,255,.025)}.compare-box strong{display:block;font-size:10px;margin-bottom:4px}.compare-box span{font-size:9.5px;line-height:1.45;color:var(--muted)}
+#toast{position:absolute;z-index:20;left:50%;top:18px;transform:translateX(-50%) translateY(-8px);opacity:0;pointer-events:none;border-radius:9px;padding:7px 10px;font-size:10px;color:var(--muted);transition:.2s}#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:900px){
+  #intro{width:305px}
+  #searchInput{width:160px}
+  #drawer{top:auto;left:8px;right:8px;bottom:8px;width:auto;max-height:71vh;border-radius:16px}
+  #drawer.open{animation:sheetIn .25s ease-out}
+  #badge{display:none}
+}
+@media(max-width:650px){
+  #intro{top:9px;left:9px;width:min(282px,calc(100vw - 76px));padding:11px 12px}
+  #intro h1{font-size:14px}#intro .sub{font-size:9.7px;margin-bottom:7px}
+  .layerbtn,.mode{font-size:8.7px;padding:6px 3px}
+  #quickInfo{display:none}
+  #toolbar{top:9px;right:9px;padding:5px}
+  #searchBox{display:none}
+  #toolbar.searching #searchBox{display:block;position:fixed;top:54px;left:9px;right:9px}
+  #toolbar.searching #searchInput{width:100%;background:rgba(7,23,30,.97)}
+  #legend{left:9px;bottom:10px;grid-template-columns:1fr;max-height:108px;overflow:auto;padding:7px 9px}
+  #watermark{right:10px;bottom:11px;font-size:8.5px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important}}
+</style>
+<style id="coach-doll-public-dock-style">
+/* THE UNI — compact public jewel controls */
+#cdPublicDock{position:fixed;left:14px;bottom:14px;z-index:2147483000;display:flex;align-items:center;gap:7px;padding:5px 6px;border:1px solid rgba(255,255,255,.13);border-radius:999px;background:linear-gradient(145deg,rgba(18,22,27,.76),rgba(5,7,10,.66));box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px) saturate(1.18);-webkit-backdrop-filter:blur(18px) saturate(1.18);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+#cdPublicDock a{position:relative;display:grid;place-items:center;color:#f0f4f5;text-decoration:none;border:1px solid rgba(255,255,255,.15);background:radial-gradient(circle at 33% 26%,rgba(255,255,255,.18),rgba(255,255,255,.055) 39%,rgba(0,0,0,.26) 79%);box-shadow:inset 0 1px rgba(255,255,255,.12),0 0 16px rgba(198,218,233,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+#cdPublicDock a:hover,#cdPublicDock a:focus-visible{transform:translateY(-2px);border-color:rgba(229,207,166,.50);box-shadow:inset 0 1px rgba(255,255,255,.16),0 0 22px rgba(222,193,141,.17);outline:none}
+#cdPublicDock .cdWatch{width:38px;height:38px;border-radius:50%;box-shadow:inset 0 1px rgba(255,255,255,.15),0 0 21px rgba(222,193,141,.13)}
+#cdPublicDock .cdContact{width:34px;height:34px;border-radius:50%}
+#cdPublicDock .cdWatch::before,#cdPublicDock .cdContact::before{content:"";position:absolute;inset:-3px;border-radius:50%;border:1px solid rgba(229,204,151,.18);pointer-events:none}
+#cdPublicDock .cdWatch::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:1px solid rgba(226,199,146,.11);animation:cdJewelBreath 5.6s ease-in-out infinite;pointer-events:none}
+#cdPublicDock svg{width:16px;height:16px}.cdWatch svg{width:17px!important;height:17px!important}
+.cdDockWord{width:auto!important;height:34px!important;padding:0 12px!important;border-radius:999px!important;font-size:8.5px!important;letter-spacing:.15em!important;text-transform:uppercase!important;color:#e9e1d7!important}
+@keyframes cdJewelBreath{0%,100%{opacity:.32;transform:scale(.96)}50%{opacity:.9;transform:scale(1.04)}}
+@media(max-width:680px){#cdPublicDock{left:8px;bottom:8px;gap:5px;padding:4px 5px}#cdPublicDock .cdWatch{width:36px;height:36px}#cdPublicDock .cdContact{width:33px;height:33px}.cdDockWord{width:33px!important;height:33px!important;padding:0!important;font-size:0!important}.cdDockWord::after{content:"⌂";font-size:15px}}
+@media(prefers-reduced-motion:reduce){#cdPublicDock a{transition:none!important}#cdPublicDock .cdWatch::after{animation:none!important}}
+</style>
+
+<!-- IKL SEO + SOCIAL PUBLISHING LAYER -->
+<meta name="description" content="Explore Fish Anatomy — Blue Current as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://theuni.barbph.com/builds/175-fish-anatomy-v1.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="THE UNI — Interactive Knowledge Library">
+<meta property="og:title" content="Fish Anatomy — Blue Current | THE UNI">
+<meta property="og:description" content="Explore Fish Anatomy — Blue Current as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…">
+<meta property="og:url" content="https://theuni.barbph.com/builds/175-fish-anatomy-v1.html">
+<meta property="og:image" content="https://theuni.barbph.com/social/175-fish-anatomy-v1.jpg">
+<meta property="og:image:secure_url" content="https://theuni.barbph.com/social/175-fish-anatomy-v1.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Fish Anatomy — Blue Current — THE UNI interactive learning preview">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fish Anatomy — Blue Current | THE UNI">
+<meta name="twitter:description" content="Explore Fish Anatomy — Blue Current as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…">
+<meta name="twitter:image" content="https://theuni.barbph.com/social/175-fish-anatomy-v1.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":["WebPage","LearningResource"],"@id":"https://theuni.barbph.com/builds/175-fish-anatomy-v1.html#learning-resource","url":"https://theuni.barbph.com/builds/175-fish-anatomy-v1.html","name":"Fish Anatomy — Blue Current | THE UNI","headline":"Fish Anatomy — Blue Current","description":"Explore Fish Anatomy — Blue Current as an interactive THE UNI knowledge object. Touch structures, reveal functions, follow pathways, and test…","inLanguage":"en","image":"https://theuni.barbph.com/social/175-fish-anatomy-v1.jpg","isPartOf":{"@id":"https://theuni.barbph.com/#website"},"creator":{"@id":"https://theuni.barbph.com/#publisher"},"learningResourceType":"Interactive learning object","educationalUse":["instruction","self study","assessment"]}</script>
+<!-- /IKL SEO + SOCIAL PUBLISHING LAYER -->
+
+<style id="ikl-mobile-fish-header-collision-fix">
+@media(max-width:650px){
+  #intro{top:58px!important}
+  #toolbar.searching{left:9px!important;right:9px!important;width:auto!important}
+  #toolbar.searching #searchBox{display:block!important;position:relative!important;left:auto!important;right:auto!important;top:auto!important;flex:1 1 auto!important}
+  #toolbar.searching #searchInput{width:100%!important}
+  #toolbar.searching .iconbtn:not(#mobileSearch){display:none!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="ambient"></div>
+
+<div id="canvasWrap">
+<svg id="fishSvg" viewBox="0 0 1000 700" role="img" aria-labelledby="svgTitle svgDesc">
+<title id="svgTitle">Interactive high-yield anatomy of a generalized bony fish</title>
+<desc id="svgDesc">A lateral-view teaching schematic of a generalized bony fish with external structures and a toggleable internal anatomy overlay.</desc>
+<g id="zoomLayer">
+
+<!-- BODY -->
+<g id="externalLayer" class="anatomy-group visible-layer">
+  <g class="part" data-part="body">
+    <path class="shape" d="M190 350 C240 250 360 205 570 220 C690 228 785 278 825 350 C785 422 690 472 570 480 C360 495 240 450 190 350 Z"
+      fill="#7199a8" fill-opacity=".74" stroke="#b7d6df" stroke-width="2"/>
+  </g>
+
+  <!-- tail -->
+  <g class="part fin-anim" data-part="caudal-fin">
+    <path class="shape" d="M805 350 C858 303 904 262 958 255 C946 305 924 334 892 350 C924 366 946 395 958 445 C904 438 858 397 805 350 Z"
+      fill="#547f94" fill-opacity=".72" stroke="#acd1df" stroke-width="1.8"/>
+  </g>
+
+  <!-- caudal peduncle -->
+  <g class="part" data-part="caudal-peduncle">
+    <path class="shape" d="M755 310 C790 320 814 333 832 350 C814 367 790 380 755 390 C766 363 766 337 755 310 Z"
+      fill="#668e9c" fill-opacity=".55" stroke="#a7c9d3" stroke-width="1.3"/>
+  </g>
+
+  <!-- dorsal fins -->
+  <g class="part fin-anim" data-part="dorsal-fin">
+    <path class="shape" d="M430 228 C447 183 468 147 506 120 C531 160 548 193 555 223 Z"
+      fill="#527e92" fill-opacity=".76" stroke="#a9cfdd" stroke-width="1.7"/>
+    <path class="shape" d="M598 231 C615 202 637 185 668 177 C674 200 672 221 663 241 Z"
+      fill="#527e92" fill-opacity=".70" stroke="#a9cfdd" stroke-width="1.5"/>
+  </g>
+
+  <!-- pectoral -->
+  <g class="part fin-anim" data-part="pectoral-fin">
+    <path class="shape" d="M360 350 C395 356 441 374 469 408 C423 413 383 397 350 369 Z"
+      fill="#4c768b" fill-opacity=".80" stroke="#aad0dd" stroke-width="1.7"/>
+  </g>
+
+  <!-- pelvic -->
+  <g class="part fin-anim" data-part="pelvic-fin">
+    <path class="shape" d="M475 451 C501 463 522 490 526 526 C489 509 466 487 456 460 Z"
+      fill="#4c768b" fill-opacity=".76" stroke="#aad0dd" stroke-width="1.6"/>
+  </g>
+
+  <!-- anal -->
+  <g class="part fin-anim" data-part="anal-fin">
+    <path class="shape" d="M620 458 C648 475 668 502 674 530 C637 517 612 493 601 466 Z"
+      fill="#4c768b" fill-opacity=".74" stroke="#aad0dd" stroke-width="1.6"/>
+  </g>
+
+  <!-- eye -->
+  <g class="part" data-part="eye">
+    <circle class="shape" cx="278" cy="312" r="23" fill="#d5e7eb" stroke="#effcff" stroke-width="1.8"/>
+    <circle cx="282" cy="314" r="12" fill="#0b1d23"/>
+    <circle cx="277" cy="308" r="3.8" fill="#f6fdff"/>
+  </g>
+
+  <!-- mouth -->
+  <g class="part" data-part="mouth">
+    <path class="shape" d="M190 346 C168 341 147 343 128 353 C151 366 174 365 196 357" fill="none" stroke="#d8e9ee" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- nostril -->
+  <g class="part" data-part="nostril">
+    <ellipse class="shape" cx="233" cy="327" rx="5" ry="3.2" fill="#0d2a33" stroke="#a7c9d3" stroke-width="1"/>
+  </g>
+
+  <!-- operculum -->
+  <g class="part" data-part="operculum">
+    <path class="shape" d="M315 278 C343 300 349 350 337 397 C320 381 309 360 306 335 C304 312 307 294 315 278 Z"
+      fill="rgba(79,119,133,.34)" stroke="#b1d1da" stroke-width="3"/>
+  </g>
+
+  <!-- gill region hidden-ish -->
+  <g class="part" data-part="gills">
+    <path class="shape" d="M320 296 C336 310 339 329 338 349 C337 369 332 384 322 396"
+      fill="none" stroke="#c47886" stroke-width="7" stroke-linecap="round" opacity=".74"/>
+  </g>
+
+  <!-- lateral line -->
+  <g class="part" data-part="lateral-line">
+    <path class="shape" d="M345 352 C460 337 595 340 752 353" fill="none" stroke="#b7dbe4" stroke-width="2.2" stroke-dasharray="4 5" opacity=".72"/>
+  </g>
+
+  <!-- scales -->
+  <g class="part" data-part="scales">
+    <path class="shape" d="M400 282 q16 12 0 24 q16 12 0 24 M430 278 q16 12 0 24 q16 12 0 24 M460 275 q16 12 0 24 q16 12 0 24 M490 273 q16 12 0 24 q16 12 0 24"
+      fill="none" stroke="rgba(213,235,241,.35)" stroke-width="1.2"/>
+  </g>
+
+  <!-- labels external -->
+  <g id="externalLabels" class="labels">
+    <path class="leader" d="M470 128 L483 167"/><text class="label-text" x="390" y="112">Dorsal fin</text>
+    <path class="leader" d="M280 260 L280 287"/><text class="label-text" x="244" y="246">Eye</text>
+    <path class="leader" d="M152 331 L183 346"/><text class="label-text" x="85" y="326">Mouth</text>
+    <path class="leader" d="M286 417 L321 387"/><text class="label-text" x="229" y="429">Operculum</text>
+    <path class="leader" d="M480 370 L430 364"/><text class="label-text" x="489" y="373">Lateral line</text>
+    <path class="leader" d="M428 425 L394 389"/><text class="label-text" x="344" y="441">Pectoral fin</text>
+    <path class="leader" d="M496 536 L497 497"/><text class="label-text" x="449" y="555">Pelvic fin</text>
+    <path class="leader" d="M650 537 L640 502"/><text class="label-text" x="618" y="556">Anal fin</text>
+    <path class="leader" d="M918 227 L903 279"/><text class="label-text" x="878" y="210">Caudal fin</text><text class="label-sub" x="892" y="224">tail fin</text>
+  </g>
+</g>
+
+<!-- INTERNAL -->
+<g id="internalLayer" class="anatomy-group hidden-layer">
+  <!-- translucent outline -->
+  <path d="M190 350 C240 250 360 205 570 220 C690 228 785 278 825 350 C785 422 690 472 570 480 C360 495 240 450 190 350 Z"
+    fill="rgba(90,136,151,.16)" stroke="rgba(183,214,223,.50)" stroke-width="2"/>
+
+  <g class="part" data-part="brain">
+    <path class="shape" d="M253 302 C265 284 288 282 302 295 C308 306 302 319 289 326 C273 329 258 320 253 302 Z"
+      fill="#9a87b6" stroke="#c9bae0" stroke-width="1.6"/>
+  </g>
+
+  <g class="part" data-part="heart">
+    <path class="shape" d="M327 378 C315 365 318 345 332 340 C346 345 352 358 349 370 C346 382 337 392 327 398 C320 391 317 385 327 378 Z"
+      fill="#b65f72" stroke="#dfa0ae" stroke-width="1.6"/>
+  </g>
+
+  <g class="part" data-part="liver">
+    <path class="shape" d="M360 345 C390 326 425 330 445 350 C442 374 420 390 385 390 C365 380 355 364 360 345 Z"
+      fill="#8b5d4a" stroke="#bd8b75" stroke-width="1.6"/>
+  </g>
+
+  <g class="part" data-part="stomach">
+    <path class="shape" d="M445 350 C478 343 503 360 507 382 C502 405 478 416 454 405 C443 392 441 370 445 350 Z"
+      fill="#c79b66" stroke="#ead0a1" stroke-width="1.6"/>
+  </g>
+
+  <g class="part" data-part="intestine">
+    <path class="shape" d="M500 411 C524 396 550 398 560 412 C546 424 519 423 510 435 C524 446 548 443 560 455 C538 467 500 461 491 447 C486 434 489 421 500 411 Z"
+      fill="none" stroke="#d0b176" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <g class="part" data-part="swim-bladder">
+    <path class="shape" d="M425 284 C495 262 610 270 690 304 C632 319 530 324 448 315 C430 309 421 298 425 284 Z"
+      fill="rgba(171,216,229,.40)" stroke="#d1edf4" stroke-width="1.8"/>
+  </g>
+
+  <g class="part" data-part="kidney">
+    <path class="shape" d="M370 264 C465 246 590 253 707 286" fill="none" stroke="#78556c" stroke-width="10" stroke-linecap="round" opacity=".78"/>
+  </g>
+
+  <g class="part" data-part="gonad">
+    <path class="shape" d="M518 339 C564 326 616 333 649 355 C621 374 570 380 529 370 C517 362 514 350 518 339 Z"
+      fill="#c8a2b4" stroke="#e1c5d2" stroke-width="1.5" opacity=".82"/>
+  </g>
+
+  <g class="part" data-part="vertebral-column">
+    <path class="shape" d="M325 326 C440 300 575 306 747 340" fill="none" stroke="#d3d5d0" stroke-width="7" stroke-linecap="round"/>
+    <path d="M342 322 L347 338 M365 318 L370 334 M390 315 L395 331 M416 312 L421 329 M444 310 L449 327 M475 309 L480 326 M507 310 L512 327 M540 311 L545 329 M574 314 L579 332 M609 318 L614 336 M645 323 L650 341 M682 329 L687 346 M718 335 L723 351"
+      stroke="#929a98" stroke-width="1.5"/>
+  </g>
+
+  <!-- water / blood pathways -->
+  <path id="waterPath" d="M140 353 C205 353 263 349 316 348 C331 348 340 345 350 338"></path>
+  <path id="bloodPath" d="M330 376 C345 355 348 330 351 315 C380 301 415 295 450 292"></path>
+
+  <g id="internalLabels" class="labels">
+    <path class="leader" d="M257 258 L273 285"/><text class="label-text" x="218" y="244">Brain</text>
+    <path class="leader" d="M300 420 L326 394"/><text class="label-text" x="248" y="436">Heart</text>
+    <path class="leader" d="M385 417 L390 388"/><text class="label-text" x="352" y="437">Liver</text>
+    <path class="leader" d="M482 438 L478 405"/><text class="label-text" x="451" y="458">Stomach</text>
+    <path class="leader" d="M542 494 L536 458"/><text class="label-text" x="503" y="514">Intestine</text>
+    <path class="leader" d="M550 234 L548 276"/><text class="label-text" x="496" y="218">Swim bladder</text>
+    <path class="leader" d="M650 244 L632 266"/><text class="label-text" x="654" y="241">Kidney</text>
+    <path class="leader" d="M617 410 L605 374"/><text class="label-text" x="622" y="425">Gonad</text>
+  </g>
+</g>
+
+</g>
+</svg>
+</div>
+
+<section id="intro" class="glass">
+  <div class="kicker">Aquatic Holograph · Blue Current Lab</div>
+  <h1>High-Yield Anatomy of a Fish</h1>
+  <p class="sub">Generalized bony-fish teaching model. Switch between external and internal anatomy, touch structures, trace respiration/swimming, and test yourself.</p>
+
+  <div class="layer-row">
+    <button class="layerbtn active" data-layer="external">External anatomy</button>
+    <button class="layerbtn" data-layer="internal">Internal anatomy</button>
+  </div>
+
+  <div class="mode-row">
+    <button class="mode active" data-mode="explore">Explore</button>
+    <button class="mode" data-mode="pathway">Pathways</button>
+    <button class="mode" data-mode="quiz">Quiz</button>
+  </div>
+
+  <div id="quickInfo"><strong>Touch the fish.</strong><br>Try the gills, caudal fin, lateral line or swim bladder.</div>
+
+  <div id="pathPanel">
+    <div class="small-title">Fish function pathway</div>
+    <div id="pathStep"></div>
+    <div class="actions"><button class="action" id="prevPath">← Back</button><button class="action primary" id="nextPath">Next →</button></div>
+  </div>
+
+  <div id="quizPanel">
+    <div class="small-title">Identify the structure</div>
+    <div id="quizPrompt"></div>
+    <div id="quizFeedback"></div>
+    <div id="quizMeta"><span id="quizScore">Score 0/0</span><span id="quizStreak">Streak 0</span></div>
+    <div class="actions"><button class="action" id="quizExplain">Explain</button><button class="action primary" id="nextQuiz">Next →</button></div>
+  </div>
+</section>
+
+<div id="toolbar" class="glass">
+  <div id="searchBox"><input id="searchInput" type="search" placeholder="Find a fish structure…" autocomplete="off"><span id="searchMark">⌕</span></div>
+  <button class="iconbtn" id="mobileSearch" title="Search">⌕</button>
+  <button class="iconbtn on" id="labelToggle" title="Labels">Aa</button>
+  <button class="iconbtn" id="compareBtn" title="High-yield comparisons">≠</button>
+  <button class="iconbtn" id="soundToggle" title="Sound">◌</button>
+  <button class="iconbtn" id="resetView" title="Reset view">◎</button>
+</div>
+
+<div id="legend" class="glass">
+  <div class="legend-item"><span class="dot" style="background:#62b9cf"></span>External / sensory</div>
+  <div class="legend-item"><span class="dot" style="background:#4f82ab"></span>Fins / locomotion</div>
+  <div class="legend-item"><span class="dot" style="background:#c68191"></span>Internal organs</div>
+  <div class="legend-item"><span class="dot" style="background:#d2ad67"></span>Digestive / buoyancy</div>
+</div>
+
+<div id="badge" class="glass">Generalized actinopterygian teaching schematic · fish anatomy varies by species</div>
+
+
+<aside id="drawer" class="glass">
+  <div class="drawer-head">
+    <div class="drawer-title"><div class="drawer-kicker" id="drawerKicker">Fish intelligence</div><h2 id="drawerTitle">—</h2></div>
+    <button class="iconbtn" id="drawerClose">×</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</aside>
+
+<div id="toast" class="glass"></div>
+</div>
+
+<script>
+const sources={
+ F1:{title:"Fish Anatomy",org:"Florida Museum of Natural History",type:"University natural-history reference",url:"https://www.floridamuseum.ufl.edu/discover-fish/fish/anatomy/"},
+ F2:{title:"Features & Measurements",org:"Florida Museum of Natural History",type:"University ichthyology reference",url:"https://www.floridamuseum.ufl.edu/discover-fish/fish/anatomy/features-measurements/"},
+ F3:{title:"How Are Sturgeons Built?",org:"NOAA Fisheries",type:"U.S. government fisheries education",url:"https://www.fisheries.noaa.gov/new-england-mid-atlantic/endangered-species-conservation/scutes-student-resources"},
+ F4:{title:"How do scientists locate schools of fish?",org:"NOAA National Ocean Service",type:"U.S. government ocean-science reference",url:"https://oceanservice.noaa.gov/facts/fish-sonar.html"},
+ F5:{title:"Fish Anatomy",org:"Smithsonian Marine Station",type:"Smithsonian educational reference",url:"https://www.si.edu/object/fish-anatomy%3Ayt_BE9QIaP7sIU"},
+ F6:{title:"Educational Uses of Gyotaku or Fish Printing",org:"Smithsonian Ocean",type:"Smithsonian anatomy education",url:"https://ocean.si.edu/conservation/get-involved/educational-uses-gyotaku-or-fish-printing"},
+ F7:{title:"X-Ray Image of a Viper Moray Eel",org:"Smithsonian Ocean",type:"Smithsonian anatomy reference",url:"https://ocean.si.edu/ocean-life/fish/x-ray-image-viper-moray-eel"},
+ F8:{title:"Fish Groups",org:"Florida Museum of Natural History",type:"University comparative-fish reference",url:"https://www.floridamuseum.ufl.edu/discover-fish/fish/fish-groups/"},
+ F9:{title:"Fun Facts About Fascinating Fish",org:"NOAA Fisheries",type:"U.S. government fisheries reference",url:"https://www.fisheries.noaa.gov/national/outreach-and-education/fun-facts-about-fascinating-fish"}
+};
+
+const parts={
+ "body":{title:"Body / Trunk",group:"External anatomy",what:"The trunk houses most visceral organs and axial musculature. Body shape varies widely among fishes and reflects habitat and swimming strategy.",function:"Provides the main propulsive musculature and contains the major organ systems.",pearl:"Fish body shape is highly adaptive; do not treat the streamlined form drawn here as universal.",trap:"Flatfishes, eels, boxfishes, seahorses and many others depart dramatically from this generalized body plan.",sources:["F1","F8"],related:["scales","lateral-line","caudal-peduncle"]},
+ "mouth":{title:"Mouth",group:"Head · feeding & respiration",what:"The mouth takes in food and, in many bony fishes, also serves as the entry point for water that passes across the gills.",function:"Feeding plus water intake for branchial ventilation.",pearl:"Mouth position can reveal feeding ecology: terminal, superior and inferior mouths are common descriptive categories.",trap:"Fish mouths are highly variable in size, position, protrusibility and teeth; this diagram shows only a generalized terminal mouth.",sources:["F1","F3"],related:["gills","operculum","nostril"]},
+ "nostril":{title:"Nostril / Narial opening",group:"Head · chemosensory",what:"Fish nostrils generally serve olfaction rather than breathing. Water contacts olfactory tissue and provides chemical information.",function:"Smell / chemical sensing.",pearl:"In most fishes, nostrils are not the route to the gills; water for respiration typically enters through the mouth.",trap:"Do not assume fish breathe through their nostrils the way air-breathing tetrapods do.",sources:["F5"],related:["mouth","eye"]},
+ "eye":{title:"Eye",group:"Head · sensory",what:"The fish eye provides visual information for orientation, feeding, predator avoidance and social behavior. Visual specialization varies greatly by habitat.",function:"Vision.",pearl:"Aquatic visual systems are adapted to underwater optics; eye size and placement often reflect ecology.",trap:"Not every fish relies heavily on vision; deep-sea and cave species can be highly modified.",sources:["F5"],related:["nostril","lateral-line"]},
+ "operculum":{title:"Operculum",group:"Head · gill cover",what:"In many bony fishes, the operculum is a movable bony flap covering and protecting the gills.",function:"Protects the gill chamber and participates in moving water across the gills during ventilation.",pearl:"Operculum is characteristic of most bony fishes; sharks and rays instead have exposed gill slits.",trap:"Do not label the operculum itself as the gill. It covers the gill chamber.",sources:["F3","F5"],related:["gills","mouth"]},
+ "gills":{title:"Gills",group:"Respiratory anatomy",what:"Gills are the primary respiratory organs of most fishes. Water passes over thin, vascular respiratory surfaces where oxygen and carbon dioxide are exchanged.",function:"Gas exchange between water and blood.",pearl:"Gill arches support the gills; Smithsonian notes that gill arches are present in all fish.",trap:"Gills do not 'extract air.' They exchange dissolved gases with water.",sources:["F3","F7","F9"],related:["operculum","mouth","heart"]},
+ "dorsal-fin":{title:"Dorsal fin",group:"Fins · stability",what:"The dorsal fin or fins lie along the back. In many fishes they contribute strongly to stability and may also aid maneuvering.",function:"Stabilization, maneuvering and species-specific display/defense roles.",pearl:"NOAA describes dorsal and anal fins as important stabilizers in sturgeon and many other fishes.",trap:"Fin number, shape, spines and rays vary greatly; some fishes have multiple dorsal fins.",sources:["F2","F3"],related:["anal-fin","caudal-fin","pectoral-fin"]},
+ "pectoral-fin":{title:"Pectoral fin",group:"Paired fins · maneuvering",what:"Pectoral fins are paired fins located on the sides of the body behind the head in many fishes.",function:"Steering, braking, lift, hovering and maneuvering; exact role depends on species.",pearl:"Paired fins are evolutionary counterparts of paired vertebrate appendages.",trap:"Pectoral fins are not always used mainly for propulsion; some species rely on them heavily, others much less.",sources:["F3","F5","F8"],related:["pelvic-fin","dorsal-fin","caudal-fin"]},
+ "pelvic-fin":{title:"Pelvic fin",group:"Paired fins · maneuvering",what:"Pelvic fins are paired ventral fins whose position varies among fish groups.",function:"Balance, braking, positioning and maneuvering.",pearl:"Pelvic fin position is useful in fish identification because it can be abdominal, thoracic or jugular depending on the group.",trap:"Do not assume pelvic fins are always directly beneath the abdomen.",sources:["F1","F2","F3"],related:["pectoral-fin","anal-fin"]},
+ "anal-fin":{title:"Anal fin",group:"Median fins · stability",what:"The anal fin is a median fin on the ventral posterior body, behind the anus.",function:"Often helps stabilize the fish and control yaw or roll.",pearl:"Dorsal + anal fins commonly function as stabilizers.",trap:"The anal fin is not the same as the anus; it is a fin posterior to it.",sources:["F2","F3"],related:["dorsal-fin","pelvic-fin","caudal-fin"]},
+ "caudal-fin":{title:"Caudal fin",group:"Tail · propulsion",what:"The caudal or tail fin is the terminal fin at the posterior end of the fish.",function:"In many fishes it generates a major portion of thrust for forward swimming.",pearl:"Smithsonian and NOAA educational materials describe the caudal fin as a major propulsive structure.",trap:"Not all fishes rely primarily on caudal propulsion; locomotor strategies vary widely.",sources:["F3","F6"],related:["caudal-peduncle","dorsal-fin","anal-fin"]},
+ "caudal-peduncle":{title:"Caudal peduncle",group:"Tail base",what:"The caudal peduncle is the narrowed posterior body region immediately before the caudal fin.",function:"Transfers muscular force to the tail and influences swimming performance.",pearl:"It is the 'wrist' of the tail system: body → caudal peduncle → caudal fin.",trap:"Do not confuse caudal peduncle with the caudal fin itself.",sources:["F1","F2"],related:["caudal-fin","body"]},
+ "lateral-line":{title:"Lateral line",group:"Mechanosensory system",what:"The lateral-line system detects local water movement and pressure disturbances through specialized sensory organs distributed along the body and head.",function:"Helps fishes sense nearby water motion, objects, prey, predators and schooling neighbors.",pearl:"The lateral line is a sensory system—not a blood vessel or simple stripe.",trap:"Its external appearance varies; in some species it is obvious, interrupted or otherwise modified.",sources:["F5","F6"],related:["eye","body"]},
+ "scales":{title:"Scales",group:"Integument",what:"Many bony fishes are covered by scales embedded in the skin, but scale type and even presence vary substantially among taxa.",function:"Contributes to protection and body-surface performance.",pearl:"Most bony fishes have scales, but some are armored with plates and others—such as many catfishes—may lack scales.",trap:"Do not define a fish by having scales; some fishes do not have them.",sources:["F1","F8"],related:["body","lateral-line"]},
+ "brain":{title:"Brain",group:"Internal · nervous system",what:"The brain integrates sensory input and controls behavior, movement and physiological functions. Relative development of brain regions varies with ecology.",function:"Central processing and control.",pearl:"Fish brains follow the basic vertebrate plan but show major group- and species-level specializations.",trap:"Do not infer cognitive ability from one simple brain-size comparison.",sources:["F5","F7"],related:["eye","lateral-line","vertebral-column"]},
+ "heart":{title:"Heart",group:"Internal · circulation",what:"Fish have a vertebrate circulatory pump that sends deoxygenated blood toward the gills, where gas exchange occurs, before oxygenated blood travels to the body.",function:"Drives circulation through the branchial and systemic vascular pathways.",pearl:"Classic bony-fish circulation is a single circuit: heart → gills → body → heart.",trap:"The simplified 'two-chambered heart' description usually refers to the main pumping chambers, atrium and ventricle; additional associated regions exist.",sources:["F5","F7"],related:["gills","liver","kidney"]},
+ "liver":{title:"Liver",group:"Internal · digestive/metabolic",what:"The liver is a major metabolic organ associated with digestion, nutrient processing, detoxification and bile production.",function:"Metabolism, storage and digestive support.",pearl:"The liver is commonly a large anterior visceral organ in fish dissections.",trap:"Its color and exact shape vary with species, diet and physiological state.",sources:["F5"],related:["stomach","intestine"]},
+ "stomach":{title:"Stomach",group:"Internal · digestive",what:"In fishes that possess one, the stomach receives food from the esophagus and begins substantial mechanical and chemical digestion.",function:"Food storage and digestion.",pearl:"Not all fishes have a true stomach; digestive anatomy varies with evolutionary lineage and diet.",trap:"Never assume every fish has the same stomach morphology.",sources:["F5","F8"],related:["liver","intestine","mouth"]},
+ "intestine":{title:"Intestine",group:"Internal · digestive",what:"The intestine continues digestion and absorbs nutrients. Length and complexity can vary with diet and species.",function:"Digestion and nutrient absorption.",pearl:"Diet strongly influences gut morphology; herbivorous fishes often have different intestinal proportions from many carnivores.",trap:"This schematic coil is not a universal fish intestinal layout.",sources:["F5","F8"],related:["stomach","liver"]},
+ "swim-bladder":{title:"Swim bladder",group:"Internal · buoyancy",what:"In many bony fishes, the swim bladder is a gas-filled organ located dorsally in the body cavity.",function:"Helps regulate buoyancy and depth with less continuous swimming effort; in some fishes it also contributes to sound production or reception.",pearl:"NOAA describes the swim bladder as a dorsally located gas-filled organ important for buoyancy and as a strong sonar reflector.",trap:"Not all fishes have a swim bladder; sharks and many bottom-associated or specialized bony fishes do not use one in the typical way.",sources:["F4","F8"],related:["body","kidney"]},
+ "kidney":{title:"Kidney",group:"Internal · excretory/osmoregulatory",what:"Fish kidneys lie dorsally along the body cavity and participate in excretion, ion balance and water regulation.",function:"Waste removal and osmoregulation.",pearl:"Osmoregulation differs profoundly between freshwater and marine fishes because their water/ion challenges are opposite.",trap:"The long dorsal kidney shown here is generalized; size and shape vary among fish groups.",sources:["F5"],related:["swim-bladder","heart"]},
+ "gonad":{title:"Gonad",group:"Internal · reproductive",what:"Fish gonads produce gametes—eggs in ovaries or sperm in testes—and often change markedly in size during the reproductive cycle.",function:"Gamete production and reproduction.",pearl:"Gonad size and appearance can vary dramatically with sex, season and reproductive condition.",trap:"A generic fish diagram cannot represent the reproductive anatomy of all species or reproductive strategies.",sources:["F5"],related:["intestine","kidney"]},
+ "vertebral-column":{title:"Vertebral column",group:"Internal · axial skeleton",what:"The vertebral column forms the central axial support of the fish body and provides attachment and leverage for swimming musculature.",function:"Structural support, spinal-cord protection and transmission of locomotor forces.",pearl:"Fish locomotion depends heavily on sequential contractions of axial muscles acting against the skeleton.",trap:"The skeleton varies greatly among cartilaginous and bony fishes; this is a generalized bony-fish model.",sources:["F7","F9"],related:["body","caudal-peduncle","brain"]}
+};
+
+const pathways=[
+ {layer:"external",part:"mouth",text:"1 · Water enters through the mouth during branchial ventilation in many bony fishes."},
+ {layer:"external",part:"gills",text:"2 · Water passes across the gills, where dissolved oxygen diffuses into blood and carbon dioxide diffuses out."},
+ {layer:"external",part:"operculum",text:"3 · Movements of the mouth and opercular region help maintain water flow across the gills."},
+ {layer:"internal",part:"heart",text:"4 · The heart pumps deoxygenated blood toward the gills; oxygenated blood then supplies the body."},
+ {layer:"external",part:"body",text:"5 · Sequential contractions of axial muscles on alternating sides bend the body and generate swimming waves."},
+ {layer:"external",part:"caudal-peduncle",text:"6 · The caudal peduncle transfers muscular force toward the tail."},
+ {layer:"external",part:"caudal-fin",text:"7 · In many fishes the caudal fin produces major forward thrust, while other fins stabilize and maneuver."},
+ {layer:"internal",part:"swim-bladder",text:"8 · In many bony fishes the swim bladder helps control buoyancy, reducing the need for constant swimming to hold depth."}
+];
+
+const quizExternal=[
+ {q:"Which structure is the principal respiratory organ?",a:"gills"},
+ {q:"Which fin commonly produces major forward thrust?",a:"caudal-fin"},
+ {q:"Which sensory system detects water movement and pressure disturbances?",a:"lateral-line"},
+ {q:"Which bony flap covers the gills in many bony fishes?",a:"operculum"},
+ {q:"Which paired fin sits just behind the head in many fishes?",a:"pectoral-fin"},
+ {q:"Which median fin is positioned ventrally behind the anus?",a:"anal-fin"},
+ {q:"Which narrowed body region connects the trunk to the tail fin?",a:"caudal-peduncle"},
+ {q:"Which structure usually brings water into the gill ventilation pathway?",a:"mouth"}
+];
+const quizInternal=[
+ {q:"Which gas-filled organ helps many bony fishes regulate buoyancy?",a:"swim-bladder"},
+ {q:"Which organ pumps blood toward the gills?",a:"heart"},
+ {q:"Which elongated dorsal organ participates in excretion and osmoregulation?",a:"kidney"},
+ {q:"Which organ receives food from the esophagus in fishes that possess one?",a:"stomach"},
+ {q:"Which organ continues digestion and nutrient absorption?",a:"intestine"},
+ {q:"Which axial structure supports the body and protects the spinal cord?",a:"vertebral-column"},
+ {q:"Which reproductive organ produces gametes?",a:"gonad"},
+ {q:"Which major metabolic organ supports digestion and nutrient processing?",a:"liver"}
+];
+
+let layer="external",mode="explore",selected=null,soundOn=false,audioCtx=null;
+let pathIndex=0,quizIndex=-1,quizScore=0,quizTotal=0,quizStreak=0,answered=false;
+
+const svg=document.getElementById("fishSvg");
+const defaultView={x:0,y:0,w:1000,h:700};let view={...defaultView},panState=null;
+function applyView(){svg.setAttribute("viewBox",`${view.x} ${view.y} ${view.w} ${view.h}`)}
+function svgPoint(clientX,clientY){const r=svg.getBoundingClientRect();return{x:view.x+(clientX-r.left)/r.width*view.w,y:view.y+(clientY-r.top)/r.height*view.h}}
+svg.addEventListener("wheel",e=>{e.preventDefault();const b=svgPoint(e.clientX,e.clientY),f=Math.exp(e.deltaY*.0012),nw=Math.max(330,Math.min(1700,view.w*f)),nh=nw*.7,rx=(b.x-view.x)/view.w,ry=(b.y-view.y)/view.h;view.x=b.x-rx*nw;view.y=b.y-ry*nh;view.w=nw;view.h=nh;applyView()},{passive:false});
+svg.addEventListener("pointerdown",e=>{if(e.target.closest?.(".part"))return;panState={x:e.clientX,y:e.clientY,sx:view.x,sy:view.y};svg.setPointerCapture?.(e.pointerId)});
+svg.addEventListener("pointermove",e=>{if(!panState)return;const r=svg.getBoundingClientRect();view.x=panState.sx-(e.clientX-panState.x)/r.width*view.w;view.y=panState.sy-(e.clientY-panState.y)/r.height*view.h;applyView()});
+["pointerup","pointercancel","pointerleave"].forEach(t=>svg.addEventListener(t,()=>panState=null));applyView();
+
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function sourceCards(ids){return ids.map(id=>{const s=sources[id];return `<a class="source-card" href="${s.url}" target="_blank" rel="noopener"><div class="source-name">${s.title} ↗</div><div class="source-meta">${s.org} · ${s.type}</div></a>`}).join("")}
+function tone(f=540,d=.04,v=.018){if(!soundOn)return;try{if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(v,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}catch(e){}}
+function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove("show"),1300)}
+function els(id){return [...document.querySelectorAll(`.part[data-part="${id}"]`)]}
+function clearHi(){document.querySelectorAll(".part").forEach(e=>e.classList.remove("dim","selected","related","pathway-target"));document.getElementById("waterPath").classList.remove("active");document.getElementById("bloodPath").classList.remove("active")}
+function hi(id,rel=[]){clearHi();document.querySelectorAll(".part").forEach(e=>{if(!e.closest(`#${layer}Layer`))return;const p=e.dataset.part;if(p===id)e.classList.add("selected");else if(rel.includes(p))e.classList.add("related");else e.classList.add("dim")})}
+function setLayer(next){
+ layer=next;
+ document.getElementById("externalLayer").classList.toggle("hidden-layer",layer!=="external");
+ document.getElementById("externalLayer").classList.toggle("visible-layer",layer==="external");
+ document.getElementById("internalLayer").classList.toggle("hidden-layer",layer!=="internal");
+ document.getElementById("internalLayer").classList.toggle("visible-layer",layer==="internal");
+ document.querySelectorAll(".layerbtn").forEach(b=>b.classList.toggle("active",b.dataset.layer===layer));
+ document.getElementById("drawer").classList.remove("open");clearHi();
+ if(mode==="quiz")nextQuiz(true);
+ if(mode==="pathway")renderPath();
+ document.getElementById("quickInfo").innerHTML=`<strong>${layer==="external"?"External":"Internal"} anatomy.</strong><br>Touch any structure for high-yield facts and sources.`;
+ tone(480,.035,.016)
+}
+function openPart(id){
+ const d=parts[id];if(!d)return;
+ selected=id;hi(id,d.related||[]);
+ document.getElementById("quickInfo").innerHTML=`<strong>${esc(d.title)}</strong><br>${esc(d.what)}`;
+ document.getElementById("drawerKicker").textContent="Verified fish anatomy";
+ document.getElementById("drawerTitle").textContent=d.title;
+ document.getElementById("drawerBody").innerHTML=`
+ <div class="section-title">${esc(d.group)}</div><div class="lead">${esc(d.what)}</div>
+ <div class="badges"><span class="badge">High-yield</span><span class="badge">${d.sources.length} sources</span><span class="badge">Generalized bony fish</span></div>
+ <div class="fact-grid"><div class="fact"><div class="f-label">Core function</div><div class="f-text">${esc(d.function)}</div></div><div class="fact"><div class="f-label">System</div><div class="f-text">${esc(d.group)}</div></div></div>
+ <div class="pearl"><b>Exam pearl</b><div>${esc(d.pearl)}</div></div>
+ <div class="trap"><b>Common trap</b><div>${esc(d.trap)}</div></div>
+ <div class="section-title">Related structures</div><div class="related-grid">${(d.related||[]).map(r=>`<button class="related-btn" data-rel="${r}">${esc(parts[r]?.title||r)}</button>`).join("")}</div>
+ <div class="section-title">Evidence & sources</div>${sourceCards(d.sources)}
+ <div class="note">This is a generalized bony-fish teaching schematic. Fishes are extraordinarily diverse, so structure, number, position and function can vary substantially among species and groups.</div>`;
+ document.getElementById("drawer").classList.add("open");
+ document.querySelectorAll("[data-rel]").forEach(b=>b.addEventListener("click",()=>{const r=b.dataset.rel;const targetLayer=els(r)[0]?.closest("#internalLayer")?"internal":"external";if(targetLayer!==layer)setLayer(targetLayer);setTimeout(()=>openPart(r),50)}));
+ tone(580,.04,.018)
+}
+function openCompare(){
+ clearHi();document.getElementById("drawerKicker").textContent="High-yield distinctions";document.getElementById("drawerTitle").textContent="Fish anatomy comparisons";
+ document.getElementById("drawerBody").innerHTML=`
+ <div class="section-title">Do not mix these up</div>
+ <div class="compare-row"><div class="compare-box"><strong>Gills</strong><span>Respiratory organs performing gas exchange.</span></div><div class="compare-box"><strong>Operculum</strong><span>Bony cover protecting the gill chamber in many bony fishes.</span></div></div>
+ <div class="compare-row"><div class="compare-box"><strong>Caudal fin</strong><span>The tail fin itself; major thrust producer in many fishes.</span></div><div class="compare-box"><strong>Caudal peduncle</strong><span>The narrowed body region immediately before the tail fin.</span></div></div>
+ <div class="compare-row"><div class="compare-box"><strong>Dorsal / anal fins</strong><span>Often major stabilizers.</span></div><div class="compare-box"><strong>Pectoral / pelvic fins</strong><span>Paired fins important for maneuvering, balance and braking.</span></div></div>
+ <div class="compare-row"><div class="compare-box"><strong>Lateral line</strong><span>Mechanosensory system for water movement.</span></div><div class="compare-box"><strong>Visible body stripe</strong><span>A pigment pattern may look similar but is not automatically the lateral-line system.</span></div></div>
+ <div class="compare-row"><div class="compare-box"><strong>Swim bladder</strong><span>Gas-filled buoyancy organ in many bony fishes.</span></div><div class="compare-box"><strong>Shark buoyancy</strong><span>Sharks lack a typical swim bladder and use other mechanisms.</span></div></div>
+ <div class="pearl"><b>Very high-yield</b><div>“Fish” is an extremely diverse assemblage. A structure that is typical of a teleost or generalized bony fish may be absent or very different in sharks, rays, eels, flatfishes, seahorses, lungfishes and many others.</div></div>
+ <div class="section-title">Sources</div>${sourceCards(["F1","F3","F4","F5","F8"])}`;
+ document.getElementById("drawer").classList.add("open");tone(620,.04,.018)
+}
+function setMode(m){
+ mode=m;document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));
+ document.getElementById("pathPanel").classList.toggle("show",m==="pathway");
+ document.getElementById("quizPanel").classList.toggle("show",m==="quiz");
+ const labelsOn=document.getElementById("labelToggle").classList.contains("on");
+ document.querySelectorAll(".labels").forEach(e=>e.classList.toggle("hidden",m==="quiz"||!labelsOn));
+ document.getElementById("drawer").classList.remove("open");clearHi();
+ if(m==="pathway"){pathIndex=0;renderPath()}
+ if(m==="quiz")startQuiz();
+ if(m==="explore")document.getElementById("quickInfo").innerHTML="<strong>Explore the fish.</strong><br>Switch layers and touch any structure.";
+ tone(470,.035,.016)
+}
+function renderPath(){
+ const s=pathways[pathIndex];if(layer!==s.layer)setLayer(s.layer);
+ document.getElementById("pathStep").textContent=s.text;clearHi();
+ if(s.part==="mouth"||s.part==="gills"||s.part==="operculum"){document.getElementById("waterPath").classList.add("active")}
+ if(s.part==="heart"){document.getElementById("bloodPath").classList.add("active")}
+ els(s.part).forEach(e=>e.classList.add("pathway-target"));
+ document.getElementById("prevPath").disabled=pathIndex===0;document.getElementById("nextPath").textContent=pathIndex===pathways.length-1?"Restart ↻":"Next →"
+}
+function stepPath(d){if(d>0&&pathIndex===pathways.length-1)pathIndex=0;else pathIndex=Math.max(0,Math.min(pathways.length-1,pathIndex+d));renderPath();tone(530,.035,.016)}
+function qSet(){return layer==="external"?quizExternal:quizInternal}
+function startQuiz(){quizScore=0;quizTotal=0;quizStreak=0;quizIndex=-1;nextQuiz(true)}
+function nextQuiz(force=false){const qs=qSet();quizIndex=(quizIndex+1)%qs.length;answered=false;clearHi();document.getElementById("quizPrompt").textContent=qs[quizIndex].q;document.getElementById("quizFeedback").textContent="Touch the answer on the fish.";updateQuiz()}
+function updateQuiz(){document.getElementById("quizScore").textContent=`Score ${quizScore}/${quizTotal}`;document.getElementById("quizStreak").textContent=`Streak ${quizStreak}`}
+function answer(id){if(answered)return;const q=qSet()[quizIndex];quizTotal++;answered=true;if(id===q.a){quizScore++;quizStreak++;document.getElementById("quizFeedback").textContent=`✓ Correct — ${parts[id].title}`;els(id).forEach(e=>e.classList.add("selected"));tone(760,.06,.022)}else{quizStreak=0;document.getElementById("quizFeedback").textContent=`Not quite. Correct answer: ${parts[q.a].title}`;clearHi();els(q.a).forEach(e=>e.classList.add("selected"));tone(330,.07,.018)}updateQuiz()}
+document.querySelectorAll(".part").forEach(e=>{
+ const go=()=>{const id=e.dataset.part;if(mode==="quiz"){answer(id);return}openPart(id)};
+ e.addEventListener("click",ev=>{ev.stopPropagation();go()});
+ e.setAttribute("tabindex","0");e.setAttribute("role","button");e.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();go()}})
+});
+document.querySelectorAll(".layerbtn").forEach(b=>b.addEventListener("click",()=>setLayer(b.dataset.layer)));
+document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.mode)));
+document.getElementById("prevPath").addEventListener("click",()=>stepPath(-1));document.getElementById("nextPath").addEventListener("click",()=>stepPath(1));
+document.getElementById("nextQuiz").addEventListener("click",()=>nextQuiz());document.getElementById("quizExplain").addEventListener("click",()=>openPart(qSet()[quizIndex].a));
+document.getElementById("compareBtn").addEventListener("click",openCompare);
+document.getElementById("drawerClose").addEventListener("click",()=>document.getElementById("drawer").classList.remove("open"));
+document.getElementById("labelToggle").addEventListener("click",e=>{e.currentTarget.classList.toggle("on");const on=e.currentTarget.classList.contains("on");document.querySelectorAll(".labels").forEach(x=>x.classList.toggle("hidden",!on||mode==="quiz"));toast(on?"Labels on":"Labels off")});
+document.getElementById("soundToggle").addEventListener("click",e=>{soundOn=!soundOn;e.currentTarget.classList.toggle("on",soundOn);e.currentTarget.textContent=soundOn?"●":"◌";if(soundOn)tone(620,.06,.022);toast(soundOn?"Interface sound on":"Interface sound off")});
+document.getElementById("resetView").addEventListener("click",()=>{view={...defaultView};applyView();clearHi();if(mode==="pathway")renderPath();tone(460,.03,.014)});
+const search=document.getElementById("searchInput");
+search.addEventListener("input",()=>{const q=search.value.trim().toLowerCase();if(!q){clearHi();return}const hit=Object.keys(parts).find(id=>id.includes(q)||parts[id].title.toLowerCase().includes(q)||parts[id].group.toLowerCase().includes(q));if(hit){const target=els(hit)[0]?.closest("#internalLayer")?"internal":"external";if(target!==layer)setLayer(target);hi(hit,parts[hit].related||[])}});
+search.addEventListener("keydown",e=>{if(e.key==="Enter"){const q=search.value.trim().toLowerCase();const hit=Object.keys(parts).find(id=>id.includes(q)||parts[id].title.toLowerCase().includes(q));if(hit){const target=els(hit)[0]?.closest("#internalLayer")?"internal":"external";if(target!==layer)setLayer(target);setTimeout(()=>openPart(hit),40)}}});
+document.getElementById("mobileSearch").addEventListener("click",()=>{const t=document.getElementById("toolbar");t.classList.toggle("searching");if(t.classList.contains("searching"))setTimeout(()=>search.focus(),40)});
+svg.addEventListener("click",()=>{if(mode==="explore"){clearHi();document.getElementById("drawer").classList.remove("open")}});
+["intro","toolbar","drawer","legend"].forEach(id=>document.getElementById(id)?.addEventListener("click",e=>e.stopPropagation()));
+</script>
+<nav id="cdPublicDock" aria-label="THE UNI public links">
+<a aria-label='Back to the Interactive Knowledge Library' class='cdDockWord' href='/' title='Back to the Interactive Knowledge Library'>Library</a>
+<a class="cdWatch" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a>
+<a class="cdContact" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact THE UNI"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a>
+</nav>
+
+<style id="ikl-collision-guard-style">
+/* IKL production collision guard: only moves bottom UI when the public dock would cover it. */
+:root{--ikl-dock-safe-bottom:74px}
+@media(max-width:680px){:root{--ikl-dock-safe-bottom:62px}}
+</style>
+<script id="ikl-collision-guard">
+(()=>{
+ const MOVE=['#legend','.legend','#drawer','.drawer','#modebar','.modebar','.modeBar','.mode-bar','#timeline','.timeline','.pathbar','.pathBar','.path-bar','.timelineWrap','.timeline-wrap','.bottomBar','.bottom-bar','.statusbar','.status-bar','#status'];
+ const QUIET=['#legend','.legend','#watermark','.watermark','.badge'];
+ const visible=e=>{const s=getComputedStyle(e),r=e.getBoundingClientRect();return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)!==0&&r.width>2&&r.height>2};
+ const overlap=(a,b,pad=4)=>Math.min(a.right,b.right)-Math.max(a.left,b.left)>pad&&Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top)>pad;
+ let queued=false,applying=false;
+ const observer=new MutationObserver(muts=>{if(applying)return;for(const m of muts){if(m.type==='attributes'&&m.attributeName==='class'){run();break}}});
+ const observe=()=>observer.observe(document.documentElement,{subtree:true,attributes:true,attributeFilter:['class']});
+ function all(selectors){const out=[];selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!out.includes(el))out.push(el)}));return out}
+ function rememberMove(el){if(el.dataset.iklMoveRemembered)return;el.dataset.iklMoveRemembered='1';el.dataset.iklInlineBottom=el.style.bottom||'';el.dataset.iklInlineTransform=el.style.transform||'';el.dataset.iklInlineMaxHeight=el.style.maxHeight||''}
+ function restoreMove(el){if(el.dataset.iklAdjusted!=='1')return;if(el.dataset.iklInlineBottom==='')el.style.removeProperty('bottom');else el.style.bottom=el.dataset.iklInlineBottom;if(el.dataset.iklInlineTransform==='')el.style.removeProperty('transform');else el.style.transform=el.dataset.iklInlineTransform;if(el.dataset.iklInlineMaxHeight==='')el.style.removeProperty('max-height');else el.style.maxHeight=el.dataset.iklInlineMaxHeight;el.dataset.iklAdjusted='0'}
+ function rememberQuiet(el){if(el.dataset.iklQuietRemembered)return;el.dataset.iklQuietRemembered='1';el.dataset.iklInlineVisibility=el.style.visibility||'';el.dataset.iklInlineOpacity=el.style.opacity||''}
+ function restoreQuiet(el){if(el.dataset.iklQuieted!=='1')return;if(el.dataset.iklInlineVisibility==='')el.style.removeProperty('visibility');else el.style.visibility=el.dataset.iklInlineVisibility;if(el.dataset.iklInlineOpacity==='')el.style.removeProperty('opacity');else el.style.opacity=el.dataset.iklInlineOpacity;el.dataset.iklQuieted='0'}
+ function run(){if(queued||applying)return;queued=true;requestAnimationFrame(()=>{
+   applying=true;observer.disconnect();
+   const movers=all(MOVE),quiets=all(QUIET);movers.forEach(el=>{rememberMove(el);restoreMove(el)});quiets.forEach(el=>{rememberQuiet(el);restoreQuiet(el)});
+   const dock=document.getElementById('cdPublicDock');
+   if(dock&&visible(dock)){
+     const dr=dock.getBoundingClientRect(),safe=Math.max(12,innerHeight-dr.top+10);
+     movers.forEach(el=>{if(el===dock||!visible(el))return;const cs=getComputedStyle(el);if(cs.position!=='fixed'&&cs.position!=='absolute')return;const r=el.getBoundingClientRect();if(!overlap(r,dr))return;const b=parseFloat(cs.bottom);el.dataset.iklAdjusted='1';if(Number.isFinite(b))el.style.bottom=Math.max(b,safe)+'px';else if(r.bottom>dr.top){const base=el.style.transform||'';el.style.transform=(base?base+' ':'')+'translateY(-'+(r.bottom-dr.top+10)+'px)'}if(el.matches('#drawer,.drawer')){const top=el.getBoundingClientRect().top;el.style.maxHeight=Math.max(160,innerHeight-top-safe-10)+'px'}})
+   }
+   const drawers=all(['#drawer','.drawer']).filter(visible);
+   drawers.forEach(drawer=>{const rr=drawer.getBoundingClientRect();quiets.forEach(el=>{if(el===drawer||!visible(el))return;if(overlap(el.getBoundingClientRect(),rr,6)){el.dataset.iklQuieted='1';el.style.visibility='hidden';el.style.opacity='0'}})});
+   queued=false;
+   applying=false;observe();
+ });}
+ addEventListener('load',run);addEventListener('resize',run,{passive:true});addEventListener('orientationchange',run,{passive:true});
+ observe();
+ run();setTimeout(run,30);setTimeout(run,120);setTimeout(run,350);
+})();
+</script>
+</body>
+</html>
