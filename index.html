@@ -999,6 +999,83 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   .libraryStage:after{inset:8px!important;border-radius:23px!important}
 }
 </style>
+
+<style id="the-uni-theme-breathing-orb-final">
+/* Replace the shard/star with a tiny breathing pearl orb. */
+.stageHead .stageAtmo{
+  padding-left:9px!important;
+}
+.stageHead .stageAtmo:before{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  top:50%!important;
+  width:5px!important;
+  height:5px!important;
+  transform:translateY(-50%) scale(.88)!important;
+  clip-path:none!important;
+  border-radius:50%!important;
+  border:0!important;
+  background:
+    radial-gradient(circle at 36% 32%,
+      rgba(255,255,255,1) 0 14%,
+      rgba(245,242,234,.95) 15% 38%,
+      rgba(205,214,224,.86) 55%,
+      rgba(150,161,174,.42) 76%,
+      rgba(255,255,255,.08) 100%)!important;
+  box-shadow:
+    0 0 2px rgba(255,255,255,.92),
+    0 0 5px rgba(229,236,244,.52),
+    0 0 9px rgba(255,239,204,.18)!important;
+  text-shadow:none!important;
+  opacity:.84!important;
+  animation:theUniOrbBreathe 3.6s ease-in-out infinite!important;
+  pointer-events:none!important;
+}
+.stageHead .stageAtmo:after{
+  content:none!important;
+  display:none!important;
+}
+@keyframes theUniOrbBreathe{
+  0%,100%{
+    transform:translateY(-50%) scale(.82);
+    opacity:.62;
+    box-shadow:
+      0 0 2px rgba(255,255,255,.72),
+      0 0 4px rgba(229,236,244,.30),
+      0 0 7px rgba(255,239,204,.10);
+  }
+  48%{
+    transform:translateY(-50%) scale(1.08);
+    opacity:1;
+    box-shadow:
+      0 0 3px rgba(255,255,255,1),
+      0 0 7px rgba(229,236,244,.64),
+      0 0 11px rgba(255,239,204,.22);
+  }
+  58%{
+    transform:translateY(-50%) scale(.98);
+    opacity:.88;
+  }
+}
+@media(max-width:680px){
+  .stageHead .stageAtmo{
+    padding-left:8px!important;
+  }
+  .stageHead .stageAtmo:before{
+    width:4px!important;
+    height:4px!important;
+    left:0!important;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .stageHead .stageAtmo:before{
+    animation:none!important;
+    transform:translateY(-50%) scale(.92)!important;
+    opacity:.82!important;
+  }
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
