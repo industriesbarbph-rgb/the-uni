@@ -3,11 +3,11 @@
 <desc id="desc">THE UNI wordmark with BarbPH integrated vertically inside the letter I.</desc>
 <g fill="#f7f5f0">
   <text x="1" y="34" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700" letter-spacing="4.2">THE</text>
-  <path d="M82 8h7v26.2c0 4.2 2.7 6.3 8.1 6.3h6.8c5.4 0 8.1-2.1 8.1-6.3V8h7v26.8c0 8.1-5 12.2-15 12.2h-7c-10 0-15-4.1-15-12.2V8z"/>
-  <path d="M128 47V8h7.2l25.8 27.3V8h7V47h-7.1L135 19.7V47z"/>
-  <rect x="170" y="8" width="27" height="5.2" rx="2.1"/>
-  <rect x="170" y="41.8" width="27" height="5.2" rx="2.1"/>
-  <rect x="178" y="13.2" width="11" height="28.6" rx="1.8" fill="rgba(247,245,240,.10)" stroke="#f7f5f0" stroke-width="1.35"/>
+  <path d="M70 8h7v26.2c0 4.2 2.7 6.3 8.1 6.3h6.8c5.4 0 8.1-2.1 8.1-6.3V8h7v26.8c0 8.1-5 12.2-15 12.2h-7c-10 0-15-4.1-15-12.2V8z"/>
+  <path d="M116 47V8h7.2l25.8 27.3V8h7V47h-7.1L123 19.7V47z"/>
+  <rect x="158" y="8" width="27" height="5.2" rx="2.1"/>
+  <rect x="158" y="41.8" width="27" height="5.2" rx="2.1"/>
+  <rect x="166" y="13.2" width="11" height="28.6" rx="1.8" fill="rgba(247,245,240,.10)" stroke="#f7f5f0" stroke-width="1.35"/>
 </g>
-<text transform="translate(185.6 39.3) rotate(-90)" fill="#e4b74e" font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="7.1" font-weight="700" letter-spacing=".15">BarbPH</text>
+<text transform="translate(173.6 39.3) rotate(-90)" fill="#e4b74e" font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="7.1" font-weight="700" letter-spacing=".15">BarbPH</text>
 </svg>
