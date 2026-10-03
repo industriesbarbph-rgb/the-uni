@@ -30,7 +30,7 @@
 </defs>
 
 <g filter="url(#rough)">
-  <path d="M66 28Q83 19 107 21L1100 18Q1125 20 1138 37L1154 199Q1150 220 1125 226L96 231Q70 228 59 208L45 57Q46 39 66 28Z"
+  <path d="M108 30Q124 21 148 23L1058 20Q1083 22 1097 39L1110 197Q1107 216 1083 222L136 227Q112 224 101 205L90 59Q91 42 108 30Z"
         fill="url(#rock)" stroke="#aa9276" stroke-opacity=".28" stroke-width="2.5"/>
 </g>
 
@@ -40,11 +40,11 @@
 </g>
 
 <g filter="url(#cut)" fill="#201813" stroke="#17120e" stroke-width="1.15" paint-order="stroke fill">
-  <text x="184" y="163" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="800" letter-spacing="6">THE</text>
-  <text x="425" y="184" font-family="Georgia, 'Times New Roman', serif" font-size="145" font-weight="800" letter-spacing="-10">UN</text>
-  <path d="M741 47h112v22h-29v118h29v22H741v-22h29V69h-29z"/>
+  <text x="284" y="163" font-family="Georgia, 'Times New Roman', serif" font-size="78" font-weight="800" letter-spacing="5">THE</text>
+  <text x="500" y="184" font-family="Georgia, 'Times New Roman', serif" font-size="145" font-weight="800" letter-spacing="-12">UN</text>
+  <path d="M724 47h108v22h-28v118h28v22H724v-22h28V69h-28z"/>
 </g>
 
-<text transform="translate(810 178) rotate(-90)" fill="#b88d52" stroke="#241811" stroke-width=".7"
+<text transform="translate(790 178) rotate(-90)" fill="#b88d52" stroke="#241811" stroke-width=".7"
       font-family="Arial Narrow, Arial, Helvetica, sans-serif" font-size="20" font-weight="800" letter-spacing="1.1">BarbPH</text>
 </svg>

@@ -213,12 +213,45 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
  .stoneMonument img{max-height:118px!important}
 }
 </style>
+
+<style id="the-uni-restored-proportion-fix">
+/* Post-recovery visual correction: keep the nav pill; make the stone a compact artifact. */
+.stoneMonument{
+  width:min(720px,64vw)!important;
+  margin:14px auto 22px!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.stoneMonument:after{display:none!important}
+.stoneMonument img{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-height:128px!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  filter:drop-shadow(0 14px 26px rgba(0,0,0,.34))!important;
+}
+.libraryDirect{margin-top:4px!important}
+@media(max-width:900px){
+  .stoneMonument{width:min(620px,76vw)!important;margin:12px auto 18px!important}
+  .stoneMonument img{max-height:112px!important}
+}
+@media(max-width:680px){
+  .stoneMonument{width:88vw!important;margin:10px auto 16px!important}
+  .stoneMonument img{max-height:96px!important}
+}
+</style>
+
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
 <div class="masthead">
-<a class="brandArtifact" href="/" aria-label="THE UNI by BarbPH"><img src="/assets/the-uni-wordmark-artifact-v4.svg?v=2" alt="THE UNI"></a>
+<a class="brandArtifact" href="/" aria-label="THE UNI by BarbPH"><img src="/assets/the-uni-wordmark-artifact-v4.svg?v=3" alt="THE UNI"></a>
 <div class="mastUtilities">
 <button class="atmoName" id="atmoName" type="button" title="Change atmosphere" aria-label="Change atmosphere">The Nocturne Cabinet</button>
 <div class="jewels"><a class="jewel play" href="https://www.youtube.com/@barbphtv" target="_blank" rel="noopener noreferrer" title="Watch" aria-label="Watch"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8.2 5.5v13L18.4 12 8.2 5.5Z"/></svg></a><a class="jewel" href="https://docs.google.com/forms/d/e/1FAIpQLScEhOayq1REf29-2cFxVxdaCXJaHFA3yP4z_rY5pF8HixQnkg/viewform?usp=publish-editor" target="_blank" rel="noopener noreferrer" title="Contact" aria-label="Contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="m4.7 7.4 7.3 5.2 7.3-5.2" stroke-linecap="round"/></svg></a></div>
@@ -227,7 +260,7 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 <header class="navDock">
 <nav class="nav" aria-label="Primary"><a href="#library">Library</a><a href="#about">About</a><a href="/coauthor/" target="_blank" rel="noopener noreferrer">Co-Author</a></nav>
 </header>
-<section class="section libraryDirect" id="library"><div class="stoneMonument" aria-label="THE UNI stone inscription"><img src="/assets/the-uni-stone-plaque.svg?v=2" alt="THE UNI carved into weathered stone"></div><div class="libraryStage"><div class="stageHead"><div class="searchWrap"><input class="search" id="search" type="search" placeholder="Search heart, flower, atom, volcano…" aria-label="Search the library"><button class="allBtn" id="showAll" type="button">All</button></div></div>
+<section class="section libraryDirect" id="library"><div class="stoneMonument" aria-label="THE UNI stone inscription"><img src="/assets/the-uni-stone-plaque.svg?v=3" alt="THE UNI carved into weathered stone"></div><div class="libraryStage"><div class="stageHead"><div class="searchWrap"><input class="search" id="search" type="search" placeholder="Search heart, flower, atom, volcano…" aria-label="Search the library"><button class="allBtn" id="showAll" type="button">All</button></div></div>
 <svg id="network" role="application" aria-label="Interactive constellation of THE UNI learning experiences"><defs><filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g class="zoomLayer"><g class="links"></g><g class="nodes"></g></g></svg>
 <div class="networkHint">Touch a glow · search to explore</div><div class="networkLegend"><span class="legendItem"><i class="legendDot" style="--c:#d1b06f"></i>Maps</span><span class="legendItem"><i class="legendDot" style="--c:#a8becd"></i>Objects</span><span class="legendItem"><i class="legendDot" style="--c:#ad94bc"></i>Labs</span><span class="legendItem"><i class="legendDot" style="--c:#c0815b"></i>Reconstruction</span></div>
 <aside class="drawer" id="drawer" aria-live="polite"><button class="close" id="closeDrawer" type="button" aria-label="Close">×</button><div class="drawerKicker" id="drawerKicker"></div><h3 id="drawerTitle"></h3><p id="drawerDesc"></p><div class="badges" id="badges"></div><a class="exploreBtn" id="exploreBtn" href="#">Explore experience →</a><div class="relTitle">Related exhibits</div><div class="related" id="related"></div><p class="relationNote">Related exhibits are suggested from shared subject terms and library structure. They are discovery links, not evidence claims.</p></aside>
