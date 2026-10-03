@@ -247,6 +247,103 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   }
 }
 </style>
+<style id="the-uni-search-refine">
+/* Quiet museum-console search controls */
+.stageHead .searchWrap{
+  pointer-events:auto!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:14px!important;
+  padding:0!important;
+}
+.stageHead .searchWrap:before{
+  content:"⌕";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:18px;
+  height:18px;
+  color:var(--faint);
+  font-size:17px;
+  line-height:1;
+  opacity:.72;
+  transform:translateY(-1px);
+}
+.stageHead .search{
+  width:min(360px,38vw)!important;
+  height:38px!important;
+  border:0!important;
+  border-bottom:1px solid rgba(255,255,255,.14)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  color:var(--ink)!important;
+  padding:0 2px!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  font-size:15px!important;
+  letter-spacing:.01em!important;
+  transition:border-color .2s ease,color .2s ease!important;
+}
+.stageHead .search::placeholder{
+  color:var(--faint)!important;
+  opacity:.76!important;
+}
+.stageHead .search:hover{
+  border-bottom-color:rgba(255,255,255,.28)!important;
+}
+.stageHead .search:focus{
+  border-bottom-color:var(--accent)!important;
+  box-shadow:none!important;
+  outline:none!important;
+}
+.stageHead .allBtn{
+  height:auto!important;
+  min-width:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  padding:8px 2px!important;
+  color:var(--faint)!important;
+  font-size:9px!important;
+  font-weight:700!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  cursor:pointer!important;
+  position:relative!important;
+  transition:color .2s ease,opacity .2s ease!important;
+}
+.stageHead .allBtn:after{
+  content:"";
+  position:absolute;
+  left:2px;
+  right:2px;
+  bottom:2px;
+  height:1px;
+  background:var(--accent);
+  transform:scaleX(0);
+  transform-origin:left;
+  opacity:.8;
+  transition:transform .2s ease;
+}
+.stageHead .allBtn:hover,
+.stageHead .allBtn:focus-visible{
+  color:var(--ink)!important;
+  outline:none!important;
+}
+.stageHead .allBtn:hover:after,
+.stageHead .allBtn:focus-visible:after{
+  transform:scaleX(1);
+}
+@media(max-width:900px){
+  .stageHead .search{width:min(300px,44vw)!important;font-size:14px!important}
+}
+@media(max-width:680px){
+  .stageHead .searchWrap{gap:10px!important}
+  .stageHead .searchWrap:before{display:none!important}
+  .stageHead .search{width:52vw!important;height:34px!important;font-size:13px!important}
+  .stageHead .allBtn{font-size:8.5px!important;letter-spacing:.14em!important}
+}
+</style>
 </head>
 <body data-atmo="nocturne">
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
