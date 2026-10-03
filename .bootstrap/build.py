@@ -31,7 +31,7 @@ def brand_domain(text):
     ]
     for old, new in replacements:
         text = text.replace(old, new)
-    text = re.sub(r'coach\\s+doll(?:\\s+edition)?', 'THE UNI', text, flags=re.I)
+    text = re.sub(r'coach\s+doll(?:\s+edition)?', 'THE UNI', text, flags=re.I)
     return text
 
 sitemap_bytes = get(BASE + 'sitemap.xml')
