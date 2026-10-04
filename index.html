@@ -1181,6 +1181,8 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   font-style:normal;
   font-weight:400;
   line-height:.86;
+  transform-origin:right bottom;
+  will-change:transform;
   letter-spacing:.015em;
   text-shadow:
     0 1px 0 rgba(255,255,255,.12),
@@ -1205,7 +1207,7 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   margin-right:.035em;
 }
 @media(prefers-reduced-motion:reduce){
-  #the-uni-live-logo{will-change:auto}
+  #the-uni-live-logo{will-change:auto;transform:none!important}
 }
 </style></head>
 <body data-atmo="nocturne"><div id="the-uni-live-logo" aria-hidden="true"><span class="word the">THE</span><span class="word">UN<span class="i">I</span></span></div><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
@@ -1332,27 +1334,30 @@ const search=document.getElementById('search');function doSearch(){query=search.
     return 38;
   }
 
-  function alignToBaseline(){
-    if(stableBaseline===null)return;
-    const logoHeight=logo.getBoundingClientRect().height;
-    logo.style.top=Math.round(stableBaseline-logoHeight)+'px';
+  function setBaseSize(){
+    logo.style.fontSize=baseSize()+'px';
   }
 
   function setAnchor({refreshBaseline=false}={}){
     const jr=jewels.getBoundingClientRect();
     const vw=document.documentElement.clientWidth;
-    const scrollY=window.scrollY||window.pageYOffset||0;
-    const documentBottom=scrollY+jr.bottom;
 
-    if(stableBaseline===null||refreshBaseline)stableBaseline=documentBottom;
+    // The wordmark is fixed to the viewport, so keep one fixed visual baseline.
+    // Nudge it slightly down and right from the previous placement.
+    const baseline=jr.bottom+5;
+    if(stableBaseline===null||refreshBaseline)stableBaseline=baseline;
 
-    const mirroredRight=clamp(jr.left,8,Math.max(8,vw*.08));
+    const mirroredRight=clamp(jr.left-12,4,Math.max(4,vw*.08));
     logo.style.right=Math.round(mirroredRight)+'px';
-    alignToBaseline();
+
+    // offsetHeight ignores transforms, so the bottom edge stays planted
+    // while the parent scales around its bottom-right corner.
+    logo.style.top=Math.round(stableBaseline-logo.offsetHeight)+'px';
   }
 
   function resetAnchor(){
     stableBaseline=null;
+    setBaseSize();
     setAnchor({refreshBaseline:true});
   }
 
@@ -1390,9 +1395,8 @@ const search=document.getElementById('search');function doSearch(){query=search.
     return end;
   }
 
-  function applySize(scale){
-    logo.style.fontSize=(baseSize()*scale).toFixed(2)+'px';
-    alignToBaseline();
+  function applyScale(scale){
+    logo.style.transform=reduce.matches?'none':`scale(${scale.toFixed(4)})`;
   }
 
   function paint(now){
@@ -1401,7 +1405,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
     last=now;
     const response=1-Math.exp(-dt/115);
     current+=(target-current)*response;
-    applySize(current);
+    applyScale(current);
     if(Math.abs(target-current)>.0007)raf=requestAnimationFrame(paint);
   }
 
@@ -1410,7 +1414,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
     if(snap||!initialized||reduce.matches){
       current=target;
       initialized=true;
-      applySize(current);
+      applyScale(current);
       return;
     }
     if(!raf){
@@ -1419,7 +1423,8 @@ const search=document.getElementById('search');function doSearch(){query=search.
     }
   }
 
-  applySize(1);
+  setBaseSize();
+  applyScale(1);
   setAnchor({refreshBaseline:true});
 
   addEventListener('scroll',()=>update(),{passive:true});
@@ -1433,10 +1438,15 @@ const search=document.getElementById('search');function doSearch(){query=search.
     update({snap:true});
   },{passive:true});
 
-  reduce.addEventListener?.('change',()=>update({snap:true}));
+  reduce.addEventListener?.('change',()=>{
+    setBaseSize();
+    setAnchor({refreshBaseline:true});
+    update({snap:true});
+  });
 
   if('ResizeObserver' in window){
     const ro=new ResizeObserver(()=>{
+      setBaseSize();
       setAnchor({refreshBaseline:true});
       update({snap:true});
     });
