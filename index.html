@@ -1344,7 +1344,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
     // The wordmark is fixed to the viewport, so keep one fixed visual baseline.
     // Nudge it slightly down and right from the previous placement.
-    const baseline=jr.bottom+5;
+    const baseline=jr.bottom-3;
     if(stableBaseline===null||refreshBaseline)stableBaseline=baseline;
 
     const mirroredRight=clamp(jr.left-12,4,Math.max(4,vw*.08));
