@@ -1087,37 +1087,7 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 .jewel svg{width:20px!important;height:20px!important}
 @media(max-width:680px){.jewel{width:44px!important;height:44px!important}.jewel.play{width:50px!important;height:50px!important}}
 </style>
-<style id="the-uni-scroll-logo-style">
-#the-uni-scroll-logo{
-  position:fixed;
-  top:82px;
-  right:22px;
-  z-index:64;
-  width:190px;
-  max-width:calc(100vw - 30px);
-  pointer-events:none;
-  user-select:none;
-  -webkit-user-select:none;
-  transform-origin:top right;
-  opacity:.96;
-  filter:drop-shadow(0 12px 28px rgba(0,0,0,.30));
-  will-change:width,transform,opacity;
-}
-#the-uni-scroll-logo img{
-  display:block;
-  width:100%;
-  height:auto;
-}
-@media(max-width:1050px){
-  #the-uni-scroll-logo{top:74px;right:14px;width:156px}
-}
-@media(max-width:680px){
-  #the-uni-scroll-logo{top:66px;right:8px;width:116px;opacity:.93}
-}
-@media(prefers-reduced-motion:reduce){
-  #the-uni-scroll-logo{width:clamp(116px,18vw,190px)!important;transform:none!important}
-}
-</style>
+
 <style id="jewel-thick-glass-2026-10-04">
 /* jewel-thick-glass-2026-10-04: preserve jewel colors, add thick clear beveled glass depth */
 .jewel{
@@ -1172,8 +1142,26 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
     0 0 30px rgba(215,182,119,.17)!important;
 }
 </style>
-</head>
-<body data-atmo="nocturne"><div id="the-uni-scroll-logo" aria-hidden="true"><img src="/assets/the-uni-celestial-fixed.png?v=2" alt=""></div>
+<style id="the-uni-scroll-logo-style">
+#the-uni-scroll-logo{
+  position:fixed;
+  z-index:64;
+  width:190px;
+  max-width:calc(100vw - 28px);
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  transform-origin:top right;
+  opacity:.98;
+  filter:drop-shadow(0 10px 22px rgba(0,0,0,.34));
+  will-change:width,opacity;
+}
+#the-uni-scroll-logo img{display:block;width:100%;height:auto}
+@media(max-width:1050px){#the-uni-scroll-logo{width:156px}}
+@media(max-width:680px){#the-uni-scroll-logo{width:118px}}
+@media(prefers-reduced-motion:reduce){#the-uni-scroll-logo{width:clamp(118px,18vw,190px)!important}}
+</style></head>
+<body data-atmo="nocturne"><div id="the-uni-scroll-logo" aria-hidden="true"><img src="/assets/the-uni-celestial-approved.webp?v=1" alt=""></div>
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
 <h1 class="seoOnly">THE UNI — Interactive Knowledge Library and The Impossible Museum</h1>
@@ -1272,65 +1260,61 @@ const search=document.getElementById('search');function doSearch(){query=search.
 </script>
 <script id="the-uni-scroll-logo-script">
 (()=>{
-  const logo=document.getElementById('the-uni-scroll-logo');
-  const about=document.getElementById('about');
-  if(!logo||!about)return;
+ const logo=document.getElementById('the-uni-scroll-logo');
+ const about=document.getElementById('about');
+ const jewels=document.querySelector('.mastUtilities .jewels');
+ const mast=document.querySelector('.masthead');
+ if(!logo||!about||!jewels||!mast)return;
 
-  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
-  let ticking=false;
+ const ratio=216/700;
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+ let ticking=false;
 
-  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-  const smooth=t=>t*t*(3-2*t);
+ const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+ const smooth=t=>t*t*(3-2*t);
 
-  function render(){
-    ticking=false;
-    if(reduce.matches){
-      logo.style.width='';
-      logo.style.transform='';
-      logo.style.opacity='';
-      return;
-    }
+ function baseWidth(){
+   const vw=innerWidth;
+   return vw<=680?118:(vw<=1050?156:190);
+ }
 
-    const r=about.getBoundingClientRect();
-    const vw=window.innerWidth;
-    const vh=window.innerHeight;
+ function anchors(w){
+   const jr=jewels.getBoundingClientRect();
+   const mr=mast.getBoundingClientRect();
+   // Use the jewels' document-space center so the fixed logo's resting position
+   // is on the exact same horizontal line even after the jewels scroll away.
+   const jewelDocCenterY=jr.top+scrollY+jr.height/2;
+   const top=jewelDocCenterY-(w*ratio)/2;
+   // Mirror the jewel row: jewels live on one side; THE UNI starts on the other,
+   // at the same vertical alignment and same masthead inset.
+   const right=Math.max(8,innerWidth-mr.right+12);
+   return {top,right};
+ }
 
-    // Peak enlargement when the opening of ABOUT sits in the upper-middle viewport:
-    // exactly where the screenshot has the large unused right-hand negative space.
-    const peakY=vh*0.28;
-    const range=Math.max(vh*0.82,520);
-    const distance=Math.abs(r.top-peakY);
-    const proximity=1-clamp(distance/range,0,1);
-    const p=smooth(proximity);
+ function render(){
+   ticking=false;
+   const vw=innerWidth,vh=innerHeight,minW=baseWidth();
+   const a=anchors(minW);
 
-    const minW=vw<=680?116:(vw<=1050?156:190);
-    const maxW=vw<=680
-      ? Math.min(vw*.62,300)
-      : vw<=1050
-        ? Math.min(vw*.47,460)
-        : Math.min(vw*.43,720);
+   const r=about.getBoundingClientRect();
+   const peakY=vh*.28;
+   const range=Math.max(vh*.82,520);
+   const proximity=1-clamp(Math.abs(r.top-peakY)/range,0,1);
+   const p=reduce.matches?0:smooth(proximity);
 
-    const width=minW+(maxW-minW)*p;
+   const maxW=vw<=680?Math.min(vw*.62,300):vw<=1050?Math.min(vw*.47,460):Math.min(vw*.43,720);
+   const w=minW+(maxW-minW)*p;
 
-    // Tiny positional drift keeps the enlargement graceful while preserving
-    // the same upper-right anchoring logic.
-    const y=p*(vw<=680?10:18);
-    const x=p*(vw<=680?0:6);
+   logo.style.width=w.toFixed(1)+'px';
+   logo.style.top=a.top.toFixed(1)+'px';
+   logo.style.right=a.right.toFixed(1)+'px';
+   logo.style.opacity=(.94+.06*p).toFixed(3);
+ }
 
-    logo.style.width=width.toFixed(1)+'px';
-    logo.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
-    logo.style.opacity=(.90+.10*p).toFixed(3);
-  }
-
-  function requestRender(){
-    if(ticking)return;
-    ticking=true;
-    requestAnimationFrame(render);
-  }
-
-  addEventListener('scroll',requestRender,{passive:true});
-  addEventListener('resize',requestRender,{passive:true});
-  reduce.addEventListener?.('change',requestRender);
-  render();
+ function requestRender(){if(ticking)return;ticking=true;requestAnimationFrame(render)}
+ addEventListener('scroll',requestRender,{passive:true});
+ addEventListener('resize',requestRender,{passive:true});
+ reduce.addEventListener?.('change',requestRender);
+ render();
 })();
 </script></body></html>
