@@ -1171,17 +1171,17 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   z-index:64;
   display:inline-flex;
   align-items:baseline;
-  gap:.08em;
+  gap:.16em;
   white-space:nowrap;
   pointer-events:none;
   user-select:none;
   -webkit-user-select:none;
   color:rgba(245,235,226,.90);
-  font-family:"Segoe Script","Snell Roundhand","Apple Chancery","Brush Script MT",cursive;
-  font-style:italic;
-  font-weight:700;
-  line-height:.88;
-  letter-spacing:-.035em;
+  font-family:Didot,"Bodoni 72","Bodoni MT","Times New Roman",serif;
+  font-style:normal;
+  font-weight:400;
+  line-height:.86;
+  letter-spacing:.015em;
   text-shadow:
     0 1px 0 rgba(255,255,255,.12),
     0 0 12px rgba(207,167,202,.08),
@@ -1195,8 +1195,8 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 }
 #the-uni-live-logo .i{
   display:inline-block;
-  transform:scaleX(1.16);
-  transform-origin:center center;
+  transform:scaleX(1.12);
+  transform-origin:center bottom;
   margin-left:.01em;
   margin-right:.035em;
 }
@@ -1323,9 +1323,9 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
   function baseSize(){
     const vw=document.documentElement.clientWidth;
-    if(vw<=680)return 34;
-    if(vw<=1050)return 42;
-    return 50;
+    if(vw<=680)return 30;
+    if(vw<=1050)return 34;
+    return 38;
   }
 
   function setAnchor(){
@@ -1345,9 +1345,9 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
   function maxScale(){
     const vw=document.documentElement.clientWidth;
-    if(vw<=680)return 1.52;
-    if(vw<=1050)return 1.62;
-    return 1.72;
+    if(vw<=680)return 1.22;
+    if(vw<=1050)return 1.28;
+    return 1.34;
   }
 
   function targetForScroll(){
@@ -1363,7 +1363,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
     const settleAt=Math.max(peakAt+Math.min(340,vh*.42),footerY-vh*.18);
 
     const peak=maxScale();
-    const end=1.08;
+    const end=1.04;
 
     if(y<=growStart)return 1;
     if(y<peakAt){
