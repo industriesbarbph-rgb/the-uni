@@ -1087,8 +1087,38 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 .jewel svg{width:20px!important;height:20px!important}
 @media(max-width:680px){.jewel{width:44px!important;height:44px!important}.jewel.play{width:50px!important;height:50px!important}}
 </style>
-</head>
-<body data-atmo="nocturne">
+<style id="the-uni-scroll-logo-style">
+#the-uni-scroll-logo{
+  position:fixed;
+  top:82px;
+  right:22px;
+  z-index:64;
+  width:190px;
+  max-width:calc(100vw - 30px);
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  transform-origin:top right;
+  opacity:.96;
+  filter:drop-shadow(0 12px 28px rgba(0,0,0,.30));
+  will-change:width,transform,opacity;
+}
+#the-uni-scroll-logo img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+@media(max-width:1050px){
+  #the-uni-scroll-logo{top:74px;right:14px;width:156px}
+}
+@media(max-width:680px){
+  #the-uni-scroll-logo{top:66px;right:8px;width:116px;opacity:.93}
+}
+@media(prefers-reduced-motion:reduce){
+  #the-uni-scroll-logo{width:clamp(116px,18vw,190px)!important;transform:none!important}
+}
+</style></head>
+<body data-atmo="nocturne"><div id="the-uni-scroll-logo" aria-hidden="true"><img src="/assets/the-uni-celestial-fixed.png?v=2" alt=""></div>
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
 <h1 class="seoOnly">THE UNI — Interactive Knowledge Library and The Impossible Museum</h1>
@@ -1185,4 +1215,67 @@ document.getElementById('showAll').addEventListener('click',()=>{familyFilter(nu
 
 const search=document.getElementById('search');function doSearch(){query=search.value.trim().toLowerCase();queryHits.clear();if(query){const terms=query.split(/\s+/).filter(Boolean);for(const d of EXPERIENCES){const hay=(d.title+' '+d.family+' '+d.description+' '+d.search).toLowerCase();if(terms.every(t=>hay.includes(t)))queryHits.add(d.id)}}refreshStates();if(queryHits.size===1)openNode(byId.get([...queryHits][0]))}search.addEventListener('input',doSearch);search.addEventListener('keydown',e=>{if(e.key==='Enter'&&queryHits.size)openNode(byId.get([...queryHits][0]))});
 </script>
-</body></html>
+<script id="the-uni-scroll-logo-script">
+(()=>{
+  const logo=document.getElementById('the-uni-scroll-logo');
+  const about=document.getElementById('about');
+  if(!logo||!about)return;
+
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+  let ticking=false;
+
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const smooth=t=>t*t*(3-2*t);
+
+  function render(){
+    ticking=false;
+    if(reduce.matches){
+      logo.style.width='';
+      logo.style.transform='';
+      logo.style.opacity='';
+      return;
+    }
+
+    const r=about.getBoundingClientRect();
+    const vw=window.innerWidth;
+    const vh=window.innerHeight;
+
+    // Peak enlargement when the opening of ABOUT sits in the upper-middle viewport:
+    // exactly where the screenshot has the large unused right-hand negative space.
+    const peakY=vh*0.28;
+    const range=Math.max(vh*0.82,520);
+    const distance=Math.abs(r.top-peakY);
+    const proximity=1-clamp(distance/range,0,1);
+    const p=smooth(proximity);
+
+    const minW=vw<=680?116:(vw<=1050?156:190);
+    const maxW=vw<=680
+      ? Math.min(vw*.62,300)
+      : vw<=1050
+        ? Math.min(vw*.47,460)
+        : Math.min(vw*.43,720);
+
+    const width=minW+(maxW-minW)*p;
+
+    // Tiny positional drift keeps the enlargement graceful while preserving
+    // the same upper-right anchoring logic.
+    const y=p*(vw<=680?10:18);
+    const x=p*(vw<=680?0:6);
+
+    logo.style.width=width.toFixed(1)+'px';
+    logo.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0)';
+    logo.style.opacity=(.90+.10*p).toFixed(3);
+  }
+
+  function requestRender(){
+    if(ticking)return;
+    ticking=true;
+    requestAnimationFrame(render);
+  }
+
+  addEventListener('scroll',requestRender,{passive:true});
+  addEventListener('resize',requestRender,{passive:true});
+  reduce.addEventListener?.('change',requestRender);
+  render();
+})();
+</script></body></html>
