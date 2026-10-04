@@ -88,6 +88,6 @@ if check.size != (1200, 630) or check.format != "JPEG":
 check.load()
 check.verify()
 raw = OUT.read_bytes()
-if not (raw.startswith(b"\\xff\\xd8") and raw.endswith(b"\\xff\\xd9")):
+if not (raw[:2] == bytes([0xFF, 0xD8]) and raw[-2:] == bytes([0xFF, 0xD9])):
     raise SystemExit("Social preview JPEG is not a complete JPEG stream")
 print(f"Generated valid OG image: {OUT} ({len(raw)} bytes)")
