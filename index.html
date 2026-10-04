@@ -1173,9 +1173,9 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   pointer-events:none;
   user-select:none;
   -webkit-user-select:none;
-  opacity:.99;
+  opacity:1;
   will-change:width;
-  contain:layout style paint;
+  contain:layout style;
 }
 #the-uni-smart-logo svg{
   display:block;
@@ -1184,6 +1184,27 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   overflow:visible;
   text-rendering:geometricPrecision;
   shape-rendering:geometricPrecision;
+}
+#the-uni-smart-logo .uni-main{
+  fill:#000;
+  stroke:#fff;
+  stroke-width:18;
+  stroke-linejoin:miter;
+  paint-order:stroke fill;
+}
+#the-uni-smart-logo .uni-the{
+  fill:#000;
+  stroke:#fff;
+  stroke-width:13;
+  stroke-linejoin:miter;
+  paint-order:stroke fill;
+}
+#the-uni-smart-logo .uni-barb{
+  fill:#fff;
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:53px;
+  font-weight:900;
+  text-anchor:middle;
 }
 @media(max-width:1050px){
   #the-uni-smart-logo{width:180px}
@@ -1199,40 +1220,32 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 }
 </style></head>
 <body data-atmo="nocturne"><div id="the-uni-smart-logo" aria-hidden="true">
-<svg viewBox="0 0 920 260" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="uniIvory" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fbf9f5"/>
-      <stop offset=".56" stop-color="#f6f2ec"/>
-      <stop offset="1" stop-color="#efeae2"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Academic/university serif: classical, substantial, and consistent across THE UN. -->
-  <g fill="url(#uniIvory)" stroke="url(#uniIvory)" stroke-width="1.6" paint-order="stroke fill"
-     font-family="Baskerville, Iowan Old Style, Palatino Linotype, Palatino, Georgia, Times New Roman, serif"
-     font-size="186" font-weight="800" letter-spacing="-5">
-    <text x="10" y="208">THE</text>
-    <text x="474" y="208">UN</text>
+<svg viewBox="0 0 1000 500" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <!-- Transparent vector wordmark: approved black + white collegiate treatment. -->
+  <g class="uni-main">
+    <!-- U -->
+    <path fill-rule="evenodd" d="M92 96H338V164H306V344C306 410 267 448 202 448H174C109 448 70 410 70 344V164H38V96H154V164H132V333C132 366 147 382 181 382H195C229 382 244 366 244 333V164H222V96H338V164H306V96H92ZM92 164V344C92 397 121 426 174 426H202C255 426 284 397 284 344V164H266V333C266 379 241 404 195 404H181C135 404 110 379 110 333V164H92Z"/>
+    <!-- N -->
+    <path d="M375 96H505L650 323V164H611V96H761V164H724V448H612L463 218V380H503V448H354V380H391V164H354V96H375Z"/>
+    <!-- I -->
+    <path d="M786 96H956V164H920V380H956V448H786V380H822V164H786V96Z"/>
   </g>
 
-  <!-- Wide academic slab I, aligned to the same visual cap-height and baseline. -->
-  <g fill="url(#uniIvory)">
-    <rect x="746" y="64" width="158" height="22" rx="4"/>
-    <rect x="770" y="64" width="110" height="147" rx="4"/>
-    <rect x="746" y="189" width="158" height="22" rx="4"/>
+  <!-- Small THE tucked into the extreme upper-left corner of the U. -->
+  <g class="uni-the">
+    <path d="M36 34H174V70H126V126H84V70H36V34Z"/>
+    <path d="M178 34H220V67H258V34H300V126H258V92H220V126H178V34Z"/>
+    <path d="M307 34H421V69H349V79H409V109H349V91H421V126H307V34Z"/>
   </g>
 
-  <!-- Precisely typeset BarbPH: centered, evenly spaced, high-contrast, no handwritten feel. -->
-  <g fill="#8f8981"
-     font-family="Arial Narrow, Inter, Segoe UI, Arial, sans-serif"
-     font-size="30" font-weight="800" text-anchor="middle">
-    <text x="825" y="94">B</text>
-    <text x="825" y="113">a</text>
-    <text x="825" y="132">r</text>
-    <text x="825" y="151">b</text>
-    <text x="825" y="170">P</text>
-    <text x="825" y="189">H</text>
+  <!-- BARBPH remains vertically typeset inside the I. -->
+  <g class="uni-barb">
+    <text x="871" y="183">B</text>
+    <text x="871" y="225">A</text>
+    <text x="871" y="267">R</text>
+    <text x="871" y="309">B</text>
+    <text x="871" y="351">P</text>
+    <text x="871" y="393">H</text>
   </g>
 </svg>
 </div><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
