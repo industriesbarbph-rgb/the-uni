@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs>
+  <linearGradient id="s" x1="8" y1="4" x2="54" y2="60">
+    <stop offset="0" stop-color="#f2d39f"/>
+    <stop offset=".45" stop-color="#c79255"/>
+    <stop offset="1" stop-color="#6f462b"/>
+  </linearGradient>
+</defs>
+<rect width="64" height="64" rx="12" fill="#0a080b"/>
+<path d="M14 8h36v10H40v28h10v10H14V46h10V18H14z" fill="url(#s)" stroke="#f1c985" stroke-width="2"/>
+<rect x="27" y="18" width="10" height="28" rx="1.5" fill="#3a2216" opacity=".85"/>
+<text x="32" y="39" text-anchor="middle" transform="rotate(-90 32 32)" fill="#f0c46e" font-family="Arial, sans-serif" font-size="7" font-weight="700" letter-spacing=".4">BarbPH</text>
+</svg>
