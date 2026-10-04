@@ -1172,7 +1172,13 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
     0 0 30px rgba(215,182,119,.17)!important;
 }
 </style>
-</head>
+<style id="the-uni-fixed-row-alignment-2026-10-04">
+/* Resting THE UNI mark mirrors the jewel row on the opposite side.
+   Keep this viewport-fixed while scroll only changes its scale. */
+#the-uni-scroll-logo{top:44px!important}
+@media(max-width:1050px){#the-uni-scroll-logo{top:24px!important}}
+@media(max-width:680px){#the-uni-scroll-logo{top:14px!important}}
+</style></head>
 <body data-atmo="nocturne"><div id="the-uni-scroll-logo" aria-hidden="true"><img src="/assets/the-uni-celestial-fixed.png?v=2" alt=""></div>
 <div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
