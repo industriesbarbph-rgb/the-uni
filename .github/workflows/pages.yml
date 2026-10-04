@@ -23,14 +23,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Guard production homepage integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -f index.html
+          test -f CNAME
+          test -f sitemap.xml
+          test -f robots.txt
+
+          bytes=$(wc -c < index.html)
+          if [ "$bytes" -lt 500000 ]; then
+            echo "Refusing deploy: index.html is unexpectedly small ($bytes bytes)."
+            exit 1
+          fi
+
+          grep -qi '<html' index.html
+          grep -qi '</html>' index.html
+          grep -q 'THE UNI' index.html
+
+          domain=$(tr -d '\r\n[:space:]' < CNAME)
+          if [ "$domain" != "theuni.barbph.com" ]; then
+            echo "Refusing deploy: unexpected CNAME '$domain'."
+            exit 1
+          fi
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
+
       - name: Upload static site
         uses: actions/upload-pages-artifact@v4
         with:
           path: .
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
