@@ -50,6 +50,13 @@ jobs:
             exit 1
           fi
 
+      - name: Generate and verify social preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --quiet pillow cairosvg
+          python scripts/generate_social_preview.py
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
