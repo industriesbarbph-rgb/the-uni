@@ -1319,7 +1319,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
   let raf=0;
   let last=0;
   let initialized=false;
-  let stableTop=null;
+  let stableBaseline=null;
 
   function baseSize(){
     const vw=document.documentElement.clientWidth;
@@ -1328,19 +1328,28 @@ const search=document.getElementById('search');function doSearch(){query=search.
     return 38;
   }
 
-  function setAnchor(){
+  function alignToBaseline(){
+    if(stableBaseline===null)return;
+    const logoHeight=logo.getBoundingClientRect().height;
+    logo.style.top=Math.round(stableBaseline-logoHeight)+'px';
+  }
+
+  function setAnchor({refreshBaseline=false}={}){
     const jr=jewels.getBoundingClientRect();
     const vw=document.documentElement.clientWidth;
-    const documentTop=(window.scrollY||window.pageYOffset||0)+jr.top;
-    if(stableTop===null)stableTop=documentTop;
+    const scrollY=window.scrollY||window.pageYOffset||0;
+    const documentBottom=scrollY+jr.bottom;
+
+    if(stableBaseline===null||refreshBaseline)stableBaseline=documentBottom;
+
     const mirroredRight=clamp(jr.left,8,Math.max(8,vw*.08));
-    logo.style.top=Math.round(stableTop)+'px';
     logo.style.right=Math.round(mirroredRight)+'px';
+    alignToBaseline();
   }
 
   function resetAnchor(){
-    stableTop=null;
-    setAnchor();
+    stableBaseline=null;
+    setAnchor({refreshBaseline:true});
   }
 
   function maxScale(){
@@ -1379,6 +1388,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
   function applySize(scale){
     logo.style.fontSize=(baseSize()*scale).toFixed(2)+'px';
+    alignToBaseline();
   }
 
   function paint(now){
@@ -1405,8 +1415,8 @@ const search=document.getElementById('search');function doSearch(){query=search.
     }
   }
 
-  setAnchor();
   applySize(1);
+  setAnchor({refreshBaseline:true});
 
   addEventListener('scroll',()=>update(),{passive:true});
   addEventListener('resize',()=>{
@@ -1423,10 +1433,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
   if('ResizeObserver' in window){
     const ro=new ResizeObserver(()=>{
-      const keepTop=stableTop;
-      setAnchor();
-      stableTop=keepTop;
-      logo.style.top=Math.round(stableTop)+'px';
+      setAnchor({refreshBaseline:true});
       update({snap:true});
     });
     ro.observe(jewels);
