@@ -1163,8 +1163,6 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 }
 </style>
 <style id="the-uni-smart-logo-style">
-/* THE UNI floating mark — revised 2026-10-04.
-   Fixed upper-right anchor; only scale responds to scroll. */
 #the-uni-smart-logo{
   position:fixed;
   top:18px;
@@ -1175,10 +1173,8 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   pointer-events:none;
   user-select:none;
   -webkit-user-select:none;
-  transform-origin:100% 0%;
-  transform:translate3d(0,0,0) scale(1);
   opacity:.99;
-  will-change:transform;
+  will-change:width;
   contain:layout style paint;
 }
 #the-uni-smart-logo svg{
@@ -1186,6 +1182,8 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   width:100%;
   height:auto;
   overflow:visible;
+  text-rendering:geometricPrecision;
+  shape-rendering:geometricPrecision;
 }
 @media(max-width:1050px){
   #the-uni-smart-logo{width:180px}
@@ -1195,50 +1193,43 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 }
 @media(prefers-reduced-motion:reduce){
   #the-uni-smart-logo{
-    transform:none!important;
+    width:214px!important;
     will-change:auto;
   }
 }
 </style></head>
 <body data-atmo="nocturne"><div id="the-uni-smart-logo" aria-hidden="true">
-<svg viewBox="0 0 952 260" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 930 260" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="uniIvory" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#fbf9f5"/>
       <stop offset=".56" stop-color="#f6f2ec"/>
       <stop offset="1" stop-color="#efeae2"/>
     </linearGradient>
-    <filter id="uniEdge" x="-4%" y="-10%" width="108%" height="120%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="1" stdDeviation=".35" flood-color="#cfc8bd" flood-opacity=".34"/>
-    </filter>
   </defs>
 
-  <!-- Custom hybrid: heavy slab structure softened with rounded joins. -->
-  <g fill="url(#uniIvory)" stroke="url(#uniIvory)" stroke-width="5.5" stroke-linejoin="round"
-     paint-order="stroke fill" filter="url(#uniEdge)"
+  <g fill="url(#uniIvory)"
      font-family="Rockwell Extra Bold, Rockwell, Roboto Slab, Georgia, serif"
      font-size="188" font-weight="900" letter-spacing="-6">
     <text x="10" y="208">THE</text>
     <text x="486" y="208">UN</text>
   </g>
 
-  <!-- Custom slab I pulled close to N; broad bars + rounded corners. -->
-  <g filter="url(#uniEdge)" fill="url(#uniIvory)">
-    <rect x="804" y="38" width="126" height="31" rx="10"/>
-    <rect x="828" y="56" width="78" height="151" rx="10"/>
-    <rect x="804" y="197" width="126" height="31" rx="10"/>
+  <g fill="url(#uniIvory)">
+    <rect x="772" y="38" width="124" height="31" rx="10"/>
+    <rect x="795" y="55" width="78" height="152" rx="10"/>
+    <rect x="772" y="197" width="124" height="31" rx="10"/>
   </g>
 
-  <!-- BarbPH: still subtle, but strong enough to survive the small resting size. -->
-  <g fill="#b6afa5"
+  <g fill="#9f988f"
      font-family="Inter, Segoe UI, Arial, sans-serif"
-     font-size="25.5" font-weight="800" text-anchor="middle">
-    <text x="867" y="84">B</text>
-    <text x="867" y="109">a</text>
-    <text x="867" y="134">r</text>
-    <text x="867" y="159">b</text>
-    <text x="867" y="184">P</text>
-    <text x="867" y="209">H</text>
+     font-size="28" font-weight="900" text-anchor="middle">
+    <text x="834" y="84">B</text>
+    <text x="834" y="109">a</text>
+    <text x="834" y="134">r</text>
+    <text x="834" y="159">b</text>
+    <text x="834" y="184">P</text>
+    <text x="834" y="209">H</text>
   </g>
 </svg>
 </div><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
@@ -1357,16 +1348,19 @@ const search=document.getElementById('search');function doSearch(){query=search.
   let initialized=false;
   let stableTop=null;
 
+  function baseWidth(){
+    const vw=document.documentElement.clientWidth;
+    if(vw<=680)return 150;
+    if(vw<=1050)return 180;
+    return 214;
+  }
+
   function setAnchor(){
     const jr=jewels.getBoundingClientRect();
     const vw=document.documentElement.clientWidth;
-
-    // Capture the jewel row's document-level starting height, not its scrolled viewport top.
-    // This keeps the fixed logo permanently in its intended starting zone.
     const documentTop=(window.scrollY||window.pageYOffset||0)+jr.top;
     if(stableTop===null)stableTop=documentTop;
 
-    // Horizontal mirror can safely be recomputed on layout/viewport changes.
     const mirroredRight=clamp(jr.left,8,Math.max(8,vw*.08));
     logo.style.top=Math.round(stableTop)+'px';
     logo.style.right=Math.round(mirroredRight)+'px';
@@ -1379,7 +1373,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
   function maxScale(){
     const vw=document.documentElement.clientWidth;
-    const base=Math.max(1,logo.offsetWidth);
+    const base=baseWidth();
     const cap=vw<=680
       ? Math.min(216,vw*.54)
       : vw<=1050
@@ -1395,7 +1389,7 @@ const search=document.getElementById('search');function doSearch(){query=search.
     const vh=Math.max(1,window.innerHeight);
     const aboutY=y+about.getBoundingClientRect().top;
     const aboutH=Math.max(1,about.getBoundingClientRect().height);
-    const footerY=footer ? y+footer.getBoundingClientRect().top : aboutY+aboutH;
+    const footerY=footer?y+footer.getBoundingClientRect().top:aboutY+aboutH;
 
     const growStart=Math.max(160,aboutY-vh*.93);
     const peakAt=Math.max(growStart+Math.min(260,vh*.30),aboutY-vh*.30);
@@ -1405,15 +1399,22 @@ const search=document.getElementById('search');function doSearch(){query=search.
     const end=1.08;
 
     if(y<=growStart)return 1;
+
     if(y<peakAt){
       const p=smoother((y-growStart)/Math.max(1,peakAt-growStart));
       return 1+(peak-1)*p;
     }
+
     if(y<settleAt){
       const p=smoother((y-peakAt)/Math.max(1,settleAt-peakAt));
       return peak+(end-peak)*p;
     }
+
     return end;
+  }
+
+  function applySize(scale){
+    logo.style.width=(baseWidth()*scale).toFixed(2)+'px';
   }
 
   function paint(now){
@@ -1421,10 +1422,9 @@ const search=document.getElementById('search');function doSearch(){query=search.
     const dt=last?Math.min(48,now-last):16;
     last=now;
 
-    // Damp scale changes so trackpad, wheel and touch all feel continuous.
     const response=1-Math.exp(-dt/115);
     current+=(target-current)*response;
-    logo.style.transform='translate3d(0,0,0) scale('+current.toFixed(4)+')';
+    applySize(current);
 
     if(Math.abs(target-current)>.0007){
       raf=requestAnimationFrame(paint);
@@ -1433,27 +1433,36 @@ const search=document.getElementById('search');function doSearch(){query=search.
 
   function update({snap=false}={}){
     target=targetForScroll();
+
     if(snap||!initialized||reduce.matches){
       current=target;
       initialized=true;
-      logo.style.transform=reduce.matches?'none':'translate3d(0,0,0) scale('+current.toFixed(4)+')';
+      applySize(current);
       return;
     }
+
     if(!raf){
       last=0;
       raf=requestAnimationFrame(paint);
     }
   }
 
-  // Anchor once. Scroll updates SCALE ONLY.
   setAnchor();
+  applySize(1);
 
   addEventListener('scroll',()=>update(),{passive:true});
-  addEventListener('resize',()=>{resetAnchor();update({snap:true})},{passive:true});
-  visualViewport?.addEventListener('resize',()=>{resetAnchor();update({snap:true})},{passive:true});
+  addEventListener('resize',()=>{
+    resetAnchor();
+    update({snap:true});
+  },{passive:true});
+
+  visualViewport?.addEventListener('resize',()=>{
+    resetAnchor();
+    update({snap:true});
+  },{passive:true});
+
   reduce.addEventListener?.('change',()=>update({snap:true}));
 
-  // Layout changes may alter horizontal geometry, but never use a scroll-relative top.
   if('ResizeObserver' in window){
     const ro=new ResizeObserver(()=>{
       const keepTop=stableTop;
