@@ -1163,21 +1163,21 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 }
 </style>
 <style id="the-uni-smart-logo-style">
-/* THE UNI floating mark — clean 2026-10-04 system.
-   Position is mirrored from the live jewel row; scroll changes scale only. */
+/* THE UNI floating mark — revised 2026-10-04.
+   Fixed upper-right anchor; only scale responds to scroll. */
 #the-uni-smart-logo{
   position:fixed;
   top:18px;
   right:18px;
   z-index:64;
-  width:210px;
+  width:214px;
   height:auto;
   pointer-events:none;
   user-select:none;
   -webkit-user-select:none;
   transform-origin:100% 0%;
   transform:translate3d(0,0,0) scale(1);
-  opacity:.985;
+  opacity:.99;
   will-change:transform;
   contain:layout style paint;
 }
@@ -1188,10 +1188,10 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
   overflow:visible;
 }
 @media(max-width:1050px){
-  #the-uni-smart-logo{width:176px}
+  #the-uni-smart-logo{width:180px}
 }
 @media(max-width:680px){
-  #the-uni-smart-logo{width:146px}
+  #the-uni-smart-logo{width:150px}
 }
 @media(prefers-reduced-motion:reduce){
   #the-uni-smart-logo{
@@ -1201,35 +1201,44 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
 }
 </style></head>
 <body data-atmo="nocturne"><div id="the-uni-smart-logo" aria-hidden="true">
-<svg viewBox="0 0 1040 260" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 1010 260" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="uniIvory" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#faf8f3"/>
-      <stop offset=".55" stop-color="#f5f1ea"/>
-      <stop offset="1" stop-color="#eee9e1"/>
+      <stop offset="0" stop-color="#fbf9f5"/>
+      <stop offset=".56" stop-color="#f6f2ec"/>
+      <stop offset="1" stop-color="#efeae2"/>
     </linearGradient>
-    <filter id="uniEdge" x="-3%" y="-8%" width="106%" height="116%" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="1" stdDeviation=".35" flood-color="#cfc8bd" flood-opacity=".38"/>
+    <filter id="uniEdge" x="-4%" y="-10%" width="108%" height="120%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="1" stdDeviation=".35" flood-color="#cfc8bd" flood-opacity=".34"/>
     </filter>
   </defs>
-  <g fill="url(#uniIvory)" filter="url(#uniEdge)"
-     font-family="Arial Black, Inter, Segoe UI, Arial, sans-serif"
-     font-size="196" font-weight="900" letter-spacing="-8">
+
+  <!-- Bold, rounder wordmark. Stroke rounds the heavy letter corners without adding visual clutter. -->
+  <g fill="url(#uniIvory)" stroke="url(#uniIvory)" stroke-width="7" stroke-linejoin="round"
+     paint-order="stroke fill" filter="url(#uniEdge)"
+     font-family="Arial Rounded MT Bold, Arial Black, Inter, Segoe UI, Arial, sans-serif"
+     font-size="194" font-weight="900" letter-spacing="-9">
     <text x="12" y="211">THE</text>
-    <text x="520" y="211">UN</text>
+    <text x="506" y="211">UN</text>
   </g>
-  <g filter="url(#uniEdge)">
-    <rect x="914" y="36" width="102" height="190" rx="2" fill="url(#uniIvory)"/>
-    <g fill="#c9c2b8"
-       font-family="Inter, Segoe UI, Arial, sans-serif"
-       font-size="25" font-weight="650" text-anchor="middle">
-      <text x="965" y="72">B</text>
-      <text x="965" y="100">a</text>
-      <text x="965" y="128">r</text>
-      <text x="965" y="156">b</text>
-      <text x="965" y="184">P</text>
-      <text x="965" y="212">H</text>
-    </g>
+
+  <!-- Custom slab I: rounded stem with clear top/bottom serif bars, pulled tight to the N. -->
+  <g filter="url(#uniEdge)" fill="url(#uniIvory)">
+    <rect x="862" y="38" width="122" height="30" rx="8"/>
+    <rect x="884" y="55" width="78" height="153" rx="8"/>
+    <rect x="862" y="198" width="122" height="30" rx="8"/>
+  </g>
+
+  <!-- BarbPH remains inside the I and only one soft shade darker than the ivory mark. -->
+  <g fill="#cec8bf"
+     font-family="Inter, Segoe UI, Arial, sans-serif"
+     font-size="22" font-weight="700" text-anchor="middle">
+    <text x="923" y="85">B</text>
+    <text x="923" y="109">a</text>
+    <text x="923" y="133">r</text>
+    <text x="923" y="157">b</text>
+    <text x="923" y="181">P</text>
+    <text x="923" y="205">H</text>
   </g>
 </svg>
 </div><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
@@ -1346,24 +1355,37 @@ const search=document.getElementById('search');function doSearch(){query=search.
   let raf=0;
   let last=0;
   let initialized=false;
+  let stableTop=null;
 
-  function anchor(){
+  function setAnchor(){
     const jr=jewels.getBoundingClientRect();
     const vw=document.documentElement.clientWidth;
+
+    // Capture the jewel row's document-level starting height, not its scrolled viewport top.
+    // This keeps the fixed logo permanently in its intended starting zone.
+    const documentTop=(window.scrollY||window.pageYOffset||0)+jr.top;
+    if(stableTop===null)stableTop=documentTop;
+
+    // Horizontal mirror can safely be recomputed on layout/viewport changes.
     const mirroredRight=clamp(jr.left,8,Math.max(8,vw*.08));
-    logo.style.top=Math.round(jr.top)+'px';
+    logo.style.top=Math.round(stableTop)+'px';
     logo.style.right=Math.round(mirroredRight)+'px';
+  }
+
+  function resetAnchor(){
+    stableTop=null;
+    setAnchor();
   }
 
   function maxScale(){
     const vw=document.documentElement.clientWidth;
-    const base=Math.max(1,logo.getBoundingClientRect().width/(current||1));
+    const base=Math.max(1,logo.offsetWidth);
     const cap=vw<=680
-      ? Math.min(214,vw*.54)
+      ? Math.min(216,vw*.54)
       : vw<=1050
-        ? Math.min(302,vw*.36)
-        : Math.min(360,vw*.29);
-    return clamp(cap/base,1.18,1.74);
+        ? Math.min(306,vw*.36)
+        : Math.min(366,vw*.29);
+    return clamp(cap/base,1.18,1.72);
   }
 
   function targetForScroll(){
@@ -1375,10 +1397,6 @@ const search=document.getElementById('search');function doSearch(){query=search.
     const aboutH=Math.max(1,about.getBoundingClientRect().height);
     const footerY=footer ? y+footer.getBoundingClientRect().top : aboutY+aboutH;
 
-    // Three wide scroll zones instead of snapping to sections:
-    // 1) quiet resting mark through the opening library,
-    // 2) a long, eased rise as ABOUT approaches,
-    // 3) a long, eased return as the footer approaches.
     const growStart=Math.max(160,aboutY-vh*.93);
     const peakAt=Math.max(growStart+Math.min(260,vh*.30),aboutY-vh*.30);
     const settleAt=Math.max(peakAt+Math.min(340,vh*.42),footerY-vh*.18);
@@ -1403,11 +1421,9 @@ const search=document.getElementById('search');function doSearch(){query=search.
     const dt=last?Math.min(48,now-last):16;
     last=now;
 
-    // Time-based damping makes the mark follow scroll smoothly even when
-    // wheel/touch events arrive unevenly. No width animation, no positional drift.
+    // Damp scale changes so trackpad, wheel and touch all feel continuous.
     const response=1-Math.exp(-dt/115);
-    current+= (target-current)*response;
-
+    current+=(target-current)*response;
     logo.style.transform='translate3d(0,0,0) scale('+current.toFixed(4)+')';
 
     if(Math.abs(target-current)>.0007){
@@ -1416,7 +1432,6 @@ const search=document.getElementById('search');function doSearch(){query=search.
   }
 
   function update({snap=false}={}){
-    anchor();
     target=targetForScroll();
     if(snap||!initialized||reduce.matches){
       current=target;
@@ -1430,15 +1445,24 @@ const search=document.getElementById('search');function doSearch(){query=search.
     }
   }
 
+  // Anchor once. Scroll updates SCALE ONLY.
+  setAnchor();
+
   addEventListener('scroll',()=>update(),{passive:true});
-  addEventListener('resize',()=>update({snap:true}),{passive:true});
-  visualViewport?.addEventListener('resize',()=>update({snap:true}),{passive:true});
+  addEventListener('resize',()=>{resetAnchor();update({snap:true})},{passive:true});
+  visualViewport?.addEventListener('resize',()=>{resetAnchor();update({snap:true})},{passive:true});
   reduce.addEventListener?.('change',()=>update({snap:true}));
 
+  // Layout changes may alter horizontal geometry, but never use a scroll-relative top.
   if('ResizeObserver' in window){
-    const ro=new ResizeObserver(()=>update({snap:true}));
+    const ro=new ResizeObserver(()=>{
+      const keepTop=stableTop;
+      setAnchor();
+      stableTop=keepTop;
+      logo.style.top=Math.round(stableTop)+'px';
+      update({snap:true});
+    });
     ro.observe(jewels);
-    ro.observe(about);
   }
 
   update({snap:true});
