@@ -1161,8 +1161,78 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
     0 10px 22px rgba(0,0,0,.28),
     0 0 30px rgba(215,182,119,.17)!important;
 }
+</style>
+<style id="the-uni-smart-logo-style">
+/* THE UNI floating mark — clean 2026-10-04 system.
+   Position is mirrored from the live jewel row; scroll changes scale only. */
+#the-uni-smart-logo{
+  position:fixed;
+  top:18px;
+  right:18px;
+  z-index:64;
+  width:210px;
+  height:auto;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  transform-origin:100% 0%;
+  transform:translate3d(0,0,0) scale(1);
+  opacity:.985;
+  will-change:transform;
+  contain:layout style paint;
+}
+#the-uni-smart-logo svg{
+  display:block;
+  width:100%;
+  height:auto;
+  overflow:visible;
+}
+@media(max-width:1050px){
+  #the-uni-smart-logo{width:176px}
+}
+@media(max-width:680px){
+  #the-uni-smart-logo{width:146px}
+}
+@media(prefers-reduced-motion:reduce){
+  #the-uni-smart-logo{
+    transform:none!important;
+    will-change:auto;
+  }
+}
 </style></head>
-<body data-atmo="nocturne"><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
+<body data-atmo="nocturne"><div id="the-uni-smart-logo" aria-hidden="true">
+<svg viewBox="0 0 1040 260" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="uniIvory" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#faf8f3"/>
+      <stop offset=".55" stop-color="#f5f1ea"/>
+      <stop offset="1" stop-color="#eee9e1"/>
+    </linearGradient>
+    <filter id="uniEdge" x="-3%" y="-8%" width="106%" height="116%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="1" stdDeviation=".35" flood-color="#cfc8bd" flood-opacity=".38"/>
+    </filter>
+  </defs>
+  <g fill="url(#uniIvory)" filter="url(#uniEdge)"
+     font-family="Arial Black, Inter, Segoe UI, Arial, sans-serif"
+     font-size="196" font-weight="900" letter-spacing="-8">
+    <text x="12" y="211">THE</text>
+    <text x="520" y="211">UN</text>
+  </g>
+  <g filter="url(#uniEdge)">
+    <rect x="914" y="36" width="102" height="190" rx="2" fill="url(#uniIvory)"/>
+    <g fill="#c9c2b8"
+       font-family="Inter, Segoe UI, Arial, sans-serif"
+       font-size="25" font-weight="650" text-anchor="middle">
+      <text x="965" y="72">B</text>
+      <text x="965" y="100">a</text>
+      <text x="965" y="128">r</text>
+      <text x="965" y="156">b</text>
+      <text x="965" y="184">P</text>
+      <text x="965" y="212">H</text>
+    </g>
+  </g>
+</svg>
+</div><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
 <h1 class="seoOnly">THE UNI — Interactive Knowledge Library and The Impossible Museum</h1>
 <div class="masthead">
@@ -1258,4 +1328,119 @@ document.getElementById('showAll').addEventListener('click',()=>{familyFilter(nu
 
 const search=document.getElementById('search');function doSearch(){query=search.value.trim().toLowerCase();queryHits.clear();if(query){const terms=query.split(/\s+/).filter(Boolean);for(const d of EXPERIENCES){const hay=(d.title+' '+d.family+' '+d.description+' '+d.search).toLowerCase();if(terms.every(t=>hay.includes(t)))queryHits.add(d.id)}}refreshStates();if(queryHits.size===1)openNode(byId.get([...queryHits][0]))}search.addEventListener('input',doSearch);search.addEventListener('keydown',e=>{if(e.key==='Enter'&&queryHits.size)openNode(byId.get([...queryHits][0]))});
 </script>
-</body></html>
+
+<script id="the-uni-smart-logo-script">
+(()=>{
+  const logo=document.getElementById('the-uni-smart-logo');
+  const jewels=document.querySelector('.jewels');
+  const about=document.getElementById('about');
+  const footer=document.querySelector('.footer');
+  if(!logo||!jewels||!about)return;
+
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const smoother=t=>{t=clamp(t,0,1);return t*t*t*(t*(t*6-15)+10)};
+
+  let current=1;
+  let target=1;
+  let raf=0;
+  let last=0;
+  let initialized=false;
+
+  function anchor(){
+    const jr=jewels.getBoundingClientRect();
+    const vw=document.documentElement.clientWidth;
+    const mirroredRight=clamp(jr.left,8,Math.max(8,vw*.08));
+    logo.style.top=Math.round(jr.top)+'px';
+    logo.style.right=Math.round(mirroredRight)+'px';
+  }
+
+  function maxScale(){
+    const vw=document.documentElement.clientWidth;
+    const base=Math.max(1,logo.getBoundingClientRect().width/(current||1));
+    const cap=vw<=680
+      ? Math.min(214,vw*.54)
+      : vw<=1050
+        ? Math.min(302,vw*.36)
+        : Math.min(360,vw*.29);
+    return clamp(cap/base,1.18,1.74);
+  }
+
+  function targetForScroll(){
+    if(reduce.matches)return 1;
+
+    const y=window.scrollY||window.pageYOffset||0;
+    const vh=Math.max(1,window.innerHeight);
+    const aboutY=y+about.getBoundingClientRect().top;
+    const aboutH=Math.max(1,about.getBoundingClientRect().height);
+    const footerY=footer ? y+footer.getBoundingClientRect().top : aboutY+aboutH;
+
+    // Three wide scroll zones instead of snapping to sections:
+    // 1) quiet resting mark through the opening library,
+    // 2) a long, eased rise as ABOUT approaches,
+    // 3) a long, eased return as the footer approaches.
+    const growStart=Math.max(160,aboutY-vh*.93);
+    const peakAt=Math.max(growStart+Math.min(260,vh*.30),aboutY-vh*.30);
+    const settleAt=Math.max(peakAt+Math.min(340,vh*.42),footerY-vh*.18);
+
+    const peak=maxScale();
+    const end=1.08;
+
+    if(y<=growStart)return 1;
+    if(y<peakAt){
+      const p=smoother((y-growStart)/Math.max(1,peakAt-growStart));
+      return 1+(peak-1)*p;
+    }
+    if(y<settleAt){
+      const p=smoother((y-peakAt)/Math.max(1,settleAt-peakAt));
+      return peak+(end-peak)*p;
+    }
+    return end;
+  }
+
+  function paint(now){
+    raf=0;
+    const dt=last?Math.min(48,now-last):16;
+    last=now;
+
+    // Time-based damping makes the mark follow scroll smoothly even when
+    // wheel/touch events arrive unevenly. No width animation, no positional drift.
+    const response=1-Math.exp(-dt/115);
+    current+= (target-current)*response;
+
+    logo.style.transform='translate3d(0,0,0) scale('+current.toFixed(4)+')';
+
+    if(Math.abs(target-current)>.0007){
+      raf=requestAnimationFrame(paint);
+    }
+  }
+
+  function update({snap=false}={}){
+    anchor();
+    target=targetForScroll();
+    if(snap||!initialized||reduce.matches){
+      current=target;
+      initialized=true;
+      logo.style.transform=reduce.matches?'none':'translate3d(0,0,0) scale('+current.toFixed(4)+')';
+      return;
+    }
+    if(!raf){
+      last=0;
+      raf=requestAnimationFrame(paint);
+    }
+  }
+
+  addEventListener('scroll',()=>update(),{passive:true});
+  addEventListener('resize',()=>update({snap:true}),{passive:true});
+  visualViewport?.addEventListener('resize',()=>update({snap:true}),{passive:true});
+  reduce.addEventListener?.('change',()=>update({snap:true}));
+
+  if('ResizeObserver' in window){
+    const ro=new ResizeObserver(()=>update({snap:true}));
+    ro.observe(jewels);
+    ro.observe(about);
+  }
+
+  update({snap:true});
+})();
+</script></body></html>
