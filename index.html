@@ -1162,8 +1162,49 @@ body[data-atmo="impossible"] .topbar,body[data-atmo="impossible"] .familyCase,bo
     0 0 30px rgba(215,182,119,.17)!important;
 }
 </style>
-</head>
-<body data-atmo="nocturne"><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
+
+<style id="the-uni-live-logo-style">
+#the-uni-live-logo{
+  position:fixed;
+  top:18px;
+  right:18px;
+  z-index:64;
+  display:inline-flex;
+  align-items:baseline;
+  gap:.08em;
+  white-space:nowrap;
+  pointer-events:none;
+  user-select:none;
+  -webkit-user-select:none;
+  color:rgba(245,235,226,.90);
+  font-family:"Segoe Script","Snell Roundhand","Apple Chancery","Brush Script MT",cursive;
+  font-style:italic;
+  font-weight:700;
+  line-height:.88;
+  letter-spacing:-.035em;
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.12),
+    0 0 12px rgba(207,167,202,.08),
+    0 0 20px rgba(214,170,118,.06);
+  text-rendering:geometricPrecision;
+  -webkit-font-smoothing:antialiased;
+}
+#the-uni-live-logo .word{
+  display:inline-flex;
+  align-items:baseline;
+}
+#the-uni-live-logo .i{
+  display:inline-block;
+  transform:scaleX(1.16);
+  transform-origin:center center;
+  margin-left:.01em;
+  margin-right:.035em;
+}
+@media(prefers-reduced-motion:reduce){
+  #the-uni-live-logo{will-change:auto}
+}
+</style></head>
+<body data-atmo="nocturne"><div id="the-uni-live-logo" aria-hidden="true"><span class="word">THE</span><span class="word">UN<span class="i">I</span></span></div><div id="atmosphere" aria-hidden="true"><div class="scene nocturne"></div><div class="scene porcelain"></div><div class="scene impossible"></div></div><div id="grain" aria-hidden="true"></div>
 <div class="shell">
 <h1 class="seoOnly">THE UNI — Interactive Knowledge Library and The Impossible Museum</h1>
 <div class="masthead">
@@ -1260,4 +1301,137 @@ document.getElementById('showAll').addEventListener('click',()=>{familyFilter(nu
 const search=document.getElementById('search');function doSearch(){query=search.value.trim().toLowerCase();queryHits.clear();if(query){const terms=query.split(/\s+/).filter(Boolean);for(const d of EXPERIENCES){const hay=(d.title+' '+d.family+' '+d.description+' '+d.search).toLowerCase();if(terms.every(t=>hay.includes(t)))queryHits.add(d.id)}}refreshStates();if(queryHits.size===1)openNode(byId.get([...queryHits][0]))}search.addEventListener('input',doSearch);search.addEventListener('keydown',e=>{if(e.key==='Enter'&&queryHits.size)openNode(byId.get([...queryHits][0]))});
 </script>
 
-</body></html>
+
+<script id="the-uni-live-logo-script">
+(()=>{
+  const logo=document.getElementById('the-uni-live-logo');
+  const jewels=document.querySelector('.jewels');
+  const about=document.getElementById('about');
+  const footer=document.querySelector('.footer');
+  if(!logo||!jewels||!about)return;
+
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
+  const smoother=t=>{t=clamp(t,0,1);return t*t*t*(t*(t*6-15)+10)};
+
+  let current=1;
+  let target=1;
+  let raf=0;
+  let last=0;
+  let initialized=false;
+  let stableTop=null;
+
+  function baseSize(){
+    const vw=document.documentElement.clientWidth;
+    if(vw<=680)return 34;
+    if(vw<=1050)return 42;
+    return 50;
+  }
+
+  function setAnchor(){
+    const jr=jewels.getBoundingClientRect();
+    const vw=document.documentElement.clientWidth;
+    const documentTop=(window.scrollY||window.pageYOffset||0)+jr.top;
+    if(stableTop===null)stableTop=documentTop;
+    const mirroredRight=clamp(jr.left,8,Math.max(8,vw*.08));
+    logo.style.top=Math.round(stableTop)+'px';
+    logo.style.right=Math.round(mirroredRight)+'px';
+  }
+
+  function resetAnchor(){
+    stableTop=null;
+    setAnchor();
+  }
+
+  function maxScale(){
+    const vw=document.documentElement.clientWidth;
+    if(vw<=680)return 1.52;
+    if(vw<=1050)return 1.62;
+    return 1.72;
+  }
+
+  function targetForScroll(){
+    if(reduce.matches)return 1;
+    const y=window.scrollY||window.pageYOffset||0;
+    const vh=Math.max(1,window.innerHeight);
+    const aboutY=y+about.getBoundingClientRect().top;
+    const aboutH=Math.max(1,about.getBoundingClientRect().height);
+    const footerY=footer?y+footer.getBoundingClientRect().top:aboutY+aboutH;
+
+    const growStart=Math.max(160,aboutY-vh*.93);
+    const peakAt=Math.max(growStart+Math.min(260,vh*.30),aboutY-vh*.30);
+    const settleAt=Math.max(peakAt+Math.min(340,vh*.42),footerY-vh*.18);
+
+    const peak=maxScale();
+    const end=1.08;
+
+    if(y<=growStart)return 1;
+    if(y<peakAt){
+      const p=smoother((y-growStart)/Math.max(1,peakAt-growStart));
+      return 1+(peak-1)*p;
+    }
+    if(y<settleAt){
+      const p=smoother((y-peakAt)/Math.max(1,settleAt-peakAt));
+      return peak+(end-peak)*p;
+    }
+    return end;
+  }
+
+  function applySize(scale){
+    logo.style.fontSize=(baseSize()*scale).toFixed(2)+'px';
+  }
+
+  function paint(now){
+    raf=0;
+    const dt=last?Math.min(48,now-last):16;
+    last=now;
+    const response=1-Math.exp(-dt/115);
+    current+=(target-current)*response;
+    applySize(current);
+    if(Math.abs(target-current)>.0007)raf=requestAnimationFrame(paint);
+  }
+
+  function update({snap=false}={}){
+    target=targetForScroll();
+    if(snap||!initialized||reduce.matches){
+      current=target;
+      initialized=true;
+      applySize(current);
+      return;
+    }
+    if(!raf){
+      last=0;
+      raf=requestAnimationFrame(paint);
+    }
+  }
+
+  setAnchor();
+  applySize(1);
+
+  addEventListener('scroll',()=>update(),{passive:true});
+  addEventListener('resize',()=>{
+    resetAnchor();
+    update({snap:true});
+  },{passive:true});
+
+  visualViewport?.addEventListener('resize',()=>{
+    resetAnchor();
+    update({snap:true});
+  },{passive:true});
+
+  reduce.addEventListener?.('change',()=>update({snap:true}));
+
+  if('ResizeObserver' in window){
+    const ro=new ResizeObserver(()=>{
+      const keepTop=stableTop;
+      setAnchor();
+      stableTop=keepTop;
+      logo.style.top=Math.round(stableTop)+'px';
+      update({snap:true});
+    });
+    ro.observe(jewels);
+  }
+
+  update({snap:true});
+})();
+</script></body></html>
