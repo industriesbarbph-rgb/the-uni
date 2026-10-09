@@ -1,93 +1,139 @@
-from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
-import os, random
+import math
+import os
+from pathlib import Path
 
-W, H = 1200, 630
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "social" / "the-uni-social-preview-20261004i.jpg"
-OUT.parent.mkdir(parents=True, exist_ok=True)
+OUT = ROOT / "assets" / "the-uni-social-v2.jpg"
 
-# Dark cosmic base.
-im = Image.new("RGBA", (W, H), (7, 6, 10, 255))
-halo = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-hd = ImageDraw.Draw(halo)
-hd.ellipse((190, 65, 1010, 570), fill=(112, 83, 126, 34))
-halo = halo.filter(ImageFilter.GaussianBlur(105))
-im = Image.alpha_composite(im, halo)
+WIDTH = 1200
+HEIGHT = 630
 
-# Constellation / node language.
-draw = ImageDraw.Draw(im)
-pts = [(90,170),(185,110),(270,145),(1035,120),(1110,210),(980,275),
-       (155,455),(275,520),(925,505),(1080,440),(575,92),(650,118)]
-for a,b in [(0,1),(1,2),(3,4),(4,5),(6,7),(8,9),(10,11),(2,10),(5,11)]:
-    draw.line((*pts[a], *pts[b]), fill=(211,193,168,30), width=1)
-for x,y in pts:
-    draw.ellipse((x-3,y-3,x+3,y+3), fill=(235,221,202,130))
-    draw.ellipse((x-9,y-9,x+9,y+9), outline=(211,193,168,35), width=1)
+def font(size, bold=False, serif=False):
+    if serif:
+        candidates = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf",
+            "/usr/share/fonts/truetype/liberation2/LiberationSerif-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSerif-Regular.ttf",
+        ]
+    else:
+        candidates = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation2/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf",
+        ]
+    for path in candidates:
+        if os.path.exists(path):
+            return ImageFont.truetype(path, size=size)
+    return ImageFont.load_default()
 
-# Render THE UNI's actual stone wordmark. Fall back to type if SVG rendering fails.
-wordmark_done = False
-try:
-    import cairosvg
-    svg = ROOT / "assets" / "the-uni-wordmark-artifact-v4.svg"
-    tmp = ROOT / "social" / ".the-uni-wordmark-render.png"
-    cairosvg.svg2png(url=str(svg), write_to=str(tmp), output_width=860, output_height=310)
-    wm = Image.open(tmp).convert("RGBA")
-    bbox = wm.getbbox()
-    if bbox:
-        wm = wm.crop(bbox)
-    if wm.width > 850:
-        s = 850 / wm.width
-        wm = wm.resize((int(wm.width*s), int(wm.height*s)), Image.Resampling.LANCZOS)
-    im.alpha_composite(wm, ((W-wm.width)//2, 155))
-    wordmark_done = True
-    tmp.unlink(missing_ok=True)
-except Exception as exc:
-    print("Wordmark SVG fallback:", exc)
+# Deep-space blue/black gradient.
+img = Image.new("RGB", (WIDTH, HEIGHT))
+px = img.load()
+for y in range(HEIGHT):
+    for x in range(WIDTH):
+        dx = (x - WIDTH * 0.52) / WIDTH
+        dy = (y - HEIGHT * 0.45) / HEIGHT
+        radial = max(0.0, 1.0 - math.sqrt(dx * dx + dy * dy) * 1.6)
+        horizon = max(0.0, 1.0 - abs(y - HEIGHT * 0.72) / (HEIGHT * 0.52))
+        r = int(4 + 3 * radial)
+        g = int(8 + 14 * radial + 4 * horizon)
+        b = int(18 + 37 * radial + 22 * horizon)
+        px[x, y] = (r, g, b)
 
-font_regular = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-font_bold = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
-if not os.path.exists(font_regular):
-    font_regular = None
-if not os.path.exists(font_bold):
-    font_bold = font_regular
+# Soft cyan beam and horizon glow.
+glow = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+gd = ImageDraw.Draw(glow)
+for w, alpha in [(160, 8), (90, 12), (40, 20), (10, 80), (3, 180)]:
+    gd.rectangle(
+        [WIDTH // 2 - w // 2, 0, WIDTH // 2 + w // 2, HEIGHT],
+        fill=(70, 205, 255, alpha),
+    )
+for h, alpha in [(90, 8), (45, 16), (14, 70), (3, 150)]:
+    y = 492
+    gd.rectangle([0, y - h // 2, WIDTH, y + h // 2], fill=(67, 196, 255, alpha))
+glow = glow.filter(ImageFilter.GaussianBlur(14))
+img = Image.alpha_composite(img.convert("RGBA"), glow)
+draw = ImageDraw.Draw(img)
 
-if not wordmark_done:
-    fallback = ImageDraw.Draw(im)
-    f = ImageFont.truetype(font_bold, 150) if font_bold else ImageFont.load_default()
-    label = "THE UNI"
-    box = fallback.textbbox((0,0), label, font=f)
-    fallback.text(((W-(box[2]-box[0]))//2, 190), label, font=f, fill=(226,195,145,255))
+GOLD = (230, 196, 127, 255)
+GOLD_SOFT = (188, 151, 84, 210)
+IVORY = (245, 241, 229, 255)
+MUTED = (169, 188, 205, 235)
+CYAN = (92, 214, 255, 220)
+LINE = (83, 132, 170, 105)
 
-draw = ImageDraw.Draw(im)
-small = ImageFont.truetype(font_regular, 22) if font_regular else ImageFont.load_default()
-tiny = ImageFont.truetype(font_regular, 15) if font_regular else ImageFont.load_default()
+# Sparse constellation network: decorative, not busy.
+nodes = [
+    (90, 112), (175, 72), (260, 124), (355, 86), (450, 132),
+    (752, 92), (842, 132), (945, 76), (1108, 120),
+    (108, 515), (215, 553), (323, 520), (878, 525), (1012, 558), (1110, 510),
+]
+connections = [(0,1),(1,2),(2,3),(3,4),(5,6),(6,7),(7,8),(9,10),(10,11),(12,13),(13,14)]
+for a, b in connections:
+    draw.line([nodes[a], nodes[b]], fill=LINE, width=2)
+for i, (x, y) in enumerate(nodes):
+    radius = 4 if i % 3 else 5
+    fill = GOLD if i % 4 == 0 else CYAN
+    draw.ellipse([x-radius, y-radius, x+radius, y+radius], fill=fill)
 
-subtitle = "INTERACTIVE KNOWLEDGE LIBRARY  ·  THE IMPOSSIBLE MUSEUM"
-box = draw.textbbox((0,0), subtitle, font=small)
-draw.text(((W-(box[2]-box[0]))//2, 435), subtitle, font=small, fill=(224,214,201,225))
-draw.line((395,493,805,493), fill=(207,176,135,55), width=1)
+# Main wordmark.
+the_font = font(62, bold=True, serif=True)
+uni_font = font(180, bold=True, serif=True)
+subtitle_font = font(31, bold=True)
+museum_font = font(23)
+domain_font = font(22)
+
+# Center THE + UNI as one lockup.
+the_text = "THE"
+uni_text = "UNI"
+the_box = draw.textbbox((0, 0), the_text, font=the_font)
+uni_box = draw.textbbox((0, 0), uni_text, font=uni_font)
+the_w = the_box[2] - the_box[0]
+uni_w = uni_box[2] - uni_box[0]
+gap = 24
+total_w = the_w + gap + uni_w
+x0 = (WIDTH - total_w) // 2
+draw.text((x0, 216), the_text, font=the_font, fill=GOLD)
+draw.text((x0 + the_w + gap, 150), uni_text, font=uni_font, fill=IVORY)
+
+# BarbPH signature sits inside the I of UNI.
+barb_font = font(18, bold=True)
+label_text = "BarbPH"
+label_bbox = draw.textbbox((0, 0), label_text, font=barb_font)
+label_w = label_bbox[2] - label_bbox[0] + 12
+label_h = label_bbox[3] - label_bbox[1] + 8
+label = Image.new("RGBA", (label_w, label_h), (0, 0, 0, 0))
+ld = ImageDraw.Draw(label)
+ld.text((6, -label_bbox[1] + 4), label_text, font=barb_font, fill=(8, 27, 50, 255))
+label = label.rotate(90, expand=True)
+img.alpha_composite(label, (831, 220))
+draw = ImageDraw.Draw(img)
+
+# Fine gold accent rule.
+draw.rounded_rectangle([222, 382, 978, 387], radius=2, fill=GOLD_SOFT)
+
+# Search-readable identity remains prominent.
+subtitle = "INTERACTIVE KNOWLEDGE LIBRARY"
+subtitle_box = draw.textbbox((0, 0), subtitle, font=subtitle_font)
+subtitle_w = subtitle_box[2] - subtitle_box[0]
+draw.text(((WIDTH - subtitle_w) // 2, 411), subtitle, font=subtitle_font, fill=IVORY)
+
+museum = "THE IMPOSSIBLE MUSEUM"
+museum_box = draw.textbbox((0, 0), museum, font=museum_font)
+museum_w = museum_box[2] - museum_box[0]
+draw.text(((WIDTH - museum_w) // 2, 463), museum, font=museum_font, fill=MUTED)
+
+# Footer domain.
 domain = "theuni.barbph.com"
-box = draw.textbbox((0,0), domain, font=tiny)
-draw.text(((W-(box[2]-box[0]))//2, 518), domain, font=tiny, fill=(164,156,148,170))
+domain_box = draw.textbbox((0, 0), domain, font=domain_font)
+domain_w = domain_box[2] - domain_box[0]
+draw.text(((WIDTH - domain_w) // 2, 555), domain, font=domain_font, fill=MUTED)
 
-# Baseline JPEG, RGB, exact OG dimensions. Deliberately NOT progressive.
-im.convert("RGB").save(
-    OUT,
-    "JPEG",
-    quality=82,
-    subsampling=2,
-    progressive=False,
-    optimize=True,
-)
+# Small framing corners.
+corner = 42
+for x, y, sx, sy in [(42,42,1,1),(WIDTH-42,42,-1,1),(42,HEIGHT-42,1,-1),(WIDTH-42,HEIGHT-42,-1,-1)]:
+    draw.line([(x, y), (x + sx * corner, y)], fill=GOLD_SOFT, width=2)
+    draw.line([(x, y), (x, y + sy * corner)], fill=GOLD_SOFT, width=2)
 
-# Strict decode verification: fail deployment if the image is damaged.
-check = Image.open(OUT)
-if check.size != (1200, 630) or check.format != "JPEG":
-    raise SystemExit(f"Bad social preview geometry/format: {check.size} {check.format}")
-check.load()
-check.verify()
-raw = OUT.read_bytes()
-if not (raw[:2] == bytes([0xFF, 0xD8]) and raw[-2:] == bytes([0xFF, 0xD9])):
-    raise SystemExit("Social preview JPEG is not a complete JPEG stream")
-print(f"Generated valid OG image: {OUT} ({len(raw)} bytes)")
+OUT.parent.mkdir(parents=True, exist_ok=True)
+img.convert("RGB").save(OUT, "JPEG", quality=92, optimize=True, progressive=True)
+print(f"Generated {OUT} ({OUT.stat().st_size} bytes)")
