@@ -3,8 +3,8 @@ import base64
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DIR = ROOT / "social" / ".marble-final-v2"
-OUT = ROOT / "assets" / "the-uni-social-marble-20261010-1305.jpg"
+SOURCE_DIR = ROOT / "social" / ".marble-fullbleed-20261010"
+OUT = ROOT / "assets" / "the-uni-social-marble-fullbleed-20261010.jpg"
 
 parts = sorted(SOURCE_DIR.glob("part*.txt"))
 if len(parts) != 6:
@@ -18,12 +18,12 @@ OUT.write_bytes(raw)
 # Fully decode the JPEG so a truncated/broken stream fails the deploy.
 with Image.open(OUT) as img:
     img.load()
-    if img.size != (600, 315):
+    if img.size != (1200, 630):
         raise RuntimeError(f"Unexpected social preview size: {img.size}")
     if img.format != "JPEG":
         raise RuntimeError(f"Unexpected social preview format: {img.format}")
 
-if OUT.stat().st_size < 8000:
+if OUT.stat().st_size < 100000:
     raise RuntimeError(f"Social preview is suspiciously small: {OUT.stat().st_size} bytes")
 
-print(f"Generated valid {OUT} from approved marble artwork ({OUT.stat().st_size} bytes)")
+print(f"Generated valid {OUT} full-bleed marble preview ({OUT.stat().st_size} bytes)")
