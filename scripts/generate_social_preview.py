@@ -6,9 +6,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIR = ROOT / "social" / ".marble-fullbleed-20261010"
 OUT = ROOT / "assets" / "the-uni-social-marble-fullbleed-20261010.jpg"
 
-parts = sorted(SOURCE_DIR.glob("part*.txt"))
-if len(parts) != 4:
-    raise RuntimeError(f"Expected 4 marble preview source parts, found {len(parts)}")
+parts = [SOURCE_DIR / f"part{i:02d}.txt" for i in range(4)]
+for part in parts:
+    if not part.exists():
+        raise RuntimeError(f"Missing marble preview source part: {part.name}")
 
 encoded = "".join(p.read_text(encoding="ascii").strip() for p in parts)
 raw = base64.b64decode(encoded, validate=True)
