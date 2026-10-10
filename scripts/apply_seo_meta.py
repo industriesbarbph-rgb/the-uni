@@ -12,7 +12,7 @@ DESCRIPTION = (
     "Explore interactive learning, visual guides, knowledge maps, educational models, "
     "and quizzes across science, engineering, technology, business, and psychology."
 )
-IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-20261010-1230.jpg"
+IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-20261010-1248.jpg"
 
 META_KEYS = [
     "description",
@@ -49,7 +49,6 @@ def remove_meta_tag(html: str, key: str) -> str:
 
 html = INDEX.read_text(encoding="utf-8")
 
-# Remove any previously managed THE UNI block.
 html = re.sub(
     r"\s*<!-- THE UNI SEO START -->.*?<!-- THE UNI SEO END -->\s*",
     "\n",
@@ -57,7 +56,6 @@ html = re.sub(
     flags=re.IGNORECASE | re.DOTALL,
 )
 
-# Remove stale or duplicate SEO/social tags before adding one authoritative block.
 html = re.sub(r"<title\b[^>]*>.*?</title>\s*", "", html, flags=re.IGNORECASE | re.DOTALL)
 html = re.sub(
     r"<link\b(?=[^>]*\brel\s*=\s*(?:\"canonical\"|'canonical'))[^>]*>\s*",
@@ -117,8 +115,8 @@ block = f'''<!-- THE UNI SEO START -->
 <meta property="og:image:url" content="{IMAGE_URL}">
 <meta property="og:image:secure_url" content="{IMAGE_URL}">
 <meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:width" content="600">
+<meta property="og:image:height" content="315">
 <meta property="og:image:alt" content="THE UNI marble monument — by barb the builder">
 
 <meta name="twitter:card" content="summary_large_image">
@@ -132,8 +130,6 @@ block = f'''<!-- THE UNI SEO START -->
 <!-- THE UNI SEO END -->
 '''
 
-# Put the complete social block immediately after the charset declaration so
-# crawlers encounter it before the large inline stylesheet.
 charset_match = re.search(
     r"<meta\b[^>]*\bcharset\s*=\s*(?:\"[^\"]+\"|'[^']+'|[^\s>]+)[^>]*>\s*",
     html,
