@@ -12,7 +12,7 @@ DESCRIPTION = (
     "Explore interactive learning, visual guides, knowledge maps, educational models, "
     "and quizzes across science, engineering, technology, business, and psychology."
 )
-IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-20261010-1301.jpg"
+IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-20261010-1305.jpg"
 
 META_KEYS = [
     "description",
