@@ -3,12 +3,12 @@ import base64
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_DIR = ROOT / "social" / ".marble-final"
-OUT = ROOT / "assets" / "the-uni-social-marble-20261010-1301.jpg"
+SOURCE_DIR = ROOT / "social" / ".marble-final-v2"
+OUT = ROOT / "assets" / "the-uni-social-marble-20261010-1305.jpg"
 
 parts = sorted(SOURCE_DIR.glob("part*.txt"))
-if not parts:
-    raise RuntimeError("No marble preview source parts found")
+if len(parts) != 6:
+    raise RuntimeError(f"Expected 6 marble preview source parts, found {len(parts)}")
 
 encoded = "".join(p.read_text(encoding="ascii").strip() for p in parts)
 raw = base64.b64decode(encoded, validate=True)
