@@ -4,7 +4,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_B64 = ROOT / "social" / "the-uni-marble-preview-600x315.b64"
-OUT = ROOT / "assets" / "the-uni-social-marble-20261010-1250.jpg"
+OUT = ROOT / "assets" / "the-uni-social-marble-20261010-1248.jpg"
 
 encoded = SOURCE_B64.read_text(encoding="ascii").strip()
 # Normalize padding because the repository text transport may preserve extra '='.
