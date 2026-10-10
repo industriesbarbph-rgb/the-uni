@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "assets" / "the-uni-social-v2.jpg"
+OUT = ROOT / "assets" / "the-uni-social-20261010-1116.jpg"
 
 WIDTH = 1200
 HEIGHT = 630
@@ -135,5 +135,6 @@ for x, y, sx, sy in [(42,42,1,1),(WIDTH-42,42,-1,1),(42,HEIGHT-42,1,-1),(WIDTH-4
     draw.line([(x, y), (x, y + sy * corner)], fill=GOLD_SOFT, width=2)
 
 OUT.parent.mkdir(parents=True, exist_ok=True)
-img.convert("RGB").save(OUT, "JPEG", quality=92, optimize=True, progressive=True)
+# Baseline JPEG: avoids progressive-JPEG edge cases in social crawlers.
+img.convert("RGB").save(OUT, "JPEG", quality=92, optimize=True, progressive=False)
 print(f"Generated {OUT} ({OUT.stat().st_size} bytes)")
