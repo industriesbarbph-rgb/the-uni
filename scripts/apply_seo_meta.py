@@ -12,7 +12,7 @@ DESCRIPTION = (
     "Explore interactive learning, visual guides, knowledge maps, educational models, "
     "and quizzes across science, engineering, technology, business, and psychology."
 )
-IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-20261010-1248.jpg"
+IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-20261010-1252.jpg"
 
 META_KEYS = [
     "description",
@@ -115,8 +115,8 @@ block = f'''<!-- THE UNI SEO START -->
 <meta property="og:image:url" content="{IMAGE_URL}">
 <meta property="og:image:secure_url" content="{IMAGE_URL}">
 <meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="600">
-<meta property="og:image:height" content="315">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="THE UNI marble monument — by barb the builder">
 
 <meta name="twitter:card" content="summary_large_image">
