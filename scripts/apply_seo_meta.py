@@ -12,7 +12,7 @@ DESCRIPTION = (
     "Explore interactive learning, visual guides, knowledge maps, educational models, "
     "and quizzes across science, engineering, technology, business, and psychology."
 )
-IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-v2.jpg"
+IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-20261010-1116.jpg"
 
 META_KEYS = [
     "description",
@@ -24,6 +24,7 @@ META_KEYS = [
     "og:title",
     "og:description",
     "og:image",
+    "og:image:url",
     "og:image:secure_url",
     "og:image:type",
     "og:image:width",
@@ -48,7 +49,7 @@ def remove_meta_tag(html: str, key: str) -> str:
 
 html = INDEX.read_text(encoding="utf-8")
 
-# Remove a previous managed block, if one is ever checked into source.
+# Remove any previously managed THE UNI block.
 html = re.sub(
     r"\s*<!-- THE UNI SEO START -->.*?<!-- THE UNI SEO END -->\s*",
     "\n",
@@ -56,10 +57,22 @@ html = re.sub(
     flags=re.IGNORECASE | re.DOTALL,
 )
 
-# Remove old/duplicate tags so crawlers never encounter stale metadata first.
+# Remove stale or duplicate SEO/social tags before adding one authoritative block.
 html = re.sub(r"<title\b[^>]*>.*?</title>\s*", "", html, flags=re.IGNORECASE | re.DOTALL)
 html = re.sub(
     r"<link\b(?=[^>]*\brel\s*=\s*(?:\"canonical\"|'canonical'))[^>]*>\s*",
+    "",
+    html,
+    flags=re.IGNORECASE,
+)
+html = re.sub(
+    r"<link\b(?=[^>]*\brel\s*=\s*(?:\"image_src\"|'image_src'))[^>]*>\s*",
+    "",
+    html,
+    flags=re.IGNORECASE,
+)
+html = re.sub(
+    r"<meta\b(?=[^>]*\bitemprop\s*=\s*(?:\"image\"|'image'))[^>]*>\s*",
     "",
     html,
     flags=re.IGNORECASE,
@@ -91,6 +104,8 @@ block = f'''<!-- THE UNI SEO START -->
 <meta name="description" content="{DESCRIPTION}">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="canonical" href="{SITE_URL}">
+<link rel="image_src" href="{IMAGE_URL}">
+<meta itemprop="image" content="{IMAGE_URL}">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="THE UNI">
@@ -99,6 +114,7 @@ block = f'''<!-- THE UNI SEO START -->
 <meta property="og:title" content="{SOCIAL_TITLE}">
 <meta property="og:description" content="{DESCRIPTION}">
 <meta property="og:image" content="{IMAGE_URL}">
+<meta property="og:image:url" content="{IMAGE_URL}">
 <meta property="og:image:secure_url" content="{IMAGE_URL}">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
@@ -116,11 +132,22 @@ block = f'''<!-- THE UNI SEO START -->
 <!-- THE UNI SEO END -->
 '''
 
-match = re.search(r"</head\s*>", html, flags=re.IGNORECASE)
-if not match:
-    raise RuntimeError("Could not find </head> in index.html")
+# Put the complete social block immediately after the charset declaration so
+# crawlers encounter it before the large inline stylesheet.
+charset_match = re.search(
+    r"<meta\b[^>]*\bcharset\s*=\s*(?:\"[^\"]+\"|'[^']+'|[^\s>]+)[^>]*>\s*",
+    html,
+    flags=re.IGNORECASE,
+)
+if charset_match:
+    insert_at = charset_match.end()
+else:
+    head_match = re.search(r"<head\b[^>]*>\s*", html, flags=re.IGNORECASE)
+    if not head_match:
+        raise RuntimeError("Could not find <head> in index.html")
+    insert_at = head_match.end()
 
-html = html[:match.start()] + block + html[match.start():]
+html = html[:insert_at] + block + html[insert_at:]
 INDEX.write_text(html, encoding="utf-8")
 
 print("Applied THE UNI SEO and social metadata")
