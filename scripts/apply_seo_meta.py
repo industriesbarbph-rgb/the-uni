@@ -12,7 +12,7 @@ DESCRIPTION = (
     "Explore interactive learning, visual guides, knowledge maps, educational models, "
     "and quizzes across science, engineering, technology, business, and psychology."
 )
-IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-wordmark-preview.png"
+IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-transparent-1200x630-20261011.png"
 
 META_KEYS = [
     "description",
@@ -115,8 +115,8 @@ block = f'''<!-- THE UNI SEO START -->
 <meta property="og:image:url" content="{IMAGE_URL}">
 <meta property="og:image:secure_url" content="{IMAGE_URL}">
 <meta property="og:image:type" content="image/png">
-<meta property="og:image:width" content="696">
-<meta property="og:image:height" content="160">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="THE UNI — by barb the builder">
 
 <meta name="twitter:card" content="summary_large_image">
