@@ -12,7 +12,7 @@ DESCRIPTION = (
     "Explore interactive learning, visual guides, knowledge maps, educational models, "
     "and quizzes across science, engineering, technology, business, and psychology."
 )
-IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-social-marble-fullbleed-20261010.jpg"
+IMAGE_URL = "https://theuni.barbph.com/assets/the-uni-wordmark-preview.png"
 
 META_KEYS = [
     "description",
@@ -114,17 +114,17 @@ block = f'''<!-- THE UNI SEO START -->
 <meta property="og:image" content="{IMAGE_URL}">
 <meta property="og:image:url" content="{IMAGE_URL}">
 <meta property="og:image:secure_url" content="{IMAGE_URL}">
-<meta property="og:image:type" content="image/jpeg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="THE UNI marble monument — by barb the builder">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="696">
+<meta property="og:image:height" content="160">
+<meta property="og:image:alt" content="THE UNI — by barb the builder">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="{SITE_URL}">
 <meta name="twitter:title" content="{SOCIAL_TITLE}">
 <meta name="twitter:description" content="{DESCRIPTION}">
 <meta name="twitter:image" content="{IMAGE_URL}">
-<meta name="twitter:image:alt" content="THE UNI marble monument — by barb the builder">
+<meta name="twitter:image:alt" content="THE UNI — by barb the builder">
 
 <script type="application/ld+json">{json.dumps(schema, ensure_ascii=False, separators=(",", ":"))}</script>
 <!-- THE UNI SEO END -->
